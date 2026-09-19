@@ -75,6 +75,13 @@ GUI 검증은 `test/gui-check.mjs` 가 한다(서버 spawn → `chromium.launch`
 - **`.bat`(WigoWebTester.bat/run.bat) 주석·문자열은 ASCII 로만 쓴다.** `chcp 65001` 이 있어도 `rem` 줄에 한글·em대시(—)를 넣으면 cmd 가 주석을 명령으로 오파싱해 실행이 통째로 깨진다(2026-08-29 실제로 겪음: `'체인을' is not recognized`). 설명은 영어로.
 
 ## 5. 변경 이력
+### 2026-09-19 — 개인 git 레포로 이전
+코드(`src/`·`ui/`) 변경 없음. 작업 위치가 옛 공용 폴더에서 개인 레포 `arusestech/web-tester`(main)로 바뀌었다(형제 레포 `scbk_voc`·`starbucks_voc`·`wrb_voc` 와 같은 방식).
+- 커밋 대상 = 소스·문서·시나리오. **로컬 전용(gitignore)** = `node_modules/`·`runtime/`·`reports/`·`dist/`·`logs/`·`.sessions/`(로그인 쿠키)·`CLAUDE.local.md`. 옛 `scenarios/*.json` 제외 규칙은 시나리오가 프로젝트 폴더로 옮겨진 뒤 아무것도 거르지 못하고 있어 삭제.
+- `.gitattributes` 로 `*.sh` 는 체크아웃해도 LF — Windows 체크아웃(autocrlf)에서 만든 리눅스/맥 번들의 셸 런처가 CRLF 로 깨지는 것 방지.
+- 옛 최상위 폴더의 MCP 설정 기록·프로젝트 CLAUDE.md 템플릿은 `setup/` 으로(번들 포함 목록 밖).
+- 커밋 전에도 §4 의 반입 위생 점검을 돌린다(첫 커밋 때 0건).
+
 ### 2026-09-17 — 데이터: SCBK(SC제일은행 VOC) 프로젝트 신설 + SIT 온라인 시나리오 24개
 코드(`src/`·`ui/`) 변경 없음.
 - `scenarios/SCBK/_project.json`(baseUrl localhost:9090, 로그인 `#userid/#userpw/#login`, success `POR0001`+`#menu`, `login.retries:1`(계정 잠금 방지), `reuseSession:false`) + `01_SIT_온라인/_공통.json` + `SIT-VOC-xxxx-yy.json` 24개(SIT v0.5 케이스 1:1, 흐름 115) + `README.md`.

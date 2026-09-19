@@ -148,17 +148,31 @@ export async function runScenario(sc, opt) {
   const page = await context.newPage();
   const collector = createCollector(page, ignore);
   const dialogs = [];
-  page.on('dialog', async (d) => {
-    const msg = `${d.type()}: ${d.message()}`;
-    if (!ignore.test('dialogs', d.message())) dialogs.push(msg);
-    await d.accept().catch(() => {}); // 수락 중 페이지가 이동/닫히면 무시 (미처리 예외로 프로세스가 죽지 않게)
-  });
+  const forbiddenAll = (sc.forbidden || []).map((s) => new RegExp(s, 'i'));
+  // ---------- 다이얼로그(alert/confirm) 처리 ----------
+  // 로그인·CRUD 흐름: 지금처럼 자동 확인(수락).
+  // 메뉴 순회(화면·버튼 동작 검사·상세 진입·자동 수집): confirm/prompt 는 **취소**한다 — 행 클릭이나 아이콘 버튼이 띄운
+  //   "삭제하시겠습니까?" 에 확인을 눌러 실데이터가 바뀌는 사고를 막는다. 메시지가 forbidden 에 걸리면 ❌ 로 남긴다.
+  //   조회만 하는 confirm 이라 눌러야 하면 시나리오/메뉴/버튼/상세에 "confirm": "accept".
+  let safeDialogs = false;
+  const blockedDialogs = [];
+  const safeOf = (...items) => { for (const i of items) if (i && typeof i === 'object' && i.confirm) return i.confirm !== 'accept'; return sc.confirm !== 'accept'; };
+  const onDialog = async (d) => {
+    const type = d.type(), text = d.message();
+    const dismiss = safeDialogs && (type === 'confirm' || type === 'prompt');
+    if (dismiss && forbiddenAll.some((re) => re.test(text))) blockedDialogs.push(`${type}: ${text}`);
+    else if (!ignore.test('dialogs', text)) dialogs.push(`${type}: ${text}${dismiss ? ' [취소함]' : ''}`);
+    // 처리 중 페이지가 이동/닫히면 무시 (미처리 예외로 프로세스가 죽지 않게)
+    await (dismiss ? d.dismiss() : d.accept()).catch(() => {});
+  };
+  page.on('dialog', onDialog);
+  // 취소한 금지 확인창 → 실패 이슈로 (꺼내면서 비운다)
+  const blockedIssues = () => blockedDialogs.splice(0).map((b) => ({ level: 'fail', msg: `금지 동작 확인창 차단(취소함): "${b}"` }));
   // 이벤트 핸들러 등에서 새는 예외가 실행 전체를 죽이지 않도록
   const onRej = (e) => log(`(경고) 처리되지 않은 예외: ${String(e?.message || e).split('\n')[0]}`);
   process.on('unhandledRejection', onRej);
 
   const results = [];
-  const forbiddenAll = (sc.forbidden || []).map((s) => new RegExp(s, 'i'));
 
   // ---------- 진행률 ----------
   // 전체 항목 수 = 로그인 + 메뉴(+상세 진입 예정 건수) + CRUD. 자동 수집 링크는 수집된 시점에 더해진다.
@@ -301,11 +315,29 @@ export async function runScenario(sc, opt) {
   };
   const stop = () => { const e = new Error('사용자 중단'); e.cancelled = true; throw e; };
 
+  // ---------- 금지 버튼 판정 (스텝 click / 버튼 동작 검사 / 상세 행 클릭 공용) ----------
+  // 글자가 없는 아이콘 버튼도 걸리도록 text·title·value·aria-label·alt(안쪽 img 포함)·id·name 을 모두 본다.
+  // extra: 시나리오에 적은 text·셀렉터·이름.  allow: 이 흐름/버튼에서만 풀어 줄 패턴(allowForbidden)
+  // 반환: 막아야 하면 화면에 보여 줄 라벨, 아니면 null
+  const clickLabels = async (l) => (await l.evaluate((el) => {
+    const out = [el.innerText || el.textContent || ''];
+    for (const n of [el, ...el.querySelectorAll('img, [title], [aria-label]')]) {
+      for (const a of ['title', 'value', 'aria-label', 'alt']) { const v = n.getAttribute && n.getAttribute(a); if (v) out.push(v); }
+    }
+    out.push(el.id || '', el.getAttribute('name') || '');
+    return out;
+  }).catch(() => [])).map((x) => String(x).replace(/\s+/g, ' ').trim()).filter(Boolean);
+  const forbiddenHit = async (l, extra = [], allow = []) => {
+    const allowRe = allow.map((s) => new RegExp(s, 'i'));
+    const labels = [...(await clickLabels(l)), ...extra.map((x) => String(x || '')).filter(Boolean)];
+    if (allowRe.some((a) => labels.some((t) => a.test(t)))) return null;
+    const hit = forbiddenAll.filter((re) => !allowRe.some((a) => a.source === re.source)).find((re) => labels.some((t) => re.test(t)));
+    return hit ? (labels[0] || hit.source) : null;
+  };
+
   // ---------- 스텝 실행기 (login / crud 공용) ----------
   // allow: 이 흐름에서만 금지 해제할 버튼 텍스트 (flow.allowForbidden)
   const runSteps = async (steps, label, allow = []) => {
-    const allowRe = allow.map((s) => new RegExp(s, 'i'));
-    const forbidden = forbiddenAll.filter((re) => !allowRe.some((a) => a.source === re.source));
     let target = page;       // Page | Frame
     let curPage = page;      // 팝업 전환용
     const trail = [];
@@ -326,17 +358,13 @@ export async function runScenario(sc, opt) {
         case 'goto': await curPage.goto(abs(sub(s.url)), { waitUntil: 'domcontentloaded' }); target = curPage; break;
         case 'click': {
           const l = loc();
-          const t = (await l.textContent().catch(() => '')) || '';
-          const title = (await l.getAttribute('title').catch(() => '')) || '';
-          const hit = forbidden.find((re) => re.test(t) || re.test(title) || (s.text && re.test(s.text)));
-          if (hit && !allowRe.some((a) => a.test(t) || a.test(title) || (s.text && a.test(s.text)))) {
-            throw new Error(`금지 버튼 클릭 차단: "${t.trim() || title || s.text}"`);
-          }
+          const hit = await forbiddenHit(l, [s.text, s.name], allow);
+          if (hit) throw new Error(`금지 버튼 클릭 차단: "${hit}"`);
           if (s.popup) {
             const [pop] = await Promise.all([curPage.waitForEvent('popup'), l.click()]);
             await pop.waitForLoadState('domcontentloaded');
             // 팝업 안의 alert/confirm 도 기록·자동 수락 (리스너가 없으면 Playwright 가 confirm 을 취소해 저장이 무산됨) — 2026-08-25
-            pop.on('dialog', async (dg) => { const msg = `${dg.type()}: ${dg.message()}`; if (!ignore.test('dialogs', dg.message())) dialogs.push(msg); await dg.accept().catch(() => {}); });
+            pop.on('dialog', onDialog);
             curPage = pop; target = pop;
           } else await l.click();
           break;
@@ -408,6 +436,7 @@ export async function runScenario(sc, opt) {
     await tp.waitForLoadState('networkidle').catch(() => {});
     const { issues, trace } = await inspectPage(tp, col, { expect: extra.expect, expectTimeout: expectTmoOf(extra.item), mainStatus: extra.status, ignore, ...inspectOpts });
     if (extra.issues?.length) issues.push(...extra.issues);   // 버튼 동작 검사 등 호출한 쪽에서 판정한 것
+    issues.push(...blockedIssues());
     if (dialogs.length) issues.push({ level: 'warn', msg: `다이얼로그: ${dialogs.join(' | ')}` });
     const r = { name, url, issues, trace, path: extra.path, expectFail: extra.item?.expectFail, at: new Date().toLocaleString() };
     if (wantShot(extra.item, issues.some((i) => i.level === 'fail'))) r.screenshot = await shot(name, tp, extra.item, extra.mask);
@@ -526,19 +555,14 @@ export async function runScenario(sc, opt) {
       begin(name);
       let popup = null, popCol = null;
       try {
+        safeDialogs = safeOf(a, m);
         const loc = await findClickable(a);
         if (!loc) throw new Error(`버튼 없음: ${a.click || a.text}`);
         // 금지 버튼(forbidden) 이면 누르지 않는다 — 실데이터를 바꾸는 사고를 막는 안전장치
-        const allowRe = (a.allowForbidden || []).map((s) => new RegExp(s, 'i'));
-        const txt = [
-          ((await loc.innerText().catch(() => '')) || '').trim(),
-          (await loc.getAttribute('title').catch(() => '')) || '',
-          (await loc.getAttribute('value').catch(() => '')) || '',
-        ].join(' ').replace(/\s+/g, ' ').trim();
-        const hit = forbiddenAll.filter((re) => !allowRe.some((x) => x.source === re.source)).find((re) => re.test(txt) || re.test(label) || re.test(String(a.click || '')));
-        if (hit) throw new Error(`금지 버튼 클릭 차단: "${label}"${txt && txt !== label ? ` (${txt})` : ''}`);
+        const hit = await forbiddenHit(loc, [label, a.click, a.text], a.allowForbidden || []);
+        if (hit) throw new Error(`금지 버튼 클릭 차단: "${label}"${hit !== label ? ` (${hit})` : ''}`);
 
-        collector.reset(); dialogs.length = 0;
+        collector.reset(); dialogs.length = 0; blockedDialogs.length = 0;
         const urlBefore = page.url();
         await eachFrame(page, MUT_INIT);
         let reqs = 0;
@@ -548,7 +572,7 @@ export async function runScenario(sc, opt) {
         try {
           if (a.popup) {
             [popup] = await Promise.all([page.waitForEvent('popup', { timeout: tmoOf(a) }), click()]);
-            popup.on('dialog', async (dg) => { if (!ignore.test('dialogs', dg.message())) dialogs.push(`${dg.type()}: ${dg.message()}`); await dg.accept().catch(() => {}); });
+            popup.on('dialog', onDialog);
             await popup.waitForLoadState('domcontentloaded');
             popCol = createCollector(popup, ignore);
             await popup.waitForLoadState('networkidle').catch(() => {});
@@ -567,7 +591,7 @@ export async function runScenario(sc, opt) {
         const issues = [];
         // ③ 반응이 있었나 — 이동·팝업·요청·DOM 변화·알림이 전부 없으면 "죽은 버튼"
         // (변화 1건이라도 있으면 반응한 것으로 본다 — 레이어를 style 하나로 여는 화면이 흔하다)
-        if (!popup && urlBefore === urlAfter && !reqs && mut < 1 && !dialogs.length) {
+        if (!popup && urlBefore === urlAfter && !reqs && mut < 1 && !dialogs.length && !blockedDialogs.length) {
           issues.push({ level: 'warn', msg: '버튼을 눌렀지만 아무 반응이 없습니다 (화면 변화·서버 요청·이동·알림 없음)' });
         }
         // 에러 알림(alert)은 경고가 아니라 실패로 본다
@@ -588,7 +612,7 @@ export async function runScenario(sc, opt) {
         });
       } catch (e) {
         if (e.cancelled) throw e;
-        push({ name, url: (popup || page).url(), issues: [{ level: 'fail', msg: e.message }], error: true, expectFail: a.expectFail, screenshot: await failShot(a.screenshot === undefined ? m : a, name, popup || page) });
+        push({ name, url: (popup || page).url(), issues: [{ level: 'fail', msg: e.message }, ...blockedIssues()], error: true, expectFail: a.expectFail, screenshot: await failShot(a.screenshot === undefined ? m : a, name, popup || page) });
       } finally {
         // 원래 화면으로 되돌린다 — 다음 버튼도 같은 화면에서 눌러야 하므로
         if (popup) await popup.close().catch(() => {});
@@ -631,6 +655,7 @@ export async function runScenario(sc, opt) {
     for (let i = 0; i < n; i++) {
       if (cancelled()) stop();
       let popup = null, popCol = null;
+      safeDialogs = safeOf(d, m);
       try {
         // 목록으로 복귀 (첫 번째는 이미 목록 화면)
         if (i > 0 && d.back !== 'none') {
@@ -643,14 +668,12 @@ export async function runScenario(sc, opt) {
         }
         const row = rowsLoc().nth(i);
         const txt = ((await row.innerText().catch(() => '')) || '').replace(/\s+/g, ' ').trim().slice(0, 30);
-        const t = txt + ' ' + ((await row.getAttribute('title').catch(() => '')) || '');
-        const hit = forbiddenAll.find((re) => re.test(t));
-        if (hit) throw new Error(`금지 버튼 클릭 차단: "${txt}"`);
-        collector.reset(); dialogs.length = 0;
+        if (await forbiddenHit(row)) throw new Error(`금지 버튼 클릭 차단: "${txt}"`);
+        collector.reset(); dialogs.length = 0; blockedDialogs.length = 0;
         const click = () => (d.dblclick ? row.dblclick() : row.click());
         if (d.popup) {
           [popup] = await Promise.all([page.waitForEvent('popup'), click()]);
-          popup.on('dialog', async (dg) => { if (!ignore.test('dialogs', dg.message())) dialogs.push(`${dg.type()}: ${dg.message()}`); await dg.accept().catch(() => {}); });
+          popup.on('dialog', onDialog);
           await popup.waitForLoadState('domcontentloaded');
           popCol = createCollector(popup, ignore);
           await popup.waitForLoadState('networkidle').catch(() => {});
@@ -673,7 +696,7 @@ export async function runScenario(sc, opt) {
         }
       } catch (e) {
         if (e.cancelled) throw e;
-        push({ name: label(i), url: (popup || page).url(), issues: [{ level: 'fail', msg: e.message }], error: true, screenshot: await failShot(m, `${m.name}-detail${i + 1}`, popup || page) });
+        push({ name: label(i), url: (popup || page).url(), issues: [{ level: 'fail', msg: e.message }, ...blockedIssues()], error: true, screenshot: await failShot(m, `${m.name}-detail${i + 1}`, popup || page) });
       } finally {
         if (popup) await popup.close().catch(() => {});
       }
@@ -716,7 +739,10 @@ export async function runScenario(sc, opt) {
     };
     const steps = loginSteps(over);
     let lastResp = null, why = '__init', attempt = 0;
-    while (why && attempt < attempts) {
+    const wasSafe = safeDialogs; safeDialogs = false; // 로그인 중 확인창(중복 로그인 등)은 수락해야 넘어간다
+    try { await loop(); } finally { safeDialogs = wasSafe; }
+    return { why, lastResp, attempt };
+    async function loop() { while (why && attempt < attempts) {
       attempt++;
       collector.reset();
       if (attempt > 1) log(`  ${label} 재시도 ${attempt}/${attempts} (이전 실패: ${why})`);
@@ -730,8 +756,7 @@ export async function runScenario(sc, opt) {
       why = await checkLogin();
       // 세션 경합: 성공 판정이 URL 기반인데 아직 로그인 폼이 보이면, 대상 URL 재접속으로 한 번 더 확인
       if (why && sc.login.detect) { await page.goto(abs(sc.login.after || '/'), { waitUntil: 'domcontentloaded' }).catch(() => {}); await page.waitForLoadState('networkidle').catch(() => {}); why = await checkLogin(); }
-    }
-    return { why, lastResp, attempt };
+    } }
   };
 
   // 저장된 세션이 아직 유효한지: 로그인 뒤 도착 화면(포털)으로 가서 success/detect 로 판정 (''=유효)
@@ -789,6 +814,7 @@ export async function runScenario(sc, opt) {
         await withRetry(attempts, m.name, async () => {
           collector.reset();
           begin(m.name);
+          safeDialogs = safeOf(m); // 메뉴 순회 중에는 confirm 을 취소한다 (데이터 변경 방지)
           page.setDefaultTimeout(tmoOf(m)); // 이 메뉴에만 다른 대기 시간을 줄 수 있다 (무거운 통계 화면 등)
           try {
             let status = null;
@@ -805,7 +831,7 @@ export async function runScenario(sc, opt) {
             if (m.detail) await runDetail(m); // 목록 → 상세 진입
           } catch (e) {
             if (e.cancelled) throw e;
-            push({ name: m.name, url: m.url, issues: [{ level: 'fail', msg: e.message }], error: true, step: e.message, expectFail: m.expectFail, screenshot: await failShot(m, m.name) });
+            push({ name: m.name, url: m.url, issues: [{ level: 'fail', msg: e.message }, ...blockedIssues()], error: true, step: e.message, expectFail: m.expectFail, screenshot: await failShot(m, m.name) });
           }
         });
         // 상세 진입이 예정보다 적게 실행됐으면(데이터 부족/실패) 그만큼 전체 수에서 뺀다
@@ -817,6 +843,7 @@ export async function runScenario(sc, opt) {
     // ---------- 3. 자동 링크 수집 (사이드바/탑메뉴) ----------
     if (!aborted && !opt.skipCrawl && !onlySet && sc.crawl?.enabled) {
       const c = sc.crawl;
+      safeDialogs = safeOf();
       await page.goto(abs(c.startUrl || '/'), { waitUntil: 'domcontentloaded' });
       await page.waitForLoadState('networkidle').catch(() => {});
       const origin = new URL(sc.baseUrl).origin;
@@ -852,11 +879,12 @@ export async function runScenario(sc, opt) {
     // ---------- 4. CRUD 시나리오 ----------
     if (!aborted && !opt.skipCrud && Array.isArray(sc.crud)) {
       log(`▶ CRUD 시나리오 (${crudList.length}개)`);
+      safeDialogs = false; // CRUD 흐름은 확인창을 눌러야 저장이 되므로 자동 수락
       for (const flow of crudList) {
         if (cancelled()) stop();
         // CRUD 는 데이터를 만들 수 있으므로 재시도는 흐름에 "retry" 를 직접 넣은 경우에만 (시나리오 기본값 무시)
         await withRetry(1 + Math.max(0, Number(flow.retry ?? 0)), flow.name, async () => {
-          collector.reset(); dialogs.length = 0;
+          collector.reset(); dialogs.length = 0; blockedDialogs.length = 0;
           begin(flow.name);
           page.setDefaultTimeout(tmoOf(flow));
           let trail = [];

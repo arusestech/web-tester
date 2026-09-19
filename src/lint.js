@@ -67,6 +67,10 @@ export function lintScenario(sc) {
       if (d.rows && (!Number.isInteger(d.rows) || d.rows < 1)) add('error', 'detail.rows 는 1 이상의 정수여야 합니다', where);
     }
     lintExpectFail(m.expectFail, where, add);
+    // confirm: 메뉴 순회 중 확인창 처리 ('accept' 면 수락, 기본은 취소). 메뉴·detail·actions 공통
+    const lintConfirm = (v, w) => { if (v !== undefined && v !== 'accept' && v !== 'dismiss') add('error', 'confirm 은 "accept" 또는 "dismiss" 여야 합니다', w); };
+    lintConfirm(m.confirm, where);
+    if (m.detail && typeof m.detail === 'object') lintConfirm(m.detail.confirm, where);
     // 버튼 동작 검사(actions)
     if (m.actions !== undefined) {
       if (!Array.isArray(m.actions)) add('error', 'actions 는 배열이어야 합니다', where);
@@ -84,6 +88,7 @@ export function lintScenario(sc) {
             add('warn', `금지 버튼을 누르는 동작입니다: "${a.name || a.click || a.text}" — 실행하면 차단되어 실패로 남습니다 (의도한 것이면 allowForbidden)`, aw);
           }
           lintExpectFail(a.expectFail, aw, add);
+          lintConfirm(a.confirm, aw);
         });
       }
     }

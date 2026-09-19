@@ -47,6 +47,10 @@ http.createServer((req, res) => {
     <button id="btnAlertErr">에러알림</button>
     <button id="btnLayer">검색팝업</button>
     <button id="btnDelete">삭제</button>
+    <button id="btnAjax500">통계조회</button>
+    <button id="btnConfirmDel">정리</button>
+    <button id="btnConfirmOk">다시조회</button>
+    <a class="ico" href="#"><img alt="삭제" width="16" height="16" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="></a>
     <div id="result"></div>
     <div id="layer" style="display:none">검색 레이어<button class="btn_close">닫기</button></div></div>
     <script>
@@ -57,8 +61,14 @@ http.createServer((req, res) => {
       document.getElementById('btnLayer').onclick = function(){ document.getElementById('layer').style.display='block'; };
       document.getElementById('layer').querySelector('.btn_close').onclick = function(){ document.getElementById('layer').style.display='none'; };
       document.getElementById('btnDelete').onclick = function(){ document.getElementById('result').innerHTML = '지웠습니다(실제로는 실행되면 안 됨)'; };
+      // 화면은 200 인데 AJAX 만 500 (그리드 데이터 조회 실패) / 확인창을 띄우는 버튼 / 글자 없는 아이콘 버튼
+      document.getElementById('btnAjax500').onclick = function(){ fetch('/api/err500').then(function(r){return r.text()}).then(function(){ document.getElementById('result').innerHTML = '조회 실패'; }); };
+      document.getElementById('btnConfirmDel').onclick = function(){ if (confirm('선택한 건을 삭제하시겠습니까?')) document.getElementById('result').innerHTML = '지웠습니다(확인창 수락됨)'; else document.getElementById('result').innerHTML = '취소됨'; };
+      document.getElementById('btnConfirmOk').onclick = function(){ document.getElementById('result').innerHTML = confirm('다시 조회할까요?') ? '다시 조회함' : '조회 안 함'; };
+      document.querySelector('a.ico').onclick = function(){ document.getElementById('result').innerHTML = '지웠습니다(아이콘 버튼)'; return false; };
     </script>`));
   if (url.pathname === '/api/list') return send(200, '<table id="grid"><tr><td>조회 결과 1</td></tr></table>');
+  if (url.pathname === '/api/err500') { res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' }); return res.end(JSON.stringify({ message: 'java.lang.IllegalStateException: stat query failed\n\tat com.example.StatService.list(StatService.java:77)\n\tat com.example.StatController.list(StatController.java:31)' })); }
   if (url.pathname === '/err') return send(500, `<h1>HTTP Status 500 – Internal Server Error</h1><pre>java.lang.NullPointerException\n\tat com.example.EmpController.list(EmpController.java:42)</pre>`);
   if (url.pathname === '/jserr') return send(200, html('<script>undefinedFn()</script><p>내용</p>'));
   // ---- 2순위 기능 검증용 ----

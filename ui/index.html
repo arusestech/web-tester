@@ -853,6 +853,7 @@ function addMenuRow(m = {}) {
   const shotV = m.screenshot === true ? 'true' : m.screenshot === false ? 'false' : '';
   tr.dataset.inputs = JSON.stringify(m.inputs || {}); if (m.search !== undefined) tr.dataset.search = JSON.stringify(m.search); if (m._fields) tr.dataset.fields = JSON.stringify(m._fields);
   if (m.actions?.length) tr.dataset.actions = JSON.stringify(m.actions);   // 버튼 동작 검사 (JSON 직접 편집에서 수정)
+  if (m.confirm) tr.dataset.confirm = m.confirm;   // 순회 중 확인창 처리(accept/dismiss) — 폼에 칸은 없지만 보존
   tr.innerHTML = `<td><input type="text" class="m-name" value="${esc(m.name)}"></td><td><input type="text" class="m-url" value="${esc(m.url)}" placeholder="${m.steps ? `(클릭 진입 · ${m.steps.length} 스텝)` : '/list.do'}" title="${m.steps ? 'URL 없이 steps 로 진입하는 메뉴. steps 는 JSON 직접 편집에서 수정' : ''}"></td><td><input type="text" class="m-expect" value="${esc((m.expect || []).join(', '))}"></td>
     <td><button class="sec m-inputs" style="width:100%;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" onclick="openInputsPopup(this.closest('tr'))"></button></td>
     <td><input type="text" class="m-detail" value="${esc(d.selector || '')}" placeholder="(선택) tbody tr a"></td><td><input type="number" class="m-rows" value="${d.rows ?? 1}" min="1" style="width:46px;padding:3px"></td>
@@ -1017,6 +1018,7 @@ function formToJson() {
     if (tr.dataset.search) m.search = JSON.parse(tr.dataset.search);
     if (tr.dataset.fields) m._fields = JSON.parse(tr.dataset.fields);
     if (tr.dataset.actions) { const acts = JSON.parse(tr.dataset.actions); if (acts.length) m.actions = acts; }   // 버튼 동작 검사 (폼에 칸은 없지만 보존)
+    if (tr.dataset.confirm) m.confirm = tr.dataset.confirm;
     const dsel = tr.querySelector('.m-detail').value.trim(); const rest = tr.dataset.detail ? JSON.parse(tr.dataset.detail) : {};
     if (dsel || rest.text) { m.detail = { ...rest }; if (dsel) m.detail.selector = dsel; const n = +tr.querySelector('.m-rows').value; if (n > 1) m.detail.rows = n; else delete m.detail.rows; }
     const sv = tr.querySelector('.m-shot').value; if (sv) m.screenshot = sv === 'true';

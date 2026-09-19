@@ -4,9 +4,9 @@
 
 // 순서가 곧 우선순위 (위에서 먼저 걸리는 것이 이긴다)
 const RULES = [
-  { type: '서버 버그', re: /HTTP (5\d\d)|에러 페이지 감지|Exception|SQLException|스택트레이스|업무오류 응답|JS 예외/ },
+  { type: '서버 버그', re: /HTTP (5\d\d)|서버 오류 응답|에러 페이지 감지|Exception|SQLException|스택트레이스|업무오류 응답|JS 예외/ },
   { type: '권한/세션', re: /로그인 화면으로 돌아감|HTTP 40[13]|권한이 없|접근 권한|세션이 만료/ },
-  { type: '안전장치 차단', re: /금지 버튼 클릭 차단/ },
+  { type: '안전장치 차단', re: /금지 버튼 클릭 차단|금지 동작 확인창 차단/ },
   { type: '시나리오 오류 의심', re: /핵심 요소 없음|입력 필드 없음|조회 버튼 없음|프레임 없음|입력 실패|Timeout .* exceeded|waiting for (locator|selector)|strict mode violation|net::ERR_/ },
   { type: '데이터 부족', re: /데이터가 없어 상세 조회 생략|빈 화면/ },
   { type: '화면 깨짐 의심', re: /이미지 로드 실패|가로 스크롤 발생/ },

@@ -1,7 +1,7 @@
 # WIGO Web Tester — 인수인계 / 변경 이력 (Claude 용)
 
 다른 세션의 Claude 가 이 프로젝트를 이어받을 때 먼저 읽는 문서. 사용자 대상 설명은 `README.md`, 시나리오 작성법은 `docs/시나리오-작성-가이드.md`, 작업 규칙은 `CLAUDE.md`.
-git 저장소가 아니므로 변경 이력은 이 문서가 유일하다. **기능을 바꾸면 아래 "변경 이력"에 날짜와 함께 추가할 것.**
+변경 이력은 git(`arusestech/web-tester`) 과 이 문서 양쪽에 남긴다(배경·함정은 이 문서에만 있다). **기능을 바꾸면 아래 "변경 이력"에 날짜와 함께 추가할 것.**
 
 ## 1. 무엇인가
 Java/JSP 등 웹 프로젝트의 메뉴 조회·CRUD 자동 테스트 + 증적(스크린샷/보고서) 도구. **런타임에 AI 없음** — JSON 시나리오 → Playwright 실행 → `reports/` 증적. 폐쇄망 반입용으로 Node 런타임까지 zip 으로 묶는다(`tools/bundle.mjs`). Claude 의 역할은 시나리오 작성·보고서 해석·도구 개선.
@@ -48,7 +48,7 @@ npm run test:checks     # test/checks.json (재시도·느린화면·깨진화�
                         #   ※ /flaky 는 첫 요청만 500 이라 mock 서버를 새로 띄우거나 /flaky?reset=1 을 부른 뒤 실행
 npm run test:switch     # test/switch.json (계정 전환 + 마스킹). 기대치: 전체 3 / 정상 3
 npm run test:slow       # test/slow.json (7초 뒤 그려지는 그리드). 기대치: 정상 1 / 실패 1(기본 대기) / 주의 1(느림)
-npm run test:actions    # test/actions.json (🖱 버튼 동작 검사). 기대치: 전체 8 / 정상 4 / 실패 3(JS에러·에러알림·금지버튼) / 주의 1(죽은 버튼)
+npm run test:actions    # test/actions.json (🖱 버튼 동작 검사). 기대치: 전체 12 / 정상 4 / 실패 6(JS에러·에러알림·금지버튼·AJAX 500·금지 확인창·아이콘 금지버튼) / 주의 2(죽은 버튼·취소한 확인창)
 npm run lint:test       # 검사 동작 확인 (mock.json 은 주의 4건이 정상)
 npm run test:source     # 📂 소스 스캔 (test/source-fixture 정적 분석). 기대치: 38 ok / 0 fail. 브라우저·서버 불필요
 node test/gui-check.mjs # GUI 자동 검증 (임시 프로젝트 "자동검증" 생성 → 검사 → 삭제). 기대치: 60 ok / 0 fail
@@ -75,6 +75,15 @@ GUI 검증은 `test/gui-check.mjs` 가 한다(서버 spawn → `chromium.launch`
 - **`.bat`(WigoWebTester.bat/run.bat) 주석·문자열은 ASCII 로만 쓴다.** `chcp 65001` 이 있어도 `rem` 줄에 한글·em대시(—)를 넣으면 cmd 가 주석을 명령으로 오파싱해 실행이 통째로 깨진다(2026-08-29 실제로 겪음: `'체인을' is not recognized`). 설명은 영어로.
 
 ## 5. 변경 이력
+### 2026-09-19 (2) — 판정·안전장치 3건: AJAX 5xx ❌ / 순회 중 confirm 취소 / 금지 버튼 판정 통합
+사용자 요청("더 좋아질 점" 검토 결과 1~3번). 셋 다 프로젝트 무관한 도구 본체 문제.
+- **AJAX 5xx 가 ⚠️ 환경 노이즈로 묻히던 문제** (`checks.js`): 400 이상 응답은 `errorStatus` 에 없으면 전부 `리소스 응답`(warn) 이었고 triage 는 `HTTP 5xx` 문구만 서버 버그로 봤다 → 화면은 200 인데 jqGrid 데이터 요청만 500 인(가장 흔한 서버 버그) 경우가 주의로 빠졌다. 이제 `resourceType` 이 **document/xhr/fetch 인 5xx 는 ❌ `서버 오류 응답 500 POST …`** + triage `서버 버그`. 이미지·CSS·폰트·스크립트와 4xx 는 그대로 warn. 화면 자체의 5xx 는 `HTTP 500` 과 중복으로 올리지 않는다(`mainNav && mainStatus===code`). 5xx 응답 본문에서 스택트레이스를 찾아 `trace` 에 싣는다(JSON 의 `\n` 글자는 풀어서). 환경 탓이면 `ignore.resources` 로 뺀다.
+  - **영향**: 기존 시나리오에서 ⚠️ 였던 AJAX 5xx 가 ❌ 로 바뀐다 → 첫 실행의 직전 비교에 "신규 실패"로 뜰 수 있다(배포 탓이 아님).
+- **메뉴 순회 중 confirm/prompt 는 취소** (`runner.js` `onDialog`/`safeDialogs`/`safeOf`): 예전에는 모든 dialog 를 수락했다 — forbidden 은 버튼 글자만 보므로 행 클릭·아이콘 버튼이 띄운 "삭제하시겠습니까?" 에 확인이 눌렸다. 이제 메뉴 진입·`actions`·`detail`·`crawl` 에서는 dismiss, 메시지가 forbidden 에 걸리면 ❌ `금지 동작 확인창 차단(취소함)`(triage 안전장치 차단), 아니면 ⚠️ `… [취소함]`. **로그인(`doLogin` — switchUser 포함, 중복 로그인 확인창 때문)과 crud 는 예전대로 수락.** 풀기: `"confirm": "accept"` (버튼 > detail > 메뉴 > 시나리오 순). 팝업 3곳의 dialog 핸들러도 `onDialog` 하나로 합쳤다. lint 가 `confirm` 값을 검사.
+- **금지 버튼 판정 통합** (`forbiddenHit`/`clickLabels`): 스텝 click 은 text·title, actions 는 text·title·value·셀렉터, detail 은 text·title 로 제각각이었다 → 한 함수로. text·title·value·aria-label·alt(안쪽 img 포함)·id·name + 시나리오에 적은 text/이름/셀렉터를 본다. `allowForbidden` 은 예전 스텝 규칙 그대로(허용 패턴이 라벨 중 하나에 맞으면 통과 + 같은 패턴 제외).
+- 검증: mock `/buttons` 에 AJAX 500·금지 문구 confirm·일반 confirm·글자 없는 아이콘 버튼 추가, `/api/err500`. **`npm run test:actions` 기대치 8 → 전체 12 / 정상 4 / 실패 6 / 주의 2** (§3 갱신). npm test 7/5/1 · batch · checks 3/1/3 · switch 3 · slow 1/1/1 · test:source 48 회귀 없음. gui-check 67/0.
+- GUI: 메뉴의 `confirm` 은 폼에 칸이 없어 `tr.dataset.confirm` 으로 저장 왕복에서 보존(actions 와 같은 방식). **알려진 한계(기존부터)**: 메뉴 행의 `timeout`·`expectTimeout`·`waitFor`·`loading`·`mask`·`retry`·`expectFail` 은 `formToJson` 이 다시 만들지 않아 GUI 로 저장하면 사라진다 — 별건, 미수정.
+
 ### 2026-09-19 — 개인 git 레포로 이전
 코드(`src/`·`ui/`) 변경 없음. 작업 위치가 옛 공용 폴더에서 개인 레포 `arusestech/web-tester`(main)로 바뀌었다(형제 레포 `scbk_voc`·`starbucks_voc`·`wrb_voc` 와 같은 방식).
 - 커밋 대상 = 소스·문서·시나리오. **로컬 전용(gitignore)** = `node_modules/`·`runtime/`·`reports/`·`dist/`·`logs/`·`.sessions/`(로그인 쿠키)·`CLAUDE.local.md`. 옛 `scenarios/*.json` 제외 규칙은 시나리오가 프로젝트 폴더로 옮겨진 뒤 아무것도 거르지 못하고 있어 삭제.

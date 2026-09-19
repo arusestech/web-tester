@@ -1,6 +1,6 @@
 {
   "name": "actions 자체검증",
-  "_comment": "버튼 동작 검사(actions). 기대: 전체 8 / 정상 4(로그인+화면+조회+팝업) / 실패 3(JS에러·에러알림·금지버튼차단) / 주의 1(죽은 버튼)",
+  "_comment": "버튼 동작 검사(actions). 기대: 전체 12 / 정상 4(로그인+화면+조회+팝업) / 실패 6(JS에러·에러알림·금지버튼차단·AJAX 500·금지 확인창 차단·아이콘 금지버튼) / 주의 2(죽은 버튼·취소한 확인창)",
   "baseUrl": "http://localhost:3999",
   "browser": { "channel": "chrome", "headless": true },
   "timeout": 8000,
@@ -26,7 +26,11 @@
         { "name": "JS 에러 버튼", "click": "#btnJsErr" },
         { "name": "에러 알림 버튼", "click": "#btnAlertErr" },
         { "name": "검색팝업 열기", "click": "#btnLayer", "expect": ["#layer"] },
-        { "name": "삭제(금지 버튼)", "click": "#btnDelete" }
+        { "name": "삭제(금지 버튼)", "click": "#btnDelete" },
+        { "name": "AJAX 500", "click": "#btnAjax500" },
+        { "name": "확인창(금지 문구)", "click": "#btnConfirmDel", "expectNotText": "지웠습니다" },
+        { "name": "확인창(일반)", "click": "#btnConfirmOk", "expectText": "조회 안 함" },
+        { "name": "아이콘 버튼", "click": "a.ico" }
       ]
     }
   ]

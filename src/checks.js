@@ -12,6 +12,10 @@ const ERROR_PATTERNS = [
   /SQLException|BadSqlGrammarException|MyBatisSystemException/,
 ];
 
+// 5xx 를 "서버 오류"로 볼 요청 종류 (화면 문서·iframe·AJAX). 그 외(이미지·CSS·폰트 등)는 리소스 경고로 남긴다
+const SERVER_TYPES = new Set(['document', 'xhr', 'fetch']);
+const TRACE_RE = /(?:[\w.$]+Exception[^\n]*\n(?:\s+at [^\n]+\n?){1,8})/;
+
 // 시나리오 "ignore" 블록 → 정규식 묶음. { console:[], resources:[], dialogs:[], text:[] }
 export function compileIgnore(ig = {}) {
   const rx = (arr) => (arr || []).map((s) => new RegExp(s, 'i'));
@@ -21,7 +25,7 @@ export function compileIgnore(ig = {}) {
 }
 
 export function createCollector(page, ignore = compileIgnore()) {
-  const state = { console: [], pageErrors: [], failedRequests: [], responses: [] };
+  const state = { console: [], pageErrors: [], failedRequests: [], responses: [], serverErrors: [], errorBodies: [] };
   const noise = (u) => /favicon\.ico/i.test(u);
   page.on('console', (m) => {
     if (m.type() !== 'error') return;
@@ -37,11 +41,26 @@ export function createCollector(page, ignore = compileIgnore()) {
   });
   page.on('response', (r) => {
     const s = r.status();
-    if (s >= 400 && !noise(r.url()) && !ignore.test('resources', r.url())) state.responses.push(`${s} ${r.request().method()} ${r.url()}`);
+    if (s < 400 || noise(r.url()) || ignore.test('resources', r.url())) return;
+    const line = `${s} ${r.request().method()} ${r.url()}`;
+    // 화면·AJAX(document/xhr/fetch)의 5xx 는 서버가 죽은 것 → 리소스 경고와 분리해 실패로 올린다.
+    // (jqGrid 목록 조회처럼 화면은 200 인데 데이터 요청만 500 인 경우가 주의로 묻히던 문제)
+    // 이미지·CSS·폰트·스크립트의 4xx/5xx 는 지금처럼 경고.
+    let type = '';
+    try { type = r.request().resourceType(); } catch { /* ignore */ }
+    if (s >= 500 && SERVER_TYPES.has(type)) {
+      let mainNav = false;
+      try { mainNav = r.request().isNavigationRequest() && r.frame() === page.mainFrame(); } catch { /* ignore */ }
+      state.serverErrors.push({ line, code: s, mainNav });
+      // 응답 본문 앞부분(스택트레이스)을 보관 → 서버 로그와 대조할 단서
+      r.text().then((t) => { if (t) state.errorBodies.push(String(t).slice(0, 4000)); }).catch(() => {});
+      return;
+    }
+    state.responses.push(line);
   });
   return {
     state,
-    reset() { state.console = []; state.pageErrors = []; state.failedRequests = []; state.responses = []; },
+    reset() { state.console = []; state.pageErrors = []; state.failedRequests = []; state.responses = []; state.serverErrors = []; state.errorBodies = []; },
   };
 }
 
@@ -172,6 +191,9 @@ export async function inspectPage(page, collector, { expect = [], expectTimeout 
   for (const e of dedupe(collector.state.pageErrors)) issues.push({ level: 'fail', msg: `JS 예외: ${e}` });
   for (const e of dedupe(collector.state.console)) issues.push({ level: 'warn', msg: `콘솔 에러: ${e}` });
   const errSet = new Set((errorStatus || []).map(Number));
+  // 화면 자체의 5xx 는 위에서 `HTTP 5xx` 로 이미 올렸으므로 같은 응답을 두 번 올리지 않는다
+  const srvErrs = (collector.state.serverErrors || []).filter((e) => !(e.mainNav && mainStatus === e.code)).map((e) => e.line);
+  for (const e of dedupe(srvErrs)) issues.push({ level: 'fail', msg: `서버 오류 응답 ${e}` });
   for (const e of dedupe(collector.state.responses)) {
     const code = Number(e.split(' ')[0]);
     if (errSet.has(code)) issues.push({ level: 'fail', msg: `업무오류 응답 ${e}` });
@@ -180,6 +202,14 @@ export async function inspectPage(page, collector, { expect = [], expectTimeout 
   for (const e of dedupe(collector.state.failedRequests)) issues.push({ level: 'warn', msg: `요청 실패 ${e}` });
 
   // 스택트레이스 일부를 상세로 보관
-  const trace = text.match(/(?:[\w.$]+Exception[^\n]*\n(?:\s+at [^\n]+\n?){1,8})/);
+  // 화면에 없으면 5xx 응답 본문에서 찾는다 (AJAX 에러는 화면에 안 그려진다). JSON 으로 온 것은 \n·\t 가 글자로 들어 있어 풀어서 본다
+  let trace = text.match(TRACE_RE);
+  if (!trace) {
+    for (const b of collector.state.errorBodies || []) {
+      const plain = String(b).replace(/\\r/g, '').replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/<[^>]+>/g, '');
+      trace = plain.match(TRACE_RE);
+      if (trace) { trace = [trace[0].replace(/["}\]\s]+$/, '')]; break; } // JSON 꼬리("}) 제거
+    }
+  }
   return { issues, trace: trace ? trace[0] : null };
 }

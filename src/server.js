@@ -115,7 +115,7 @@ async function startRun({ file, dir, files, mode = 'all', headless = false, only
 const resolveBody = (sc, file) => resolveForRun(sc, { dir: file ? path.dirname(scPath(file)) : SCENARIO_DIR, root: SCENARIO_DIR });
 
 // ---------- 녹화 ----------
-async function startRecord({ scenario, url, login = true, secrets = {}, name = '', file = '' }) {
+async function startRecord({ scenario, url, login = true, secrets = {}, name = '', file = '', allowForbidden = false }) {
   if (rec.recording) throw new Error('이미 녹화 중입니다');
   if (state.running) throw new Error('테스트 실행 중에는 녹화할 수 없습니다');
   scenario = resolveBody(scenario, file);
@@ -128,7 +128,7 @@ async function startRecord({ scenario, url, login = true, secrets = {}, name = '
   emit('recState', { recording: true, starting: true, name });
   try {
     rec.handle = await startRecorder(scenario, {
-      url: url || '/', login, secrets, log,
+      url: url || '/', login, secrets, log, allowForbidden: !!allowForbidden,
       onStep: (i, s, steps) => { rec.steps = steps; emit('recStep', { index: i, step: s, steps }); },
       onState: (s) => { if (!s.recording) { rec.recording = false; rec.steps = s.steps || rec.steps; rec.handle = null; emit('recState', { recording: false, reason: s.reason, steps: rec.steps, name: rec.name }); } else emit('recState', { recording: true, url: s.url, name: rec.name }); },
     });

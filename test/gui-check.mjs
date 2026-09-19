@@ -229,6 +229,17 @@ try {
   // 폼에는 칸이 없는 actions 가 저장 왕복에서 살아남아야 한다 (없으면 GUI 로 저장하는 순간 버튼 검사가 사라진다)
   const jAct = JSON.parse(await page.evaluate(() => JSON.stringify(formToJson())));
   check(jAct.menus.some((m) => m.actions?.some((a) => a.click === '#btnSearch')), '버튼 동작(actions)이 폼 저장에서 보존됨');
+  // 폼에 칸이 없는 메뉴 키(timeout·waitFor·mask·retry·expectFail·confirm …)도 저장 왕복에서 살아남아야 한다
+  const jRest = JSON.parse(await page.evaluate(() => {
+    addMenuRow({ name: '보존검사', url: '/keep', expect: ['#a'], timeout: 30000, waitFor: '#grid', loading: '.loading', mask: ['#custNm'], retry: 1, expectFail: 'HTTP 403', confirm: 'accept', _comment: '메모' });
+    const j = JSON.stringify(formToJson());
+    document.querySelector('#menuRows').lastElementChild.remove();
+    return j;
+  }));
+  const kept = jRest.menus.find((m) => m.name === '보존검사') || {};
+  check(kept.timeout === 30000 && kept.waitFor === '#grid' && kept.loading === '.loading' && kept.mask?.[0] === '#custNm' && kept.retry === 1 && kept.expectFail === 'HTTP 403' && kept.confirm === 'accept' && kept._comment === '메모',
+    '폼에 칸이 없는 메뉴 키(timeout·waitFor·loading·mask·retry·expectFail·confirm)가 폼 저장에서 보존됨', JSON.stringify(kept));
+  check(Object.keys(kept)[0] === 'name' && kept.expect?.[0] === '#a', '보존한 키가 있어도 name 이 맨 앞, 폼 값은 그대로');
   check((await page.inputValue('#f_pwSel')) === '#userPw', '소스의 로그인 셀렉터가 폼에 적용됨');
   check(/삭제/.test(await page.inputValue('#f_forbidden')), '소스에서 찾은 금지 버튼이 폼에 적용됨');
   // 이 시나리오는 이후 검사에 쓰이지 않도록 원래 값으로 되돌린다

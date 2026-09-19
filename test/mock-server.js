@@ -1,6 +1,7 @@
 // 자체 검증용 가짜 JSP 사이트: node test/mock-server.js  (포트 3999)
 import http from 'node:http';
 const items = [{ id: 1, name: '홍길동' }];
+let recHit = 0;   // /rec 는 열 때마다 목록 순서를 뒤집는다 (녹화한 행 셀렉터가 순서에 기대지 않는지 검증)
 let flakyHit = 0; // /flaky 는 첫 요청만 실패 (재시도 기능 검증용)
 const html = (b) => `<html><body><div id="menu"><a href="/main">메인</a> <a href="/emp">사원관리</a> <a href="/err">에러메뉴</a> <a href="/jserr">JS에러</a> <a href="/logout">로그아웃</a></div>${b}</body></html>`;
 http.createServer((req, res) => {
@@ -67,6 +68,35 @@ http.createServer((req, res) => {
       document.getElementById('btnConfirmOk').onclick = function(){ document.getElementById('result').innerHTML = confirm('다시 조회할까요?') ? '다시 조회함' : '조회 안 함'; };
       document.querySelector('a.ico').onclick = function(){ document.getElementById('result').innerHTML = '지웠습니다(아이콘 버튼)'; return false; };
     </script>`));
+  // 녹화(⏺) 검증용 화면: 입력·선택·체크 / AJAX 뒤 늦게 뜨는 알림 / 달력(값을 스크립트로 넣음) / 마우스를 올려야 펼쳐지는 메뉴 /
+  //   파일 첨부 / 행 id 가 숫자이고 열 때마다 순서가 뒤집히는 목록 / 확인창을 띄우는 버튼 / 글자 없는 아이콘 버튼
+  if (url.pathname === '/rec') {
+    const rows = [['101', 'C-0001', '첫째 건'], ['102', 'C-0002', '둘째 건'], ['103', 'C-0003', '셋째 건']];
+    if (++recHit % 2 === 0) rows.reverse();
+    return send(200, html(`<style>#gnb li.top{position:relative;display:inline-block}#gnb ul.sub{display:none;position:absolute;left:0;top:18px;background:#fff;border:1px solid #999;margin:0;padding:4px 12px}#gnb li.top:hover ul.sub{display:block}</style>
+    <div id="content"><h2>녹화 검증 화면</h2>
+    <ul id="gnb"><li class="top"><span>관리메뉴</span><ul class="sub"><li><a href="#" id="subItem">하위메뉴</a></li></ul></li></ul>
+    <p>제목 <input id="title" name="title"> 유형 <select id="kind" name="kind"><option value="">선택</option><option value="A">칭찬</option><option value="B">불만</option></select>
+    <input type="checkbox" id="agree" name="agree"><label for="agree">동의</label></p>
+    <p>접수일 <input id="fromDt" name="fromDt" readonly> <div id="cal" class="ui-datepicker" style="display:none"><a href="#" class="prev">이전달</a> <a href="#" class="day">15</a> <a href="#" class="day">16</a></div></p>
+    <p>첨부 <input type="file" id="attach" name="attach"></p>
+    <table id="list" border="1">${rows.map((r) => `<tr id="${r[0]}"><td>${r[1]}</td><td>접수</td><td>${r[2]}</td></tr>`).join('')}</table>
+    <button id="btnSave">등록</button> <button id="btnConfirmDel">정리</button>
+    <a class="ico" href="#"><img alt="삭제" width="16" height="16" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="></a>
+    <div id="result"></div></div>
+    <script>
+      var R = function(t){ document.getElementById('result').textContent = t; };
+      document.getElementById('subItem').onclick = function(){ R('하위메뉴 열림'); return false; };
+      document.getElementById('fromDt').onclick = function(){ document.getElementById('cal').style.display = 'block'; };
+      Array.prototype.forEach.call(document.querySelectorAll('#cal a.day'), function(a){ a.onclick = function(){ document.getElementById('fromDt').value = '2026-09-' + a.textContent; document.getElementById('cal').style.display = 'none'; return false; }; });
+      document.querySelector('#cal a.prev').onclick = function(){ return false; };
+      document.getElementById('attach').onchange = function(){ R('첨부: ' + (this.files[0] ? this.files[0].name : '없음')); };
+      Array.prototype.forEach.call(document.querySelectorAll('#list tr'), function(tr){ tr.onclick = function(){ R('선택: ' + tr.cells[0].textContent); }; });
+      document.getElementById('btnSave').onclick = function(){ setTimeout(function(){ alert('저장되었습니다'); R('저장됨: ' + document.getElementById('title').value + ' / ' + document.getElementById('fromDt').value); }, 1500); };
+      document.getElementById('btnConfirmDel').onclick = function(){ R(confirm('선택한 건을 삭제하시겠습니까?') ? '지웠습니다' : '취소됨'); };
+      document.querySelector('a.ico').onclick = function(){ R('아이콘 눌림'); return false; };
+    </script>`));
+  }
   if (url.pathname === '/api/list') return send(200, '<table id="grid"><tr><td>조회 결과 1</td></tr></table>');
   if (url.pathname === '/api/err500') { res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' }); return res.end(JSON.stringify({ message: 'java.lang.IllegalStateException: stat query failed\n\tat com.example.StatService.list(StatService.java:77)\n\tat com.example.StatController.list(StatController.java:31)' })); }
   if (url.pathname === '/err') return send(500, `<h1>HTTP Status 500 – Internal Server Error</h1><pre>java.lang.NullPointerException\n\tat com.example.EmpController.list(EmpController.java:42)</pre>`);

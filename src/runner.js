@@ -370,7 +370,31 @@ export async function runScenario(sc, opt) {
           break;
         }
         case 'dblclick': await loc().dblclick(); break;
-        case 'fill': await loc().fill(sub(s.value)); break;
+        case 'fill': {
+          // 달력(datepicker) 등 readonly 입력란은 fill 이 안 된다 → 값을 직접 넣고 input/change 이벤트를 발생시킨다 (조회 조건 입력과 같은 방식)
+          const l = loc(), v = sub(s.value);
+          const ro = await l.evaluate((el) => !!el.readOnly && !el.disabled).catch(() => false);
+          if (ro) await l.evaluate((el, val) => { el.value = val; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }, v);
+          else await l.fill(v);
+          break;
+        }
+        // 마우스를 올려야 펼쳐지는 메뉴(GNB 하위 메뉴 등)
+        case 'hover': await loc().hover(); break;
+        // 파일 첨부: files 는 절대경로, 또는 시나리오 폴더·그 아래 _files·도구 폴더 기준 상대경로
+        case 'upload': {
+          const list = [].concat(s.files ?? s.file ?? []).map((f) => sub(f)).filter(Boolean);
+          if (!list.length) throw new Error('upload: files(첨부할 파일 경로)가 없습니다');
+          const scDir = sc._file ? path.join(ROOT, 'scenarios', path.dirname(String(sc._file))) : null;
+          const bases = [scDir, scDir && path.join(scDir, '_files'), ROOT].filter(Boolean);
+          const resolved = list.map((f) => {
+            if (path.isAbsolute(f)) return f;
+            return bases.map((b) => path.join(b, f)).find((x) => fs.existsSync(x)) || f;
+          });
+          const missing = resolved.filter((f) => !fs.existsSync(f));
+          if (missing.length) throw new Error(`첨부 파일 없음: ${missing.join(', ')} (절대경로 또는 시나리오 폴더/_files 기준)`);
+          await loc().setInputFiles(resolved);
+          break;
+        }
         case 'type': await loc().pressSequentially(sub(s.value)); break;
         case 'select': await loc().selectOption(s.value); break;
         case 'check': await loc().setChecked(s.value !== false); break;
@@ -398,8 +422,13 @@ export async function runScenario(sc, opt) {
         }
         case 'expectUrl': { const c = sub(s.contains); if (!curPage.url().includes(c)) throw new Error(`URL 불일치: ${curPage.url()} (기대: *${c}*)`); break; }
         case 'expectDialog': {
+          // 저장 → AJAX → 알림처럼 늦게 뜨는 알림을 기다린다. 확인한 알림은 꺼내서, 같은 문구의 다음 검사가 예전 알림으로 통과하지 않게 한다.
           const t = sub(s.text);
-          if (!dialogs.some((d) => d.includes(t))) throw new Error(`다이얼로그 없음: "${t}" (수신: ${dialogs.join(' | ') || '없음'})`);
+          const until = Date.now() + Number(s.timeout ?? sc.timeout ?? 10000);
+          let at = dialogs.findIndex((d) => d.includes(t));
+          while (at < 0 && Date.now() < until) { if (cancelled()) stop(); await sleep(100); at = dialogs.findIndex((d) => d.includes(t)); }
+          if (at < 0) throw new Error(`다이얼로그 없음: "${t}" (수신: ${dialogs.join(' | ') || '없음'})`);
+          dialogs.splice(at, 1);
           break;
         }
         case 'screenshot': if (shotMode !== 'none') await shot(`${label}-${s.name ?? idx}`, curPage, s); break;

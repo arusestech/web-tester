@@ -51,13 +51,14 @@ npm run test:slow       # test/slow.json (7초 뒤 그려지는 그리드). 기�
 npm run test:actions    # test/actions.json (🖱 버튼 동작 검사). 기대치: 전체 12 / 정상 4 / 실패 6(JS에러·에러알림·금지버튼·AJAX 500·금지 확인창·아이콘 금지버튼) / 주의 2(죽은 버튼·취소한 확인창)
 npm run lint:test       # 검사 동작 확인 (mock.json 은 주의 4건이 정상)
 npm run test:source     # 📂 소스 스캔 (test/source-fixture 정적 분석). 기대치: 38 ok / 0 fail. 브라우저·서버 불필요
-node test/gui-check.mjs # GUI 자동 검증 (임시 프로젝트 "자동검증" 생성 → 검사 → 삭제). 기대치: 60 ok / 0 fail
+npm run test:record     # ⏺ 녹화 (mock /rec 을 헤드리스로 조작 → 기록 스텝 확인 → 그대로 재생). 기대치: 19 ok / 0 fail. mock 이 안 떠 있으면 직접 띄웠다 내린다
+node test/gui-check.mjs # GUI 자동 검증 (임시 프로젝트 "자동검증" 생성 → 검사 → 삭제). 기대치: 69 ok / 0 fail (mock 서버 필요 — 없으면 실행·재실행 항목이 실패한다)
                         #   서버는 WWT_TOKEN=test-token + WWT_NO_CONFIG=1 로 뜬다(토큰 검사·전역설정 무시). config.json 은 건드리지 않음
 node cli.js discover test/mock.json --url /main --depth 2 --pages 5   # 메뉴 수집 (후보 6개 / 새 것 2개)
 node cli.js gui --no-open --port 8766    # GUI 를 Playwright 로 자동 검증할 때 (헤드리스 녹화는 WWT_REC_HEADLESS=1)
 ```
 GUI 검증은 `test/gui-check.mjs` 가 한다(서버 spawn → `chromium.launch` → 임시 프로젝트로 트리/편집/실행/증적 확인 후 정리).
-**브라우저 `dialog` 핸들러를 달지 말 것** — 앱 창과 같은 조건(네이티브 dialog 자동 닫힘)에서 검증해야 실제 버그를 잡는다. 녹화 흐름은 아직 이 스크립트에 없다(헤드리스 녹화는 `WWT_REC_HEADLESS=1`).
+**브라우저 `dialog` 핸들러를 달지 말 것** — 앱 창과 같은 조건(네이티브 dialog 자동 닫힘)에서 검증해야 실제 버그를 잡는다. 녹화 흐름은 이 스크립트가 아니라 `test/record-check.mjs` 가 검증한다(`startRecorder` 를 headless 로 직접 호출).
 
 ## 4. 반드시 알아야 할 주의점
 - **GUI 에서 `prompt()/confirm()/alert()` 금지.** 앱 창은 Playwright `launchPersistentContext` 라 네이티브 dialog 가 자동으로 닫혀 버튼이 죽는다. `ui.ask / ui.confirm / ui.menu` (index.html 상단) 를 쓴다. 2026-08-27 실제로 이 버그로 ⋯ 메뉴·새 프로젝트·삭제가 전부 먹통이었음.
@@ -75,6 +76,19 @@ GUI 검증은 `test/gui-check.mjs` 가 한다(서버 spawn → `chromium.launch`
 - **`.bat`(WigoWebTester.bat/run.bat) 주석·문자열은 ASCII 로만 쓴다.** `chcp 65001` 이 있어도 `rem` 줄에 한글·em대시(—)를 넣으면 cmd 가 주석을 명령으로 오파싱해 실행이 통째로 깨진다(2026-08-29 실제로 겪음: `'체인을' is not recognized`). 설명은 영어로.
 
 ## 5. 변경 이력
+### 2026-09-19 (3) — ⏺ 녹화: "기록은 되는데 재생하면 깨지는" 것들 + 녹화 중 안전장치 + GUI 메뉴 키 유실
+사용자 요청(녹화 모드 검토 결과를 추천 순서대로). 먼저 검증 스크립트를 만들어 8건을 재현한 뒤 고쳤다.
+- **`test/record-check.mjs` 신설 (`npm run test:record`, 19 ok)**: mock `/rec`(입력·달력·hover 메뉴·첨부·순서가 뒤집히는 목록·늦은 알림·금지 확인창·아이콘 버튼)을 `startRecorder(headless)` + Playwright 로 조작 → 기록 스텝 검사 → **그 스텝을 runScenario 로 재생**까지. 녹화기를 고칠 때는 이걸 먼저 돌린다.
+- **`expectDialog` 가 기다린다 + 소비한다** (`runner.js`): 예전에는 click 뒤 stepDelay(0.3초)만 쉬고 바로 검사 → 저장→AJAX→alert 패턴이 `다이얼로그 없음` 으로 실패. `dialogs` 는 흐름 끝까지 안 비워져서 같은 문구의 두 번째 검사가 첫 알림으로 통과했다. 이제 `timeout`(기본 sc.timeout)까지 100ms 간격으로 기다리고, 맞은 알림 하나를 배열에서 뺀다. **영향**: 실패하는 expectDialog 는 즉시가 아니라 timeout 뒤에 실패한다.
+- **달력**: 달력 레이어(`[class*="datepicker"]`, `.flatpickr-calendar`, `.daterangepicker`, + `sc.recorder.calendar`) 안의 클릭은 버리고, 클릭 전후 입력란 값을 비교해 바뀐 것을 `fill` 로 기록(`calWatch` — 달력은 값을 스크립트로 넣어 input 이벤트가 없고, jQuery `trigger('change')` 는 addEventListener 에 안 잡힌다). 재생 `fill` 은 readonly 면 값 직접 대입 + input/change 이벤트(`applyInputs` 와 같은 방식).
+- **새 action `hover`·`upload`** (runner·lint·가이드): hover 는 녹화기가 구조로 추론 — 누른 요소가 `li`/메뉴류 부모 아래 `position:absolute|fixed` 하위 목록 안이면 그 부모의 보이는 첫 자식에 hover 를 먼저 기록(바깥부터). **`:hover` 는 쓰지 않는다** — click 캡처 시점에 조상의 `matches(':hover')` 가 false 로 읽혔다(헤드리스 Chromium 실측). 클릭으로 여는 드롭다운에 붙어도 재생에 해가 없다. upload 는 `input[type=file]` change → 파일 **이름만** 기록(`_note` 로 안내), 재생은 절대경로 → 시나리오 폴더 → `_files/` → 도구 폴더 순으로 찾고 없으면 `첨부 파일 없음`. 파일 입력 클릭 자체는 기록하지 않는다.
+- **목록 행 셀렉터**: CSS 경로를 만들 때 `tr` 은 `:nth-of-type(n)` 대신 그 행에만 있는 칸 글자로 `tr:has-text("C-0002")`(2~30자, 4자리 이하 숫자(순번 칸)는 제외, 같은 부모의 다른 행에 없을 것). 못 찾으면 예전대로 nth.
+- **녹화 중 금지 확인창 취소**: `forbidden` 에 걸리는 confirm/prompt 는 dismiss + `note`(`_warn`). `startRecorder` opt `allowForbidden`(GUI 녹화 시작 옆 **금지 동작 허용** `#rcAllowRec`, CLI `--allow-forbidden`, server `/api/record/start` body)로만 수락. 자동 로그인 중(armed 전)은 예전대로 수락.
+- **녹화 금지 경고 기준 = 재생 기준**: 브라우저 쪽에서 `labels`(title·value·aria-label·alt·id·name, 안쪽 img 포함)를 같이 보내 `_warn` 판정. 글자 없는 버튼은 `_text` 에 걸린 라벨을 넣는다(GUI 가 `_warn` 스텝의 `_text` 로 `allowForbidden` 목록을 만든다).
+- **GUI 메뉴 키 유실 수정** (`ui/index.html`): `formToJson` 이 메뉴를 name·url·expect… 만으로 다시 만들어 `timeout`·`expectTimeout`·`waitFor`·`loading`·`mask`·`retry`·`expectFail`·`confirm`·`_comment` 가 GUI 저장 때 사라졌다(9/19 (2)에서 발견). `MENU_FORM_KEYS` 밖의 키를 `tr.dataset.rest` 로 통째 보관했다가 되돌린다(name·url 뒤에). `dataset.confirm` 은 여기에 흡수. gui-check 67 → **69**.
+- 안 한 것: R7(녹화 전 자동 로그인의 성공 판정·재시도, 녹화에 mocks/stub/reuseSession 적용)은 이번 범위 밖.
+- 검증: test:record 19/0 · gui-check 69/0 · npm test 7/5/1 · batch · checks 3/1/3 · switch 3 · slow 1/1/1 · actions 12(4/6/2) · test:source 48 · `lint scenarios` 오류는 기존 1건(`기본/스타벅스_테스트.json` 빈 시나리오)뿐.
+
 ### 2026-09-19 (2) — 판정·안전장치 3건: AJAX 5xx ❌ / 순회 중 confirm 취소 / 금지 버튼 판정 통합
 사용자 요청("더 좋아질 점" 검토 결과 1~3번). 셋 다 프로젝트 무관한 도구 본체 문제.
 - **AJAX 5xx 가 ⚠️ 환경 노이즈로 묻히던 문제** (`checks.js`): 400 이상 응답은 `errorStatus` 에 없으면 전부 `리소스 응답`(warn) 이었고 triage 는 `HTTP 5xx` 문구만 서버 버그로 봤다 → 화면은 200 인데 jqGrid 데이터 요청만 500 인(가장 흔한 서버 버그) 경우가 주의로 빠졌다. 이제 `resourceType` 이 **document/xhr/fetch 인 5xx 는 ❌ `서버 오류 응답 500 POST …`** + triage `서버 버그`. 이미지·CSS·폰트·스크립트와 4xx 는 그대로 warn. 화면 자체의 5xx 는 `HTTP 500` 과 중복으로 올리지 않는다(`mainNav && mainStatus===code`). 5xx 응답 본문에서 스택트레이스를 찾아 `trace` 에 싣는다(JSON 의 `\n` 글자는 풀어서). 환경 탓이면 `ignore.resources` 로 뺀다.

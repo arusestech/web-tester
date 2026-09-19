@@ -3,6 +3,8 @@
 //
 // 기록되는 것: 페이지 이동(goto) · 클릭/더블클릭 · 입력(fill, 비밀번호는 {{password}}) · select · 체크박스 · Enter/Escape ·
 //              iframe 진입/이탈(frame/mainFrame) · 새 창(popup:true / closePopup) · alert/confirm(expectDialog, 자동 확인)
+//              달력으로 고른 날짜(fill — 달력 안의 클릭은 기록 안 함) · 마우스를 올려야 펼쳐지는 메뉴(hover) · 파일 첨부(upload)
+// 안전: 메시지가 forbidden 에 걸리는 confirm 은 녹화 중에도 취소한다 (opt.allowForbidden 으로만 수락)
 // 녹화 화면 상단 툴바: [요소 확인](다음 클릭 요소를 expectVisible 로) · [선택 텍스트 확인](드래그한 글자를 expectText 로) · [📸 캡처] · [■ 종료]
 import { chromium } from 'playwright';
 import { runLoginSteps } from './scan.js';
@@ -19,14 +21,24 @@ async function launch(sc, headless) {
 
 // ---------- 브라우저 안에 심는 스크립트 (모든 프레임, 모든 페이지) ----------
 // 클로저 없이 독립 실행되어야 함 (addInitScript 로 문자열화됨)
-const INJECT = () => {
+const INJECT = (cfg) => {
   if (window.__wwtInstalled) return; window.__wwtInstalled = true;
+  cfg = cfg || {};
   const send = (ev) => { try { window.__wwtRec(ev); } catch { /* 바인딩 없음 */ } };
   const esc = (s) => (window.CSS && CSS.escape ? CSS.escape(s) : String(s).replace(/([^\w-])/g, '\\$1'));
   const q = (s) => { try { return document.querySelectorAll(s).length; } catch { return 0; } };
   const clean = (s) => (s || '').replace(/\s+/g, ' ').trim();
   const isBar = (el) => !!(el && el.closest && el.closest('#__wwt_bar'));
   const dynamicId = (id) => /^\d|\d{4,}|^(jqg|gbox_|gview_|ui-id-|tui-|ext-|ember|react|__)/i.test(id);
+  // 행(tr) 안의 칸 글자 중 다른 행에는 없는 것 (접수번호 등). 순번 칸 같은 짧은 숫자는 쓰지 않는다
+  const rowKey = (tr, rows) => {
+    for (const td of Array.from(tr.cells || [])) {
+      const t = clean(td.textContent);
+      if (t.length < 2 || t.length > 30 || /["\\\n]/.test(t) || /^\d{1,4}$/.test(t)) continue;
+      if (rows.filter((x) => clean(x.textContent).includes(t)).length === 1) return t;
+    }
+    return '';
+  };
   // 요소 → 재생 시 다시 찾을 수 있는 셀렉터. id → name → 속성 → 짧은 텍스트 → CSS 경로 순
   const sel = (el) => {
     const tag = el.tagName.toLowerCase();
@@ -53,7 +65,14 @@ const INJECT = () => {
       const cls = Array.from(cur.classList).filter((c) => !/^(ui-|jq|hover|active|selected|focus|ng-|is-|has-|tui-|on$)/.test(c) && !/\d/.test(c)).slice(0, 2);
       if (cls.length) part += '.' + cls.map(esc).join('.');
       const par = cur.parentElement;
-      if (par) { const sib = Array.from(par.children).filter((x) => x.tagName === cur.tagName); if (sib.length > 1) part += `:nth-of-type(${sib.indexOf(cur) + 1})`; }
+      if (par) {
+        const sib = Array.from(par.children).filter((x) => x.tagName === cur.tagName);
+        if (sib.length > 1) {
+          // 목록 행은 순번(nth) 대신 그 행에만 있는 글자로 찾는다 — 데이터 순서가 바뀌어도 같은 건을 누르도록
+          const key = cur.tagName === 'TR' ? rowKey(cur, sib) : '';
+          if (key) part = `tr:has-text("${key}")`; else part += `:nth-of-type(${sib.indexOf(cur) + 1})`;
+        }
+      }
       parts.unshift(part); cur = par;
     }
     return parts.join(' > ');
@@ -74,9 +93,52 @@ const INJECT = () => {
   let hi = null;
   const unhi = () => { if (hi) { hi.style.outline = hi.__wwtO || ''; hi = null; } };
 
+  // ----- 달력(datepicker): 날짜 칸 클릭은 달이 바뀌면 재생이 깨진다 → 클릭은 버리고, 그 결과로 바뀐 입력란 값을 fill 로 기록
+  // (달력은 값을 스크립트로 넣어서 input 이벤트가 없다)
+  const CAL = '[class*="datepicker"], .flatpickr-calendar, .daterangepicker' + (cfg.calendar ? ', ' + cfg.calendar : '');
+  const inCal = (el) => { try { return !!(el.closest && el.closest(CAL)); } catch { return false; } };
+  const calWatch = () => {
+    const before = Array.from(document.querySelectorAll('input, textarea')).filter(isText).map((el) => [el, el.value]);
+    const chk = () => {
+      for (const [el, v] of before) {
+        if (el.value === v || lastVal.get(el) === el.value) continue;
+        lastVal.set(el, el.value);
+        send({ type: 'fill', selector: sel(el), value: el.value, inputType: (el.type || 'text').toLowerCase(), note: '달력에서 고른 값' });
+      }
+    };
+    setTimeout(chk, 150); setTimeout(chk, 700);
+  };
+  // ----- 마우스를 올려야 펼쳐지는 메뉴: 누른 요소가 "메뉴 항목 아래에 떠 있는(absolute) 하위 목록" 안에 있으면
+  // 그 항목에 hover 를 먼저 기록한다. (바깥 메뉴부터. 클릭으로 여는 드롭다운에 붙어도 재생에는 해가 없다)
+  const hoverChain = (t) => {
+    const out = [];
+    for (let s = t.parentElement; s && s !== document.body; s = s.parentElement) {
+      const p = s.parentElement;
+      if (!p || p === document.body || !/^(UL|OL|DL|DIV)$/.test(s.tagName)) continue;
+      const menuish = p.tagName === 'LI' || /menu|nav|gnb|lnb|drop|depth/i.test(String(p.className) + ' ' + String(s.className));
+      if (!menuish) continue;
+      let pos = ''; try { pos = getComputedStyle(s).position; } catch { /* */ }
+      // (:hover 상태는 클릭 이벤트 시점에 조상까지 안정적으로 읽히지 않아 구조만 본다)
+      if (pos !== 'absolute' && pos !== 'fixed') continue;
+      const opener = Array.from(p.children).find((c) => c !== s && !c.contains(t) && c.getBoundingClientRect().width > 0) || p;
+      out.unshift(sel(opener));
+    }
+    return out;
+  };
+  // 금지 버튼 판정용 라벨 묶음 — 재생(runner)과 같은 기준: 글자·title·value·aria-label·alt(안쪽 img 포함)·id·name
+  const labelsOf = (el) => {
+    const out = [];
+    for (const n of [el].concat(Array.from(el.querySelectorAll('img, [title], [aria-label]')))) {
+      for (const a of ['title', 'value', 'aria-label', 'alt']) { const v = n.getAttribute && n.getAttribute(a); if (v) out.push(clean(v)); }
+    }
+    out.push(el.id || '', el.getAttribute('name') || '');
+    return out.filter(Boolean).slice(0, 12);
+  };
+
   document.addEventListener('input', (e) => { if (isText(e.target) && !isBar(e.target)) pending = e.target; }, true);
   document.addEventListener('change', (e) => {
     const el = e.target; if (isBar(el)) return;
+    if (el.tagName === 'INPUT' && /^file$/i.test(el.type)) { send({ type: 'upload', selector: sel(el), files: Array.from(el.files || []).map((f) => f.name) }); return; }
     if (el.tagName === 'SELECT') { send({ type: 'select', selector: sel(el), value: el.value, text: el.options[el.selectedIndex] ? clean(el.options[el.selectedIndex].text) : '' }); return; }
     if (el.tagName === 'INPUT' && /^(checkbox|radio)$/i.test(el.type)) { send({ type: 'check', selector: sel(el), value: el.checked, text: clean((el.labels && el.labels[0] && el.labels[0].textContent) || (el.nextElementSibling && el.nextElementSibling.tagName === 'LABEL' ? el.nextElementSibling.textContent : '')) }); return; }
     if (isText(el)) { pending = el; flush(); }
@@ -95,11 +157,14 @@ const INJECT = () => {
     flush();
     if (e.detail > 1) return; // 더블클릭의 두 번째 클릭
     if (e.detail === 0 && Date.now() - enterAt < 500) return; // 입력란 Enter 의 폼 자동 제출이 만든 클릭 (press 로 이미 기록)
+    if (inCal(t)) { calWatch(); return; } // 달력 안 클릭(날짜·이전달·달력 아이콘) → 결과 값만 fill 로
     if (isText(t) || t.tagName === 'SELECT' || t.tagName === 'OPTION') return; // 포커스용 클릭
+    if (t.tagName === 'INPUT' && /^file$/i.test(t.type)) return; // 파일 선택 창 → change 에서 upload 로 기록
     if (t.tagName === 'INPUT' && /^(checkbox|radio)$/i.test(t.type)) return; // change 에서 기록
     if (t.tagName === 'LABEL' && t.control && /^(checkbox|radio)$/i.test(t.control.type)) return;
     const el = t.closest('a, button, [role=button], [onclick], input[type=button], input[type=submit], input[type=image], label, li, td, th') || t;
-    send({ type: 'click', selector: sel(el), text: clean(el.innerText || el.textContent || el.value || el.title || el.alt).slice(0, 40) });
+    for (const h of hoverChain(el)) send({ type: 'hover', selector: h });
+    send({ type: 'click', selector: sel(el), text: clean(el.innerText || el.textContent || el.value || el.title || el.alt).slice(0, 40), labels: labelsOf(el) });
   }, true);
   document.addEventListener('dblclick', (e) => {
     const t = e.target; if (isBar(t) || mode) return;
@@ -138,7 +203,7 @@ const INJECT = () => {
 };
 
 /**
- * sc: 시나리오, opt: { url='/', login=true, secrets, headless=false, onStep(index, step), onState({recording, reason}), log }
+ * sc: 시나리오(sc.recorder.calendar = 달력 레이어 셀렉터 추가), opt: { url='/', login=true, secrets, headless=false, allowForbidden=false(금지 문구 확인창도 수락), onStep(index, step), onState({recording, reason}), log }
  * 반환: { steps, stop(), remove(i), add(step), page, done: Promise }
  */
 export async function startRecorder(sc, opt = {}) {
@@ -206,8 +271,10 @@ export async function startRecorder(sc, opt = {}) {
     switch (ev.type) {
       case 'click': {
         const s = { action: 'click', selector: ev.selector };
-        if (ev.text) s._text = ev.text;
-        if (ev.text && forbidden.some((re) => re.test(ev.text))) s._warn = '금지 버튼 — 재생 시 차단됨 (allowForbidden 필요)';
+        // 재생(runner forbiddenHit)과 같은 기준으로 본다 — 글자가 없는 아이콘 버튼(img alt, id)도 여기서 미리 경고
+        const hit = [ev.text, ...(ev.labels || [])].filter(Boolean).find((t) => forbidden.some((re) => re.test(t)));
+        if (ev.text || hit) s._text = ev.text || hit;
+        if (hit) s._warn = '금지 버튼 — 재생 시 차단됨 (allowForbidden 필요)';
         emit(s); break;
       }
       case 'dblclick': {
@@ -216,11 +283,14 @@ export async function startRecorder(sc, opt = {}) {
       }
       case 'fill': {
         const s = { action: 'fill', selector: ev.selector, value: ev.inputType === 'password' ? '{{password}}' : ev.value };
+        if (ev.note) s._note = ev.note;
         const l = last(); if (l && l.action === 'fill' && l.selector === ev.selector) steps.pop(); // 같은 칸 재입력 → 최종값만
         emit(s); break;
       }
       case 'select': { const s = { action: 'select', selector: ev.selector, value: ev.value }; if (ev.text) s._text = ev.text; emit(s); break; }
       case 'check': { const s = { action: 'check', selector: ev.selector, value: !!ev.value }; if (ev.text) s._text = ev.text; emit(s); break; }
+      case 'hover': { const l = last(); if (!(l && l.action === 'hover' && l.selector === ev.selector)) emit({ action: 'hover', selector: ev.selector, _note: '마우스를 올려 하위 메뉴를 펼침' }); break; }
+      case 'upload': emit({ action: 'upload', selector: ev.selector, files: ev.files || [], _note: '파일 이름만 기록됨 — 절대경로로 바꾸거나 시나리오 폴더(또는 그 아래 _files)에 파일을 두세요' }); break;
       case 'press': { const s = { action: 'press', key: ev.key }; if (ev.selector) s.selector = ev.selector; emit(s); break; }
       case 'expectVisible': { const s = { action: 'expectVisible', selector: ev.selector }; if (ev.text) s._text = ev.text; emit(s); break; }
       case 'expectText': emit({ action: 'expectText', text: ev.text }); break;
@@ -249,9 +319,16 @@ export async function startRecorder(sc, opt = {}) {
     });
     p.on('dialog', async (d) => {
       const m = d.message();
-      await d.accept().catch(() => {});
+      // 금지 문구(삭제·발송…) 확인창은 녹화 중에도 취소한다 — 잘못 누른 버튼으로 실데이터가 바뀌지 않게.
+      // 삭제·발송 흐름을 일부러 녹화할 때만 opt.allowForbidden 으로 수락한다.
+      const block = armed && !opt.allowForbidden && /^(confirm|prompt)$/.test(d.type()) && forbidden.some((re) => re.test(m));
+      await (block ? d.dismiss() : d.accept()).catch(() => {});
       if (!armed || closed) return;
-      chain = chain.then(() => { emit({ action: 'expectDialog', text: m.replace(/\s+/g, ' ').trim().slice(0, 40), _dialog: d.type() }); });
+      const short = m.replace(/\s+/g, ' ').trim().slice(0, 40);
+      chain = chain.then(() => {
+        if (block) emit({ action: 'note', _note: `확인창을 취소했습니다: "${short}"`, _warn: '금지 문구 확인창 — 녹화 중에는 취소됩니다. 이 동작을 녹화하려면 "금지 동작 허용"을 켜고 다시 녹화하세요' });
+        else emit({ action: 'expectDialog', text: short, _dialog: d.type() });
+      });
     });
     p.on('close', () => {
       if (closed) return;
@@ -275,7 +352,7 @@ export async function startRecorder(sc, opt = {}) {
   const mainPage = await context.newPage();
   attach(mainPage);
   curPage = mainPage; curFrame = mainPage.mainFrame();
-  await context.addInitScript(INJECT);
+  await context.addInitScript(INJECT, { calendar: sc.recorder?.calendar || '' });
 
   try {
     if (opt.login !== false && sc.login) {

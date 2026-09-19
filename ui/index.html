@@ -847,13 +847,17 @@ function fillForm(sc) {
   $('#f_mocks').value = JSON.stringify(sc.mocks || [], null, 2);
   window._extra = sc; // 폼에 없는 키(crawl, _comment 등) 보존
 }
+const MENU_FORM_KEYS = new Set(['name', 'url', 'expect', 'steps', 'inputs', 'search', '_fields', 'actions', 'detail', 'screenshot']);
 function addMenuRow(m = {}) {
   const tr = document.createElement('tr');
   const d = typeof m.detail === 'string' ? { selector: m.detail } : (m.detail || {});
   const shotV = m.screenshot === true ? 'true' : m.screenshot === false ? 'false' : '';
   tr.dataset.inputs = JSON.stringify(m.inputs || {}); if (m.search !== undefined) tr.dataset.search = JSON.stringify(m.search); if (m._fields) tr.dataset.fields = JSON.stringify(m._fields);
   if (m.actions?.length) tr.dataset.actions = JSON.stringify(m.actions);   // 버튼 동작 검사 (JSON 직접 편집에서 수정)
-  if (m.confirm) tr.dataset.confirm = m.confirm;   // 순회 중 확인창 처리(accept/dismiss) — 폼에 칸은 없지만 보존
+  // 폼에 칸이 없는 메뉴 키(timeout·expectTimeout·waitFor·loading·mask·retry·expectFail·confirm·_comment …)는 통째로 보관했다가 저장 때 되돌린다.
+  // (안 하면 GUI 로 저장하는 순간 사라진다)
+  const rest = {}; for (const k of Object.keys(m)) if (!MENU_FORM_KEYS.has(k)) rest[k] = m[k];
+  if (Object.keys(rest).length) tr.dataset.rest = JSON.stringify(rest);
   tr.innerHTML = `<td><input type="text" class="m-name" value="${esc(m.name)}"></td><td><input type="text" class="m-url" value="${esc(m.url)}" placeholder="${m.steps ? `(클릭 진입 · ${m.steps.length} 스텝)` : '/list.do'}" title="${m.steps ? 'URL 없이 steps 로 진입하는 메뉴. steps 는 JSON 직접 편집에서 수정' : ''}"></td><td><input type="text" class="m-expect" value="${esc((m.expect || []).join(', '))}"></td>
     <td><button class="sec m-inputs" style="width:100%;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" onclick="openInputsPopup(this.closest('tr'))"></button></td>
     <td><input type="text" class="m-detail" value="${esc(d.selector || '')}" placeholder="(선택) tbody tr a"></td><td><input type="number" class="m-rows" value="${d.rows ?? 1}" min="1" style="width:46px;padding:3px"></td>
@@ -1010,7 +1014,7 @@ function formToJson() {
     else delete sc.login;
   }
   sc.menus = [...$('#menuRows').children].map((tr) => {
-    const m = { name: tr.querySelector('.m-name').value.trim(), url: tr.querySelector('.m-url').value.trim() };
+    const m = { name: tr.querySelector('.m-name').value.trim(), url: tr.querySelector('.m-url').value.trim(), ...(tr.dataset.rest ? JSON.parse(tr.dataset.rest) : {}) };
     const ex = splitList(tr.querySelector('.m-expect').value); if (ex.length) m.expect = ex;
     if (tr.dataset.steps) { m.steps = JSON.parse(tr.dataset.steps); if (!m.url) delete m.url; }
     const kv = JSON.parse(tr.dataset.inputs || '{}');
@@ -1018,7 +1022,6 @@ function formToJson() {
     if (tr.dataset.search) m.search = JSON.parse(tr.dataset.search);
     if (tr.dataset.fields) m._fields = JSON.parse(tr.dataset.fields);
     if (tr.dataset.actions) { const acts = JSON.parse(tr.dataset.actions); if (acts.length) m.actions = acts; }   // 버튼 동작 검사 (폼에 칸은 없지만 보존)
-    if (tr.dataset.confirm) m.confirm = tr.dataset.confirm;
     const dsel = tr.querySelector('.m-detail').value.trim(); const rest = tr.dataset.detail ? JSON.parse(tr.dataset.detail) : {};
     if (dsel || rest.text) { m.detail = { ...rest }; if (dsel) m.detail.selector = dsel; const n = +tr.querySelector('.m-rows').value; if (n > 1) m.detail.rows = n; else delete m.detail.rows; }
     const sv = tr.querySelector('.m-shot').value; if (sv) m.screenshot = sv === 'true';
@@ -1188,7 +1191,7 @@ function showReport(r) { if (r.dir) $('#reportLink').innerHTML = `<a href="/repo
 const recUI = { dlg: null, log(m) { const el = this.dlg?.querySelector('#rcLog'); if (el) { el.textContent += m + '\n'; el.scrollTop = el.scrollHeight; } }, steps(s) { if (this.dlg) renderRecSteps(s); }, state(s) { if (s.resumed && s.recording && !this.dlg) openRecorder(true); if (this.dlg) this.dlg._state(s); } };
 const stepLine = (s) => {
   const tgt = s.selector ?? s.url ?? s.name ?? s.key ?? s.text ?? s.contains ?? (s.ms ? s.ms + 'ms' : '');
-  const val = s.value !== undefined ? ` = ${typeof s.value === 'string' ? s.value : JSON.stringify(s.value)}` : '';
+  const val = s.value !== undefined ? ` = ${typeof s.value === 'string' ? s.value : JSON.stringify(s.value)}` : s.files ? ` ← ${[].concat(s.files).join(', ')}` : '';
   return `${esc(tgt)}${esc(val)}${s.popup ? ' <b>[새 창]</b>' : ''}${s._text ? ` <span class="muted">(${esc(s._text)})</span>` : ''}${s._note ? ` <span class="muted">${esc(s._note)}</span>` : ''}`;
 };
 function renderRecSteps(steps) {
@@ -1373,6 +1376,7 @@ function openRecorder(resumed = false) {
     <div class="row" id="rcSetup">
       <label>시작 URL <input type="text" id="rcUrl" value="${esc(hasLogin ? (eff.login.url || '/') : '/')}" placeholder="/login.do" style="width:220px" title="브라우저가 처음 열 주소. 로그인 자동 처리를 켜면 로그인 후 화면으로 자동 바뀝니다"></label>
       <label title="${hasLogin ? '체크하면 로그인 설정으로 먼저 자동 로그인한 뒤(기록 안 함) 녹화를 시작합니다. 해제하면 로그인 화면부터 직접 로그인하며 그 과정도 기록됩니다(비밀번호는 {{password}} 로 저장)' : '로그인 설정이 없어 바로 시작합니다'}">${hasLogin ? '<input type="checkbox" id="rcLogin"> 로그인 자동 처리 (기록 안 함)' : '<input type="checkbox" id="rcLogin" disabled> 로그인 설정 없음'}</label>
+      <label title="기본은 꺼짐: 녹화 중 '삭제하시겠습니까?' 처럼 금지 단어(forbidden)가 든 확인창은 자동으로 취소되어 데이터가 바뀌지 않습니다. 삭제·발송 흐름을 일부러 녹화할 때만 켜세요"><input type="checkbox" id="rcAllowRec"> 금지 동작 허용 (삭제·발송 확인창도 수락)</label>
       <button class="rec" id="rcStart">⏺ 녹화 시작</button>
     </div>
     <div class="muted">시작하면 <b>브라우저가 열리고 시작 URL 부터 실제로 클릭·입력</b>하면 아래 표에 실시간 기록됩니다(비밀번호는 <code>{{password}}</code> 로). <b>로그인 자동 처리</b>를 켜면 먼저 자동 로그인(기록 안 함) 후 <b>로그인 뒤 화면</b>부터, 끄면 <b>로그인 화면부터</b> 직접 로그인하며 그것도 기록. 끝나면 상단 툴바 <b>■ 종료</b>.<br>검사 스텝은 툴바 <b>☑ 요소 확인</b> / <b>선택 텍스트 확인</b>, 화면은 <b>📸 캡처</b>. alert/confirm 은 자동 확인. 금지 버튼(${esc((eff.forbidden || []).join(', ')) || '없음'})은 재생 시 차단.</div>
@@ -1414,7 +1418,7 @@ function openRecorder(resumed = false) {
     const login = q('#rcLogin') && q('#rcLogin').checked; const secrets = {};
     if (login) for (const k of placeholdersOf(eff.login || {})) { const v = await askSecret(k); if (v === null) return; secrets[k] = v; }
     q('#rcStart').disabled = true; q('#rcStatus').textContent = '⏳ 브라우저 여는 중…';
-    try { await api('/api/record/start', { scenario: eff, url: q('#rcUrl').value.trim() || '/', login, secrets, name: '녹화', file: current }); }
+    try { await api('/api/record/start', { scenario: eff, url: q('#rcUrl').value.trim() || '/', login, secrets, name: '녹화', file: current, allowForbidden: !!(q('#rcAllowRec') && q('#rcAllowRec').checked) }); }
     catch (e) { q('#rcStart').disabled = false; q('#rcStatus').textContent = '실패: ' + e.message; toast(e.message); }
   };
   q('#rcStop').onclick = () => api('/api/record/stop', {}).catch((e) => toast(e.message));

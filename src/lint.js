@@ -4,8 +4,8 @@
 
 const ACTIONS = new Set(['goto', 'click', 'dblclick', 'fill', 'type', 'select', 'check', 'press', 'frame', 'mainFrame',
   'closePopup', 'wait', 'waitFor', 'waitForLoad', 'expectVisible', 'expectText', 'expectNotText', 'expectUrl',
-  'expectDialog', 'screenshot', 'note', 'eval', 'switchUser']);
-const NEEDS_TARGET = new Set(['click', 'dblclick', 'fill', 'type', 'select', 'check', 'expectVisible']);
+  'expectDialog', 'screenshot', 'note', 'eval', 'switchUser', 'hover', 'upload']);
+const NEEDS_TARGET = new Set(['click', 'dblclick', 'fill', 'type', 'select', 'check', 'expectVisible', 'hover', 'upload']);
 
 // expectFail: true | 정규식 문자열 | 문자열 배열. 그 외/깨진 정규식은 잡는다.
 function lintExpectFail(v, where, add) {
@@ -136,6 +136,7 @@ function lintStep(s, where, add, sc) {
   if (NEEDS_TARGET.has(s.action) && !s.selector && !s.text && !s.role) add('error', `${s.action} 스텝에 대상(selector/text/role)이 없습니다`, where);
   if (s.action === 'goto' && !s.url) add('error', 'goto 스텝에 url 이 없습니다', where);
   if (s.action === 'press' && !s.key) add('error', 'press 스텝에 key 가 없습니다', where);
+  if (s.action === 'upload' && ![].concat(s.files ?? s.file ?? []).filter(Boolean).length) add('error', 'upload 스텝에 files(첨부할 파일 경로)가 없습니다', where);
   if (s.action === 'switchUser') {
     if (!s.user) add('error', 'switchUser 스텝에 user(아이디)가 없습니다', where);
     if (!sc?.login) add('error', 'switchUser 는 login 설정이 있어야 합니다', where);

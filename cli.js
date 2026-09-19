@@ -83,7 +83,7 @@ function usage() {
   WigoWebTester.bat / wigo-web-tester.sh          GUI 실행 (기본)
   run.bat <scenario.json> [옵션]           터미널에서 바로 실행
   run.bat <폴더> [옵션]                    폴더(프로젝트) 아래 시나리오 전부 일괄 실행 → 합산 증적
-  run.bat record <scenario.json> [--url /경로] [--name 이름] [--append] [--no-login]
+  run.bat record <scenario.json> [--url /경로] [--name 이름] [--append] [--no-login] [--allow-forbidden]
                                            브라우저를 띄워 조작을 녹화 → 스텝 JSON 출력 (--append 면 시나리오 crud 에 추가)
   run.bat discover <scenario.json> [--url /경로] [--depth 2] [--pages 20] [--max 200] [--selector "#lnb a"]
                                    [--pattern "/screen/{}.ub"] [--append]
@@ -170,7 +170,7 @@ async function record(file) {
   const { findPlaceholders } = await import('./src/secrets.js');
   const login = !opt('no-login', false);
   let secrets; try { secrets = await collectSecrets(login && scenario.login ? findPlaceholders(scenario.login) : []); } catch (e) { console.error(e.message); return 1; }
-  const rec = await startRecorder(scenario, { url: opt('url', '/'), login, secrets, log: (m) => console.log(m) });
+  const rec = await startRecorder(scenario, { url: opt('url', '/'), login, secrets, allowForbidden: args.includes('--allow-forbidden'), log: (m) => console.log(m) });
   const steps = tidySteps(await rec.done);
   const name = opt('name', `녹화 ${new Date().toLocaleString()}`);
   const flow = { name, steps };

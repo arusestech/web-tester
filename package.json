@@ -15,7 +15,8 @@
     "test:slow": "node cli.js run test/slow.json --headless --no-config",
     "test:actions": "node cli.js run test/actions.json --headless --no-config",
     "lint:test": "node cli.js lint test/mock.json",
-    "test:source": "node test/source-scan-check.mjs"
+    "test:source": "node test/source-scan-check.mjs",
+    "test:record": "node test/record-check.mjs"
   },
   "engines": { "node": ">=20" },
   "dependencies": {

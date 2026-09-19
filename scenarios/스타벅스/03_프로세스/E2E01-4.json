@@ -1,0 +1,166 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E01-4 [100 시스템관리자] 정리(소프트삭제)",
+  "_comment": "E2E-01 4단계. 정리",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat(SMTP 목업 localhost:1025 적용 war). 8888 = IntelliJ Tomcat(메일 host 내부망 IP → 발송 실패). CrossEditor 라이선스는 도메인 기준이라 포트 무관",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 가 컨텍스트 없는 /screen/POR0001.ub 로 보내는 알려진 현상(세션은 정상)",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "test01"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "VOC1001 → VOC1002 [삭제] → VOC1012 삭제사유 → 삭제 VOC(VOC1017) 에서 확인",
+      "allowForbidden": [
+        "삭제",
+        "Delete"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn a, #searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const td=[...document.querySelectorAll('table.ui-jqgrid-btable td')].find(t=>t.textContent.includes('TEST_E2E01'));if(!td)throw new Error('행 없음: TEST_E2E01');td.dispatchEvent(new MouseEvent('dblclick',{bubbles:true}));})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "click",
+          "selector": "#btnDel a",
+          "popup": true
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "fill",
+          "selector": "#DS_DEL",
+          "value": "TEST_ E2E 자동 테스트 정리"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.getElementById('btnDel');if(!b)throw new Error('버튼 없음: btnDel');(b.querySelector('a')||b).click();})()"
+        },
+        {
+          "action": "expectDialog",
+          "text": "삭제"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "closePopup"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC1017.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn a, #searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectText",
+          "text": "TEST_E2E01"
+        },
+        {
+          "action": "screenshot",
+          "name": "삭제VOC확인"
+        },
+        {
+          "action": "note",
+          "_manual": "영구삭제 금지(CLAUDE.md). 물리 정리는 SQL 로 사용자 수행: TBS_VOC 계열 TEST_E2E01 행"
+        }
+      ]
+    },
+    {
+      "name": "로그아웃",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "click",
+          "selector": ".logout-button a"
+        },
+        {
+          "action": "expectDialog",
+          "text": "로그아웃"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectUrl",
+          "contains": "BCO0001"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E10-4 [210] 기능권한 미등록 → 전부 차단",
+  "_comment": "E2E-10 4단계",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R210"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "VOC1019",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1019.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "eval",
+          "script": "(async()=>{const r=await fetch(uxl.getFunctionUrl('VOC1019','INQUIRY'),{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest'},body:\"\"});const t=await r.text();const st=(t.match(/\"resultStatus\":\"(\\w+)\"/)||[])[1]||'';const denied=t.includes('권한이 없습니다');if(!denied)throw new Error('VOC1019 INQUIRY 기대 권한차단, 실제 '+st+' (서버 미강제)');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(async()=>{const r=await fetch(uxl.getFunctionUrl('VOC1019','EXPORT'),{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest'},body:\"\"});const t=await r.text();const st=(t.match(/\"resultStatus\":\"(\\w+)\"/)||[])[1]||'';const denied=t.includes('권한이 없습니다');if(!denied)throw new Error('VOC1019 EXPORT 기대 권한차단, 실제 '+st+' (서버 미강제)');})()"
+        }
+      ]
+    }
+  ]
+}

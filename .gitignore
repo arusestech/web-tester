@@ -1,0 +1,12 @@
+node_modules/
+reports/
+dist/
+runtime/
+browsers/
+logs/
+.gui-profile/
+# 로그인 세션(쿠키) 저장소 — 절대 커밋하지 않음
+.sessions/
+# 사내 접속정보(DB 등)는 로컬 전용
+CLAUDE.local.md
+# 시나리오에는 비밀번호를 넣지 않는다({{password}} → 실행 시 --secret). 커밋 전 위생 점검은 docs/HANDOVER.md §4

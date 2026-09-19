@@ -1,0 +1,100 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E04-4 [800 CE관리자] VOC1021 접근",
+  "_comment": "E2E-04 4단계. DB 에 800 등록 → 허용이 정상",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R800"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "VOC1021",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1021.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{if($('#YMD_STND_START').length){$('#YMD_STND_START').val('2026-08-01');$('#YMD_STND_END').val('2026-08-31');}if($('#YY_STD').length){$('#YY_STD').val('2026');$('#MM_STD').val('08');}})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "screenshot",
+          "name": "CE관리자"
+        }
+      ]
+    }
+  ]
+}

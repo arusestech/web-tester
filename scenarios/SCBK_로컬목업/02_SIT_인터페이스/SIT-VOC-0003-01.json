@@ -1,0 +1,260 @@
+{
+  "extends": "../01_SIT_온라인/_공통.json",
+  "name": "SIT-VOC-0003-01 연계_MCI고객정보조회",
+  "_comment": "폐쇄망 MCI SIT 연계를 탄다. 조회 고객(생년월일·휴대폰)은 실행 시 입력 — MCI 담당이 제공한 SIT 테스트 고객만 사용",
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "userField": "#userid",
+    "logoutUrl": "/logout.ub",
+    "retries": 1,
+    "_comment_retries": "비밀번호 연속 실패 시 계정 잠금(maxFailPassword) → 재시도 1회",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "{{id_crt}}"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001",
+      "selector": "#menu"
+    }
+  },
+  "_manual_steps": [
+    "S1 배포본 MCI.properties(IP/PORT/SESS_CNT/TIMEOUT) SIT 값 확인 — 서버 담당 협조",
+    "미접속 상황(MCI 차단) 재현은 인프라 협조가 필요해 수동"
+  ],
+  "menus": [],
+  "crud": [
+    {
+      "name": "S2~S3 고객정보확인 전문 송수신",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"TEST_고객\";const e=document.querySelector(\"#NM_CUST\");if(!e)throw new Error('입력칸 없음: '+\"#NM_CUST\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{cust_birth}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#YMD_BIRTH\");if(!e)throw new Error('입력칸 없음: '+\"#YMD_BIRTH\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{cust_mobile}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#NO_MOBILE\");if(!e)throw new Error('입력칸 없음: '+\"#NO_MOBILE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#custSearch"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 8000
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(document.querySelector('#CUST_ID_SEG')||{}).value||'';if(!/PB|PMB|BB|PSB/.test(v))throw new Error('고객분류 비정상: '+v);})()"
+        },
+        {
+          "action": "screenshot",
+          "name": "고객분류"
+        }
+      ]
+    },
+    {
+      "name": "S4 MCI 오류 응답 시 화면 오류 없음",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"TEST_고객\";const e=document.querySelector(\"#NM_CUST\");if(!e)throw new Error('입력칸 없음: '+\"#NM_CUST\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"1900-01-01\";const e=document.querySelector(\"#YMD_BIRTH\");if(!e)throw new Error('입력칸 없음: '+\"#YMD_BIRTH\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{cust_mobile_none}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#NO_MOBILE\");if(!e)throw new Error('입력칸 없음: '+\"#NO_MOBILE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#custSearch"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 8000
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "screenshot",
+          "name": "MCI오류"
+        }
+      ]
+    },
+    {
+      "name": "S5 연속 조회",
+      "_comment": "세션 풀(SESS_CNT) 초과·누수 여부는 WAS 로그로 수동 확인. MCI 부하를 고려해 3회만",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"TEST_고객\";const e=document.querySelector(\"#NM_CUST\");if(!e)throw new Error('입력칸 없음: '+\"#NM_CUST\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{cust_birth}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#YMD_BIRTH\");if(!e)throw new Error('입력칸 없음: '+\"#YMD_BIRTH\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{cust_mobile}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#NO_MOBILE\");if(!e)throw new Error('입력칸 없음: '+\"#NO_MOBILE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#custSearch"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 4000
+        },
+        {
+          "action": "click",
+          "selector": "#custSearch"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 4000
+        },
+        {
+          "action": "click",
+          "selector": "#custSearch"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 4000
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "screenshot",
+          "name": "연속조회"
+        }
+      ]
+    }
+  ]
+}

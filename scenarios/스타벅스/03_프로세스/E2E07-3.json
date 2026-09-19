@@ -1,0 +1,277 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E07-3 [130 권한관리자] 접근 경계 + 로그인갱신",
+  "_comment": "E2E-07 3단계. DB 기준: SYS0002/SYS0158/SYS0165 만 차단. SYS0027 [잠금 해제] 는 TEST_ 계정만",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "_comment_block": "SYS0002/0158/0165 는 130 권한관리자에게 차단 → accessDenied(본문 '권한'). expectText '권한' 으로 차단을 양성 확인하므로, 공통 errorPatterns('접근권한이 없')는 ignore.text 로 무시",
+  "ignore": { "text": ["접근권한이 없"] },
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R130"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "차단 화면",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/SYS0002.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "권한"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/SYS0158.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "권한"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/SYS0165.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "권한"
+        }
+      ]
+    },
+    {
+      "name": "허용 화면",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/SYS0027.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/SYS0313.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/SYS0011.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/APM0066.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/SYS9999.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        }
+      ]
+    },
+    {
+      "name": "SYS0027 로그인갱신(TEST_R999)",
+      "allowForbidden": [
+        "로그인갱신",
+        "잠금 해제"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/SYS0027.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "fill",
+          "selector": "#USER_NM",
+          "value": "TEST_일반사용자"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "expectText",
+          "text": "TEST_R999"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const tr=[...document.querySelectorAll('table.ui-jqgrid-btable tr.jqgrow')].find(r=>r.textContent.includes('TEST_R999'));const a=tr&&tr.querySelector('a');if(!a)throw new Error('행 버튼 없음');a.click();})()"
+        },
+        {
+          "action": "expectDialog",
+          "text": "로그인갱신"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "screenshot",
+          "name": "로그인갱신"
+        }
+      ]
+    }
+  ]
+}

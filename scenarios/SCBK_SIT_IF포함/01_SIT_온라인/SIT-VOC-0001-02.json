@@ -1,0 +1,267 @@
+{
+  "extends": "_공통.json",
+  "name": "SIT-VOC-0001-02 VOC등록_고객정보확인_MCI",
+  "_comment": "폐쇄망 MCI SIT 연계를 탄다. 조회 고객(생년월일·휴대폰)은 실행 시 입력 — MCI 담당이 제공한 SIT 테스트 고객만 사용",
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "userField": "#userid",
+    "logoutUrl": "/logout.ub",
+    "retries": 1,
+    "_comment_retries": "비밀번호 연속 실패 시 계정 잠금(maxFailPassword) → 재시도 1회",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "{{id_crt}}"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001",
+      "selector": "#menu"
+    }
+  },
+  "_manual_steps": [
+    "S5 WAS 로그(MCI 통신 로그)에서 요청/응답 전문 EUC-KR 기록·타임아웃 없음 확인 — 서버 담당 협조"
+  ],
+  "menus": [
+    {
+      "name": "My job > VOC 등록",
+      "url": "/screen/VOC0001.ub",
+      "expect": [
+        "#NM_CUST",
+        "#custSearch",
+        "#DS_TITLE"
+      ]
+    }
+  ],
+  "crud": [
+    {
+      "name": "S1 VOC 등록 화면",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#NM_CUST"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#custSearch"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#YMD_BIRTH"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#NO_MOBILE"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#DS_TITLE"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#DS_CONT"
+        },
+        {
+          "action": "screenshot",
+          "name": "VOC등록"
+        }
+      ]
+    },
+    {
+      "name": "S2 생년월일·휴대폰 미입력 고객정보확인",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"\";const e=document.querySelector(\"#YMD_BIRTH\");if(!e)throw new Error('입력칸 없음: '+\"#YMD_BIRTH\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"\";const e=document.querySelector(\"#NO_MOBILE\");if(!e)throw new Error('입력칸 없음: '+\"#NO_MOBILE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#custSearch"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2000
+        },
+        {
+          "action": "expectDialog",
+          "text": "생년월일을 입력해주세요"
+        },
+        {
+          "action": "screenshot",
+          "name": "필수안내"
+        }
+      ]
+    },
+    {
+      "name": "S3 MCI 고객정보확인",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"TEST_고객\";const e=document.querySelector(\"#NM_CUST\");if(!e)throw new Error('입력칸 없음: '+\"#NM_CUST\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{cust_birth}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#YMD_BIRTH\");if(!e)throw new Error('입력칸 없음: '+\"#YMD_BIRTH\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{cust_mobile}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#NO_MOBILE\");if(!e)throw new Error('입력칸 없음: '+\"#NO_MOBILE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#custSearch"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 8000
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(document.querySelector('#CUST_ID_SEG')||{}).value||'';if(!v.trim())throw new Error('고객분류(CUST_ID_SEG) 비어 있음 — MCI 응답·테스트 고객 확인');})()"
+        },
+        {
+          "action": "screenshot",
+          "name": "MCI응답"
+        }
+      ]
+    },
+    {
+      "name": "S4 존재하지 않는 고객 조회",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"TEST_고객\";const e=document.querySelector(\"#NM_CUST\");if(!e)throw new Error('입력칸 없음: '+\"#NM_CUST\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"1900-01-01\";const e=document.querySelector(\"#YMD_BIRTH\");if(!e)throw new Error('입력칸 없음: '+\"#YMD_BIRTH\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{cust_mobile_none}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#NO_MOBILE\");if(!e)throw new Error('입력칸 없음: '+\"#NO_MOBILE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#custSearch"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 8000
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "screenshot",
+          "name": "미존재고객"
+        }
+      ]
+    }
+  ]
+}

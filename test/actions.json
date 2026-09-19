@@ -1,0 +1,33 @@
+{
+  "name": "actions 자체검증",
+  "_comment": "버튼 동작 검사(actions). 기대: 전체 8 / 정상 4(로그인+화면+조회+팝업) / 실패 3(JS에러·에러알림·금지버튼차단) / 주의 1(죽은 버튼)",
+  "baseUrl": "http://localhost:3999",
+  "browser": { "channel": "chrome", "headless": true },
+  "timeout": 8000,
+  "evidence": { "screenshotAll": false },
+  "forbidden": ["삭제"],
+  "login": {
+    "url": "/login",
+    "steps": [
+      { "action": "fill", "selector": "input[name=userId]", "value": "tester" },
+      { "action": "fill", "selector": "input[name=password]", "value": "1234" },
+      { "action": "click", "selector": "button[type=submit]" }
+    ],
+    "success": { "urlNotContains": "login" }
+  },
+  "menus": [
+    {
+      "name": "버튼 화면",
+      "url": "/buttons",
+      "expect": ["#content"],
+      "actions": [
+        { "name": "조회", "click": "#btnOk", "expect": ["#grid"], "expectText": "조회 결과" },
+        { "name": "반응없는 버튼", "click": "#btnDead" },
+        { "name": "JS 에러 버튼", "click": "#btnJsErr" },
+        { "name": "에러 알림 버튼", "click": "#btnAlertErr" },
+        { "name": "검색팝업 열기", "click": "#btnLayer", "expect": ["#layer"] },
+        { "name": "삭제(금지 버튼)", "click": "#btnDelete" }
+      ]
+    }
+  ]
+}

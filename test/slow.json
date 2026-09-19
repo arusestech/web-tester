@@ -1,0 +1,22 @@
+{
+  "_comment": "느린 쿼리·늦게 그려지는 화면 대응 검증. 그리드가 7초 뒤에 생긴다. 실행: npm run mock 후 npm run test:slow",
+  "_기대": "전체 3 / 정상 1 / 실패 1 / 주의 1 — '기본 대기(실패 예정)' 는 ❌(5초 대기 후 포기), '로딩 대기 + 대기시간 늘림' 은 성공하되 7.5초라 ⚠️ 느림",
+  "name": "slow 자체검증",
+  "baseUrl": "http://localhost:3999",
+  "browser": { "channel": "chrome", "headless": true },
+  "evidence": { "screenshotAll": false },
+  "slowMs": 6000,
+  "login": {
+    "url": "/login",
+    "steps": [
+      { "action": "fill", "selector": "input[name=userId]", "value": "tester" },
+      { "action": "fill", "selector": "input[name=password]", "value": "1234" },
+      { "action": "click", "selector": "button[type=submit]" }
+    ],
+    "success": { "urlNotContains": "login" }
+  },
+  "menus": [
+    { "name": "기본 대기(실패 예정)", "url": "/slowgrid?ms=7000", "expect": ["#grid"] },
+    { "name": "로딩 대기 + 대기시간 늘림", "url": "/slowgrid?ms=7000", "expect": ["#grid"], "loading": "#loading", "timeout": 20000, "expectTimeout": 15000 }
+  ]
+}

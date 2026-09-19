@@ -1,0 +1,233 @@
+{
+  "extends": "_공통.json",
+  "name": "개선7-04 필터 정확성",
+
+  "_comment": "조건이 '실제로 거르는지'를 건수로 확인한다. 01~03 은 오류 없이 도는지까지만 본다. 전용 테스트 데이터 6건(TESTVOC001~006)을 기준으로 기대 건수를 박아 두었다",
+  "_comment_data": "테스트 데이터 스크립트: 20_개선7_통합검색_테스트데이터_260829.sql (사내 DB반영 폴더. CCCOWN 적용 완료, 2026-08-28 접수분). 지우지 말 것 — 지우면 이 파일 전체가 실패한다. 다른 환경에서 돌리려면 그 환경에도 같은 스크립트를 넣고 baseUrl 만 바꾼다",
+  "_comment_design": "6건 중 3·4번은 제보성·불합리한차별행위·중반복을 결함9 환원 이전 방식인 레거시 'Y'/'N' 문자열로 저장해 뒀다. 레거시 호환 조건이 빠지면 이 세 항목이 3건이 아니라 2건으로 떨어진다 — 그게 회귀 신호다",
+  "_comment_count": "건수는 그리드에 그려진 행으로 센다. 전체가 6건이라 한 페이지(10건)에 다 들어온다. 업무 데이터가 있는 환경에 이 데이터를 넣으면 건수가 어긋나므로, 그때는 접수일자를 2026-08-28~2026-08-28 로 좁혀서 돌린다",
+
+  "menus": [
+    {
+      "name": "04-00 전체 6건",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 6) throw new Error('전체 기대 6건 / 실제 ' + n + '건 — 테스트 데이터가 없거나 다른 업무 데이터가 섞였다'); })()" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "04-01 VOC 처리결과 수용 = 3건 (하위 포함)",
+      "url": "/vocIntegrationList",
+      "_note": "'수용'(CODE0080000013) 선택 → 자기 자신(3번) + 하위 전부수용(1번)·일부수용(5번) = 3건. CONNECT BY 가 빠지면 1건",
+      "steps": [
+        { "action": "waitFor", "selector": "#vocTaskRsltCdWrapper select" },
+        { "action": "select", "selector": "#vocTaskRsltCdWrapper select", "value": "CODE0080000013" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 3) throw new Error('기대 3건 / 실제 ' + n + '건'); })()" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "04-02 검사이첩 예 = 3건 (하위 포함)",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "waitFor", "selector": "#prosecutorTransferYnWrapper select" },
+        { "action": "select", "selector": "#prosecutorTransferYnWrapper select", "value": "CODE0000002330" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 3) throw new Error('기대 3건 / 실제 ' + n + '건'); })()" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "04-03 공시대상 아니오 = 4건 (하위 포함)",
+      "url": "/vocIntegrationList",
+      "_note": "5번은 '아니오'의 하위코드(선처성/단순질의성)로 저장돼 있어 상위 선택 시 함께 나와야 한다",
+      "steps": [
+        { "action": "waitFor", "selector": "#publicAnnounceYnWrapper select" },
+        { "action": "select", "selector": "#publicAnnounceYnWrapper select", "value": "CODE0000002226" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 4) throw new Error('기대 4건 / 실제 ' + n + '건'); })()" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "04-04 불만발생접점 영업점 = 3건 (하위 포함)",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "waitFor", "selector": "#complaintOccrPointCdWrapper select" },
+        { "action": "select", "selector": "#complaintOccrPointCdWrapper select", "value": "CODE0000001792" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 3) throw new Error('기대 3건 / 실제 ' + n + '건'); })()" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "04-05 불합리한 차별행위 Y = 3건 (레거시 호환)",
+      "url": "/vocIntegrationList",
+      "_note": "1·5번은 관리코드 하위(장애/성별), 3번은 레거시 'Y' 문자열. 레거시 호환 OR 조건이 빠지면 2건으로 떨어진다",
+      "steps": [
+        { "action": "waitFor", "selector": "#irrationalDiscrimCdWrapper select" },
+        { "action": "select", "selector": "#irrationalDiscrimCdWrapper select", "value": "CODE0000003442" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 3) throw new Error('기대 3건 / 실제 ' + n + '건 (2건이면 레거시 Y/N 호환 조건 회귀)'); })()" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "04-06 제보성 Y = 3건 (레거시 호환)",
+      "url": "/vocIntegrationList",
+      "_note": "1·5번 CODE0080000038, 3번 레거시 'Y'. 2건이면 회귀",
+      "steps": [
+        { "action": "waitFor", "selector": "#tipOffYnWrapper select" },
+        { "action": "select", "selector": "#tipOffYnWrapper select", "value": "CODE0080000038" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 3) throw new Error('기대 3건 / 실제 ' + n + '건 (2건이면 레거시 Y/N 호환 조건 회귀)'); })()" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "04-07 중반복 Y = 3건 (레거시 호환)",
+      "url": "/vocIntegrationList",
+      "_note": "2026-08-29 수정분. 1·5번 CODE0080000306, 3번 레거시 'Y'. 수정 전 조건(= 평문 비교)이면 2건",
+      "steps": [
+        { "action": "waitFor", "selector": "#hrpWrapper select" },
+        { "action": "select", "selector": "#hrpWrapper select", "value": "CODE0080000306" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 3) throw new Error('기대 3건 / 실제 ' + n + '건 (2건이면 중반복 레거시 호환 조건 회귀)'); })()" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "04-08 불만유형 직원불친절 = 1건",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "waitFor", "selector": "#complaintTpCdWrapper select" },
+        { "action": "select", "selector": "#complaintTpCdWrapper select", "value": "CODE0000003519" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 1) throw new Error('기대 1건 / 실제 ' + n + '건'); })()" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "04-09 가입경로 영업점 = 1건",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "waitFor", "selector": "#merchandiseJoinPathWrapper select" },
+        { "action": "select", "selector": "#merchandiseJoinPathWrapper select", "value": "CODE0000003902" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 1) throw new Error('기대 1건 / 실제 ' + n + '건'); })()" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "04-10 센터보상 Y = 3건 / N = 3건",
+      "url": "/vocIntegrationList",
+      "_note": "N 분기가 서브쿼리 = 0 이라 Y + N 이 전체와 같아야 한다",
+      "steps": [
+        { "action": "waitFor", "selector": "select[name=cpesCenterYn]" },
+        { "action": "select", "selector": "select[name=cpesCenterYn]", "value": "Y" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 3) throw new Error('센터보상 Y 기대 3건 / 실제 ' + n + '건'); })()" },
+        { "action": "select", "selector": "select[name=cpesCenterYn]", "value": "N" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 3) throw new Error('센터보상 N 기대 3건 / 실제 ' + n + '건'); })()" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "04-11 이슈민원 Y = 3건 / N = 3건",
+      "url": "/vocIntegrationList",
+      "_note": "테스트 데이터는 1·3·6번에 이슈 키워드가 있어 Y 가 3건이어야 한다. 현재는 Y 0건 / N 6건으로 나온다 — vocListCond 의 이슈민원 조건에 있는 TRIM(ISSUE_KEYWORD) != '' 가 Oracle 에서 ''=NULL 이라 항상 거짓이 되기 때문(기존 결함, 개선7 무관). LENGTH(TRIM(...)) > 0 으로 바꾸면 통과한다",
+      "steps": [
+        { "action": "waitFor", "selector": "select[name=issueVocYn]" },
+        { "action": "select", "selector": "select[name=issueVocYn]", "value": "Y" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 3) throw new Error('이슈민원 Y 기대 3건 / 실제 ' + n + '건 — 0건이면 TRIM(ISSUE_KEYWORD) != \\'\\' 결함'); })()" },
+        { "action": "select", "selector": "select[name=issueVocYn]", "value": "N" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 3) throw new Error('이슈민원 N 기대 3건 / 실제 ' + n + '건'); })()" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "04-12 금감원 민원예상 Y = 3건",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "waitFor", "selector": "select[name=finesExpectYn]" },
+        { "action": "select", "selector": "select[name=finesExpectYn]", "value": "Y" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 3) throw new Error('기대 3건 / 실제 ' + n + '건'); })()" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "04-13 문제행동소비자 Y = 3건",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "waitFor", "selector": "select[name=problemBehaviorConsumerCd]" },
+        { "action": "select", "selector": "select[name=problemBehaviorConsumerCd]", "value": "Y" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 3) throw new Error('기대 3건 / 실제 ' + n + '건'); })()" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "04-14 법률질의 Y = 3건",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "waitFor", "selector": "select[name=lawInquiryYn]" },
+        { "action": "select", "selector": "select[name=lawInquiryYn]", "value": "Y" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "eval", "script": "(() => { const n = document.querySelectorAll('#divGrid1 .tui-grid-rside-area .tui-grid-body-area tbody tr').length; if (n !== 3) throw new Error('기대 3건 / 실제 ' + n + '건'); })()" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    }
+  ],
+  "_comment_제외": "사전인지여부(VOC010-062)는 관리코드가 CCCOWN 에 0건이라 검색 자체가 불가 → 이 파일에서 제외. 코드가 등록되면 TB_VOC_EXTN_DTL 의 TESTVOC001~006 행에 FINES_PRE_PERCEPT_YN 을 채우고 메뉴를 추가하면 된다",
+  "crud": []
+}

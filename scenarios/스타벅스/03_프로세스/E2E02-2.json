@@ -1,0 +1,211 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E02-2 [560 바리스타] My StoreCare 접수확인→처리완료/확인불가",
+  "_comment": "E2E-02 2단계. 9001: W0→P0→E0, 9002: W0→P0→C0. 홈페이지 회원DB 조회(getCustomerSpNo) 때문에 _mock/e2e02_stb_member_stub.sql 없이는 '처리 실패'",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R560"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "접수확인 9001",
+      "allowForbidden": [
+        "접수확인"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/STC0101.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"btnDeptSearch\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==false});if(bad.length)throw new Error('버튼 노출 불일치(기대 숨김): '+bad.join(','));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const a=[...document.querySelectorAll('a[href*=\"fnRecv\"]')].find(a=>a.href.includes('202608279001'));if(!a)throw new Error('fnRecv 링크 없음(202608279001)');a.click();})()"
+        },
+        {
+          "action": "expectDialog",
+          "text": "접수확인"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=[...document.querySelectorAll('table.ui-jqgrid-btable tr.jqgrow')].find(r=>r.textContent.includes('202608279001'));if(!r)throw new Error('행 없음 202608279001');if(!r.textContent.includes('처리중'))throw new Error('202608279001 상태 불일치: '+r.textContent.replace(/\\s+/g,' ').slice(0,80));})()"
+        },
+        {
+          "action": "screenshot",
+          "name": "접수확인"
+        }
+      ]
+    },
+    {
+      "name": "접수확인→확인불가 9002",
+      "allowForbidden": [
+        "확인불가"
+      ],
+      "steps": [
+        {
+          "action": "eval",
+          "script": "(()=>{const a=[...document.querySelectorAll('a[href*=\"fnRecv\"]')].find(a=>a.href.includes('202608279002'));if(!a)throw new Error('fnRecv 링크 없음(202608279002)');a.click();})()"
+        },
+        {
+          "action": "expectDialog",
+          "text": "접수확인"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const a=[...document.querySelectorAll('a[href*=\"fnNoCfm\"]')].find(a=>a.href.includes('202608279002'));if(!a)throw new Error('fnNoCfm 링크 없음(202608279002)');a.click();})()"
+        },
+        {
+          "action": "expectDialog",
+          "text": "확인불가"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=[...document.querySelectorAll('table.ui-jqgrid-btable tr.jqgrow')].find(r=>r.textContent.includes('202608279002'));if(!r)throw new Error('행 없음 202608279002');if(!r.textContent.includes('확인불가'))throw new Error('202608279002 상태 불일치: '+r.textContent.replace(/\\s+/g,' ').slice(0,80));})()"
+        }
+      ]
+    },
+    {
+      "name": "처리완료 9001",
+      "allowForbidden": [
+        "처리완료"
+      ],
+      "steps": [
+        {
+          "action": "eval",
+          "script": "(()=>{const a=[...document.querySelectorAll('a[href*=\"fnOpenPopup\"]')].find(a=>a.href.includes('202608279001'));if(!a)throw new Error('fnOpenPopup 링크 없음(202608279001)');a.click();})()"
+        },
+        {
+          "action": "expectDialog",
+          "text": "처리를 진행"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=[...document.querySelectorAll('table.ui-jqgrid-btable tr.jqgrow')].find(r=>r.textContent.includes('202608279001'));if(!r)throw new Error('행 없음 202608279001');if(!r.textContent.includes('처리완료'))throw new Error('202608279001 상태 불일치: '+r.textContent.replace(/\\s+/g,' ').slice(0,80));})()"
+        },
+        {
+          "action": "note",
+          "_note": "confirm 문구가 ' 처리를 진행하시겠습니까?'(동작명 공백) — 경미 문구 결함"
+        },
+        {
+          "action": "screenshot",
+          "name": "처리완료"
+        }
+      ]
+    }
+  ]
+}

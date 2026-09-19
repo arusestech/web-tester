@@ -1,0 +1,57 @@
+{
+  "extends": "_공통.json",
+  "name": "개선7-03 1단계 선택 조회",
+
+  "_comment": "'상위 1단계만 골라도 하위까지 조회' 가 실제로 동작하는지 화면 쪽에서 검증한다. 관리코드 selectWrapper 는 1단계를 고르면 같은 name 의 2단계 select 가 붙고, 폼 직렬화는 마지막 값(빈 값)을 쓰기 때문에 getWrapperValToParam 으로 1단계 값을 되살려야 한다(vocIntegrationList.jsp:877). 이 파일은 loadGrid 가 만드는 param 을 그대로 재현해 1단계 값이 살아 있는지 본다",
+  "_comment_method": "eval 로 페이지의 Utilities.formToMap / getWrapperValToParam / setParamValue 를 그대로 호출한다 — 도구가 흉내 내는 게 아니라 화면 코드 자체를 실행하므로 회귀 가드로 쓸 수 있다",
+
+  "menus": [
+    {
+      "name": "03-1 등록된 wrapper 1단계 값이 조회 조건에 실리는지",
+      "url": "/vocIntegrationList",
+      "_note": "SEARCH_WRAPPER_IDS 에 등록된 13개(기존 4 + 개선7 9) 대상. 여기서 실패하면 08-27/개선7 수정분 회귀",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#tipOffYnWrapper select" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "eval", "script": "(() => { if (typeof SEARCH_WRAPPER_IDS === 'undefined') throw new Error('SEARCH_WRAPPER_IDS 상수 없음'); const picked = []; SEARCH_WRAPPER_IDS.forEach(id => { const s = document.querySelector('#' + id + ' select'); if (!s || s.options.length < 2) return; s.selectedIndex = 1; s.dispatchEvent(new Event('change', { bubbles: true })); picked.push(id); }); if (!picked.length) throw new Error('선택지가 있는 wrapper 가 하나도 없다 — 관리코드 로딩 실패'); window.__wwtPicked = picked; })()" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "eval", "script": "(() => { const ids = window.__wwtPicked || []; const param = Utilities.formToMap($('#vocSearchFrm')); if (!$('.moreBox').hasClass('clicked')) Object.assign(param, Utilities.formToMap($('#addtFrm'))); getWrapperValToParam(param, SEARCH_WRAPPER_IDS); setParamValue(param); const bad = []; ids.forEach(id => { const w = document.getElementById(id); const nm = w.dataset.name; const first = w.querySelector('select').value; if (param[nm] !== first) bad.push(nm + '(' + id + '): 조건=' + JSON.stringify(param[nm]) + ' 1단계=' + first); }); if (bad.length) throw new Error('1단계 값이 조회 조건에 실리지 않음 -> ' + bad.join(' | ')); })()" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "03-2 2단계 select 자동 생성 (계층 코드)",
+      "url": "/vocIntegrationList",
+      "_note": "1단계를 고르면 하위 코드가 있는 항목은 2단계 select 가 붙어야 한다. 하나도 안 붙으면 계층 조회 기능 자체가 죽은 것",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#tipOffYnWrapper select" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "eval", "script": "(() => { SEARCH_WRAPPER_IDS.forEach(id => { const s = document.querySelector('#' + id + ' select'); if (!s || s.options.length < 2) return; s.selectedIndex = 1; s.dispatchEvent(new Event('change', { bubbles: true })); }); })()" },
+        { "action": "wait", "ms": 2000 },
+        { "action": "eval", "script": "(() => { const two = SEARCH_WRAPPER_IDS.filter(id => document.querySelectorAll('#' + id + ' select').length > 1); if (!two.length) throw new Error('2단계 select 가 하나도 생성되지 않음 — 계층(CONNECT BY) 조회 전제가 깨졌는지 확인'); })()" }
+      ],
+      "expect": ["#divGrid1"]
+    },
+    {
+      "name": "03-3 미등록 wrapper 1단계 조건 누락 점검",
+      "url": "/vocIntegrationList",
+      "_note": "SEARCH_WRAPPER_IDS 에 들어 있지 않은 검색폼 wrapper(채널/유형/대상/금감원처리방식/hrp 등)를 같은 방식으로 검사한다. 실패하면 개선7 회귀가 아니라 같은 유형의 남은 결함 — 상위 1단계만 고르면 그 조건이 조용히 빠진 채 조회된다. 조치는 해당 id 를 SEARCH_WRAPPER_IDS 에 추가하는 것",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#tipOffYnWrapper select" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "eval", "script": "(() => { const onScreen = Array.from(document.querySelectorAll('#vocSearchFrm .selectWrapper, #addtFrm .selectWrapper')).map(e => e.id).filter(Boolean); const extra = onScreen.filter(id => !SEARCH_WRAPPER_IDS.includes(id)); const picked = []; extra.forEach(id => { const s = document.querySelector('#' + id + ' select'); if (!s || s.options.length < 2) return; s.selectedIndex = 1; s.dispatchEvent(new Event('change', { bubbles: true })); picked.push(id); }); window.__wwtExtra = picked; })()" },
+        { "action": "wait", "ms": 2000 },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "eval", "script": "(() => { const ids = window.__wwtExtra || []; if (!ids.length) return; const param = Utilities.formToMap($('#vocSearchFrm')); if (!$('.moreBox').hasClass('clicked')) Object.assign(param, Utilities.formToMap($('#addtFrm'))); getWrapperValToParam(param, SEARCH_WRAPPER_IDS); setParamValue(param); const bad = []; ids.forEach(id => { const w = document.getElementById(id); const nm = w.dataset.name; const first = w.querySelector('select').value; if (param[nm] !== first) bad.push(nm + '(' + id + '): 조건=' + JSON.stringify(param[nm]) + ' 1단계=' + first); }); if (bad.length) throw new Error('미등록 wrapper 에서 1단계 조건 누락 -> ' + bad.join(' | ')); })()" }
+      ],
+      "expect": ["#divGrid1"]
+    }
+  ],
+  "crud": []
+}

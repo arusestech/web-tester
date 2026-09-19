@@ -1,0 +1,92 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E04-2 [530 점장] CE 고객의견 조회 — 본인 부서만",
+  "_comment": "E2E-04 2단계. c:otherwise 분기(btnDeptSearch 없음, btnChargeDept 있음)",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R530"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "VOC1034",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1034.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{if($('#YMD_STND_START').length){$('#YMD_STND_START').val('2026-08-01');$('#YMD_STND_END').val('2026-08-31');}if($('#YY_STD').length){$('#YY_STD').val('2026');$('#MM_STD').val('08');}})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "expectText",
+          "text": "(9024)"
+        },
+        {
+          "action": "expectNotText",
+          "text": "3070 타매장"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.getElementById('btnDeptSearch');if(b&&b.offsetParent!==null)throw new Error('btnDeptSearch 가 표시됨(기대: 없음)');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"btnChargeDept\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==true});if(bad.length)throw new Error('버튼 노출 불일치(기대 표시): '+bad.join(','));})()"
+        },
+        {
+          "action": "screenshot",
+          "name": "점장"
+        }
+      ]
+    }
+  ]
+}

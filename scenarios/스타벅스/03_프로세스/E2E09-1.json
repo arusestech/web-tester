@@ -1,0 +1,124 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E09-1 [220] 문자발송 팝업·발송이력",
+  "_comment": "E2E-09 1~2단계. 발송은 SSG 테이블(VOC DB) 적재만(에이전트 없음). 개발 DB 관리자번호 코드 STATUS=S 라 실패가 정상이며 실패 후 SSG_TRAN 잔존(결함) → _mock/e2e09_cleanup.sql",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R220"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "VOC0028 이력",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC0028.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        }
+      ]
+    },
+    {
+      "name": "POP0007 발송(목업 번호)",
+      "allowForbidden": [
+        "발송"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/POP0007.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"sendBtn\", \"closeBtn\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==true});if(bad.length)throw new Error('버튼 노출 불일치(기대 표시): '+bad.join(','));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{$('#PHONE_NUM').val('010-1234-5678');$('input[name=CD_VOC_CENTER][value=\"01\"]').prop('checked',true);$('#DS_CONTENT').val('TEST_E2E09 문자발송 목업 테스트').trigger('keyup');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#sendBtn a')||document.getElementById('sendBtn');if(!b)throw new Error('sendBtn 없음');b.click();})()"
+        },
+        {
+          "action": "expectDialog",
+          "text": "문자"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "screenshot",
+          "name": "발송결과"
+        }
+      ]
+    }
+  ]
+}

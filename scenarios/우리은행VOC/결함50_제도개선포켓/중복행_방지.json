@@ -1,0 +1,111 @@
+{
+  "extends": "../_공통.json",
+  "name": "결함50 중복행 방지·ORA 대응 (7138e704d9)",
+  "_comment": "커밋 7138e704d9. TB_CPA_REF·TB_CPA_BAS_CTNT 중복행 방지(INSERT NOT EXISTS), 스칼라 서브쿼리 MAX() 치환(ORA-01427), LIMIT 1 제거(ORA-00933). 매퍼가 광범위해 화면 로드 시 ORA 오류가 나지 않는지가 1차 판정",
+  "_comment_기지": "2026-08-22 메뉴테스트 당시 제도개선 등록/처리가 488(소스 OLD_BAS_ID 중복)이었다. 본 커밋 이후 해소됐는지 확인하는 자리이기도 하다",
+  "menus": [
+    {
+      "name": "제도개선포켓 등록",
+      "url": "/ideaSuggestion/regList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "제도개선포켓 검토",
+      "url": "/ideaSuggestion/procList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "제도개선 등록",
+      "url": "/improvement/regList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "제도개선 처리",
+      "url": "/improvement/processList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "교육 등록 및 검색",
+      "url": "/cpaEdu/regList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "자료열람 요구",
+      "url": "/reqRefRead/regList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    }
+  ],
+  "crud": []
+}

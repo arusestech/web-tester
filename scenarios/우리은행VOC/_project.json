@@ -1,0 +1,39 @@
+{
+  "baseUrl": "http://localhost:18081",
+  "browser": {
+    "channel": "chrome",
+    "headless": false,
+    "viewport": {
+      "width": 1600,
+      "height": 950
+    }
+  },
+  "login": {
+    "url": "/login",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#loginId",
+        "value": "b00756"
+      },
+      {
+        "action": "fill",
+        "selector": "#loginPwd",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "a[data-click=signIn]"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlNotContains": "login"
+    },
+    "detect": "#loginId",
+    "after": "/"
+  }
+}

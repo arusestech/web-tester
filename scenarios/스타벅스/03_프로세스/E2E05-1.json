@@ -1,0 +1,155 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E05-1 [220 VOC관리자] 공지 등록(에디터)",
+  "_comment": "E2E-05 1단계",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat(SMTP 목업 localhost:1025 적용 war). 8888 = IntelliJ Tomcat(메일 host 내부망 IP → 발송 실패). CrossEditor 라이선스는 도메인 기준이라 포트 무관",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 가 컨텍스트 없는 /screen/POR0001.ub 로 보내는 알려진 현상(세션은 정상)",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R220"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "INF4005 등록 → INF4001 확인",
+      "allowForbidden": [
+        "저장",
+        "Save",
+        "등록"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/INF4005.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{document.getElementById('CD_KNWLDG_CL').value='002';document.getElementById('NM_KNWLDG_CL').value='test';})()"
+        },
+        {
+          "action": "note",
+          "_note": "공지유형은 INF4003 트리 팝업 대신 TBS_KNWLDG_CL 의 NOTICE_YN=Y 분류(002 test) 를 hidden 에 직접 세팅"
+        },
+        {
+          "action": "fill",
+          "selector": "#DS_KNWLDG_TITLE",
+          "value": "TEST_E2E01_공지"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{object.SetBodyValue('<p>TEST_E2E01 공지 본문(자동, CrossEditor SetBodyValue)</p>');})()"
+        },
+        {
+          "action": "screenshot",
+          "name": "입력"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.getElementById('btnSave');if(!b)throw new Error('버튼 없음: btnSave');(b.querySelector('a')||b).click();})()"
+        },
+        {
+          "action": "expectDialog",
+          "text": "등록"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "screenshot",
+          "name": "저장결과"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/INF4001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "#btnSearch a, #btnSearch"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectText",
+          "text": "TEST_E2E01_공지"
+        },
+        {
+          "action": "screenshot",
+          "name": "목록"
+        }
+      ]
+    },
+    {
+      "name": "로그아웃",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "click",
+          "selector": ".logout-button a"
+        },
+        {
+          "action": "expectDialog",
+          "text": "로그아웃"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectUrl",
+          "contains": "BCO0001"
+        }
+      ]
+    }
+  ]
+}

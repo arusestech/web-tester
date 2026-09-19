@@ -1,0 +1,6 @@
+{
+  "extends": "_공통.json",
+  "name": "자체검증 역할2",
+  "menusExclude": ["에러메뉴"],
+  "menusAdd": [{ "name": "요소누락", "url": "/main", "expect": ["table"] }]
+}

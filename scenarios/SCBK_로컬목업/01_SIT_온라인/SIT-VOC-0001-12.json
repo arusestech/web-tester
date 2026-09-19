@@ -1,0 +1,903 @@
+{
+  "extends": "_공통.json",
+  "name": "SIT-VOC-0001-12 이관취하_대체",
+  "_comment": "SIT v0.6 SIT-VOC-0001-12 — 흐름 이름의 S<n> 이 문서 스텝 번호",
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "userField": "#userid",
+    "logoutUrl": "/logout.ub",
+    "retries": 1,
+    "_comment_retries": "비밀번호 연속 실패 시 계정 잠금(maxFailPassword) → 재시도 1회",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "{{id_crt}}"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001",
+      "selector": "#menu"
+    }
+  },
+  "menus": [],
+  "crud": [
+    {
+      "name": "S1 이관 대체: 확정 → DCC 배정",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_crt}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#TP_BIZ_1\");if(!e)throw new Error('콤보 없음: '+\"#TP_BIZ_1\");const p=\"02\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#TP_BIZ_1\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#TP_CHNN_SYSTEM\");if(!e)throw new Error('콤보 없음: '+\"#TP_CHNN_SYSTEM\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#TP_CHNN_SYSTEM\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#TP_CHNN_METHOD\");if(!e)throw new Error('콤보 없음: '+\"#TP_CHNN_METHOD\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#TP_CHNN_METHOD\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#FG_REVOC\");if(!e)throw new Error('콤보 없음: '+\"#FG_REVOC\");const p=\"N\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#FG_REVOC\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#CD_DNGR\");if(!e)throw new Error('콤보 없음: '+\"#CD_DNGR\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#CD_DNGR\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#TP_CHNN_1\");if(!e)throw new Error('콤보 없음: '+\"#TP_CHNN_1\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#TP_CHNN_1\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#TP_CHNN_2\");if(!e)throw new Error('콤보 없음: '+\"#TP_CHNN_2\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#TP_CHNN_2\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"TEST_고객\";const e=document.querySelector(\"#NM_CUST\");if(!e)throw new Error('입력칸 없음: '+\"#NM_CUST\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"test@test.invalid\";const e=document.querySelector(\"#DS_EMAIL\");if(!e)throw new Error('입력칸 없음: '+\"#DS_EMAIL\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#COMBO_CAUSE_1\");if(!e)throw new Error('콤보 없음: '+\"#COMBO_CAUSE_1\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#COMBO_CAUSE_1\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#COMBO_CAUSE_2\");if(!e)throw new Error('콤보 없음: '+\"#COMBO_CAUSE_2\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#COMBO_CAUSE_2\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#COMBO_CAUSE_3\");if(!e)throw new Error('콤보 없음: '+\"#COMBO_CAUSE_3\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#COMBO_CAUSE_3\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#CD_PRODUCT\");if(!e)throw new Error('콤보 없음: '+\"#CD_PRODUCT\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#CD_PRODUCT\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"TEST 상품\";const e=document.querySelector(\"#NM_PRODUCT\");if(!e)throw new Error('입력칸 없음: '+\"#NM_PRODUCT\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const d=new Date();while(d.getDay()===0||d.getDay()===6)d.setDate(d.getDate()-1);const v=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');const e=document.querySelector('#RECV_YMD');e.readOnly=false;e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#RECV_CD_TIME\");if(!e)throw new Error('콤보 없음: '+\"#RECV_CD_TIME\");const p=\"00\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#RECV_CD_TIME\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#RECV_CD_MINUTE\");if(!e)throw new Error('콤보 없음: '+\"#RECV_CD_MINUTE\");const p=\"00\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#RECV_CD_MINUTE\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 이관대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 이관대상 — SIT 자동 테스트 (고객정보 더미, 통보 없음)"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_CONT\");if(!e)throw new Error('입력칸 없음: '+\"#DS_CONT\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#FG_RECV_NONE\");if(!e)throw new Error('체크박스 없음: '+\"#FG_RECV_NONE\");if(!e.checked)e.click();})()"
+        },
+        {
+          "action": "wait",
+          "ms": 600
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"SIT 자동 테스트 - 통보없음\";const e=document.querySelector(\"#DS_RECV_NONE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_RECV_NONE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#deptAdd",
+          "popup": true
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2000
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{dept_cause}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DEPT_NM\");if(!e)throw new Error('입력칸 없음: '+\"#DEPT_NM\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#fnSearch_dept"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{dept_cause}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const rows=[...document.querySelectorAll('#list_dept tr.jqgrow')];const r=rows.length===1?rows[0]:rows.find(r=>r.innerText.includes(t));if(!r)throw new Error('원인부서 검색 결과 없음: '+t+' ('+rows.length+'건, 부서 STATUS 가 A 인지 확인)');(r.querySelectorAll('td')[1]||r).click();})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "click",
+          "selector": "#conFirm"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "closePopup"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!document.querySelectorAll('#deptList option').length)throw new Error('원인부서가 추가되지 않음');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[].filter(s=>{const e=document.querySelector(s);return e&&!!(e.offsetWidth||e.offsetHeight)});if(bad.length)throw new Error('보이면 안 되는 버튼이 보임: '+bad.join(', '));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const m=\"SIT 자동 테스트\";const vis=e=>!!(e.offsetWidth||e.offsetHeight);const ymd=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();document.querySelectorAll('[metaessential=\"1\"]').forEach(e=>{if(!vis(e)||e.readOnly||e.disabled)return;const id=e.id||'';if(e.tagName==='SELECT'){if(!e.value){const o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(o){e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));}}}else if(e.type==='radio'){const g=document.querySelectorAll('input[type=radio][name=\"'+e.name+'\"]');if(![...g].some(x=>x.checked))g[0].click();}else if(e.type==='checkbox'){}else if(e.tagName==='TEXTAREA'){if(!e.value.trim()){e.value=m;e.dispatchEvent(new Event('change',{bubbles:true}));}}else if(e.tagName==='INPUT'&&!e.value.trim()){let v=m;if(/YMD|DT_|DATE/i.test(id))v=ymd;if(/TIME|HH/i.test(id))v='10';if(/MINUTE|MI$/i.test(id))v='00';e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));}});})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelector('#FG_RECV_NONE');if(!n||!n.checked)throw new Error('접수회신 통보없음 미체크 — 고객 통보 위험');})()"
+        },
+        {
+          "action": "click",
+          "selector": "#registBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 6000
+        },
+        {
+          "action": "expectDialog",
+          "text": "저장이 완료되었습니다"
+        },
+        {
+          "action": "switchUser",
+          "user": "{{id_master}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0019.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=document.querySelector('.ub-layout.search-advanced');if(l&&l.classList.contains('close')){const b=l.querySelector('span.btn a')||l.querySelector('span.btn');if(b)b.click();}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 이관대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} 이관대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 이관대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "click",
+          "selector": "span#processEmp",
+          "popup": true
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2000
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{dept_proc}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DEPT_NM\");if(!e)throw new Error('입력칸 없음: '+\"#DEPT_NM\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#fnSearch_dept"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{dept_proc}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const rows=[...document.querySelectorAll('#list_dept tr.jqgrow')];const r=rows.length===1?rows[0]:rows.find(r=>r.innerText.includes(t));if(!r)throw new Error('부서 행 없음: '+t+' ('+rows.length+'건, 부서 STATUS 가 A 인지 확인)');(r.querySelectorAll('td')[1]||r).click();})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "click",
+          "selector": "#conFirm"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "closePopup"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "click",
+          "selector": "#confirmBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 6000
+        },
+        {
+          "action": "expectDialog",
+          "text": "확정처리가 완료되었습니다"
+        },
+        {
+          "action": "switchUser",
+          "user": "{{id_dcc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0005.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 이관대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} 이관대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 이관대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{id_proc}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const p=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"select#ID_VOC_ACT_EMP\");if(!e)throw new Error('콤보 없음: '+\"select#ID_VOC_ACT_EMP\");const o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)throw new Error('옵션 없음: '+p+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#assignBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 6000
+        },
+        {
+          "action": "expectDialog",
+          "text": "배정이 완료되었습니다"
+        },
+        {
+          "action": "switchUser",
+          "user": "{{id_proc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0005.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 이관대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} 이관대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 이관대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#procRecvBtn"
+        },
+        {
+          "action": "screenshot",
+          "name": "이관대체"
+        }
+      ]
+    },
+    {
+      "name": "S2 마스터 전달(차단 확인)",
+      "expectFail": "금지 버튼 클릭 차단",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_crt869}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0005.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 전달흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} 전달흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 전달흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#masterPassBtn"
+        },
+        {
+          "action": "click",
+          "selector": "#masterPassBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        }
+      ]
+    },
+    {
+      "name": "S3 취하 대체: 폐기(차단 확인)",
+      "expectFail": "금지 버튼 클릭 차단",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_master}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0019.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=document.querySelector('.ub-layout.search-advanced');if(l&&l.classList.contains('close')){const b=l.querySelector('span.btn a')||l.querySelector('span.btn');if(b)b.click();}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 폐기대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} 폐기대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 폐기대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#disuseBtn"
+        },
+        {
+          "action": "click",
+          "selector": "#disuseBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        }
+      ]
+    },
+    {
+      "name": "S4 부서장 부서 VOC 조회",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_dept}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0021.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=document.querySelector('.ub-layout.search-advanced');if(l&&l.classList.contains('close')){const b=l.querySelector('span.btn a')||l.querySelector('span.btn');if(b)b.click();}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#gbox_list"
+        },
+        {
+          "action": "screenshot",
+          "name": "부서장조회"
+        }
+      ]
+    }
+  ]
+}

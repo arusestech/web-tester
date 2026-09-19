@@ -1,0 +1,11 @@
+server:
+  port: '9090'
+  servlet:
+    context-path: /demo
+    session:
+      timeout: 1800
+spring:
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp

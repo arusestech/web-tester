@@ -1,0 +1,607 @@
+{
+  "extends": "_공통.json",
+  "name": "SIT-VOC-0001-05 VOC마스터_확정_폐기_마스터전달",
+  "_comment": "SIT v0.6 SIT-VOC-0001-05 — 흐름 이름의 S<n> 이 문서 스텝 번호",
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "userField": "#userid",
+    "logoutUrl": "/logout.ub",
+    "retries": 1,
+    "_comment_retries": "비밀번호 연속 실패 시 계정 잠금(maxFailPassword) → 재시도 1회",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "{{id_master}}"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001",
+      "selector": "#menu"
+    }
+  },
+  "menus": [],
+  "crud": [
+    {
+      "name": "S1 VOC마스터 등록 건 상세 버튼",
+      "_comment": "코드 기준 RE+200 → [확정][폐기]. 문서 S1 의 [마스터 전달]은 PR+210 에서만 노출",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_master}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0019.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=document.querySelector('.ub-layout.search-advanced');if(l&&l.classList.contains('close')){const b=l.querySelector('span.btn a')||l.querySelector('span.btn');if(b)b.click();}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectUrl",
+          "contains": "VOC0004"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#confirmBtn"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#disuseBtn"
+        },
+        {
+          "action": "screenshot",
+          "name": "등록건상세"
+        }
+      ]
+    },
+    {
+      "name": "S2 처리부서 지정 후 확정(CO)",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_master}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0019.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=document.querySelector('.ub-layout.search-advanced');if(l&&l.classList.contains('close')){const b=l.querySelector('span.btn a')||l.querySelector('span.btn');if(b)b.click();}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "click",
+          "selector": "span#processEmp",
+          "popup": true
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2000
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{dept_proc}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DEPT_NM\");if(!e)throw new Error('입력칸 없음: '+\"#DEPT_NM\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#fnSearch_dept"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{dept_proc}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const rows=[...document.querySelectorAll('#list_dept tr.jqgrow')];const r=rows.length===1?rows[0]:rows.find(r=>r.innerText.includes(t));if(!r)throw new Error('부서 행 없음: '+t+' ('+rows.length+'건, 부서 STATUS 가 A 인지 확인)');(r.querySelectorAll('td')[1]||r).click();})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "click",
+          "selector": "#conFirm"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "closePopup"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!(document.querySelector('#NM_VOC_ACT_DEPT')||{}).value)throw new Error('처리부서 미지정');})()"
+        },
+        {
+          "action": "click",
+          "selector": "#confirmBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 6000
+        },
+        {
+          "action": "expectDialog",
+          "text": "확정처리를 진행하시겠습니까"
+        },
+        {
+          "action": "expectDialog",
+          "text": "확정처리가 완료되었습니다"
+        },
+        {
+          "action": "screenshot",
+          "name": "확정"
+        }
+      ]
+    },
+    {
+      "name": "S3 등록 건 폐기(차단 확인)",
+      "expectFail": "금지 버튼 클릭 차단",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_master}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0019.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=document.querySelector('.ub-layout.search-advanced');if(l&&l.classList.contains('close')){const b=l.querySelector('span.btn a')||l.querySelector('span.btn');if(b)b.click();}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 폐기대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} 폐기대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 폐기대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#disuseBtn"
+        },
+        {
+          "action": "click",
+          "selector": "#disuseBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        }
+      ]
+    },
+    {
+      "name": "S4 금소부 CRT 처리중 건 마스터 전달(차단 확인)",
+      "expectFail": "금지 버튼 클릭 차단",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_crt869}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0005.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 전달흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} 전달흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 전달흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#masterPassBtn"
+        },
+        {
+          "action": "click",
+          "selector": "#masterPassBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        }
+      ]
+    },
+    {
+      "name": "S5 CRT 계정 등록 건 버튼 미노출",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_crt}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0021.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=document.querySelector('.ub-layout.search-advanced');if(l&&l.classList.contains('close')){const b=l.querySelector('span.btn a')||l.querySelector('span.btn');if(b)b.click();}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 폐기대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} 폐기대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 폐기대상"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[\"#confirmBtn\", \"#disuseBtn\"].filter(s=>{const e=document.querySelector(s);return e&&!!(e.offsetWidth||e.offsetHeight)});if(bad.length)throw new Error('보이면 안 되는 버튼이 보임: '+bad.join(', '));})()"
+        },
+        {
+          "action": "screenshot",
+          "name": "CRT권한통제"
+        }
+      ]
+    }
+  ]
+}

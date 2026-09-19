@@ -1,0 +1,100 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E06-3 [250 고객서비스팀] 양식 화면 접근",
+  "_comment": "E2E-06 3단계. VOC1104 REGIST 는 단일 양식 upsert(덮어쓰기) 라 저장은 실행하지 않음",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R250"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "VOC1104/VOC1114",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1104.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!document.querySelector('iframe'))throw new Error('에디터 없음');})()"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC1114.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "screenshot",
+          "name": "양식"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1226 @@
+{
+  "extends": "../_공통.json",
+  "name": "QA 전체 VOC (목록·검색조건)",
+  "_comment_source": "QA 시나리오.md VC_TC_111~240 (전체 VOC 목록/검색조건/팝업/엑셀/검색결과). 상세 화면(VC_TC_241~432)은 voc-all-detail.json.",
+  "_comment_selectors": "meta/voc/VOC1001R00.jsp: 등록일구분 #CD_VOC_SEARCH_2(:55) 기간 #DT_VOC_REG_START/#DT_VOC_REG_END(:56) 진행단계 #CD_VOC_STTUS(:58) 채널 #vocChannelBox>input[name=CD_VOC_CHANNEL_3](:60, app VOC1001.jsp:65 동적생성) 문의유형 #TP_VOC_DEMAND(:66) 고객센터 #CD_VOC_CENTER(:68) 접수자 #NM_VOC_RECV_EMP+#btnEmpSearch(:70) 분류 #NM_VOC_CAUSE_AUTO #CD_VOC_CAUSE_1/2/3 #CauseAddBtn(:75) #CAUSE_CONTENT #CauseDelBtn(:84) 방문매장 #NM_VISIT_STR+#btnVisitStrSerach(:79) 프로모션 #NM_PROMOTION+#btnPromotionSerach(:86) 주관부서 #NM_CHARGE_DEPT(:88) 이벤트 #NM_EVENT+#btnEventSearch(:94) 제품명 #NM_PRDUCT+#btnGoodsSearch(:96) 답변진행 #FG_CUST_ANSWER + radio[name=CD_CUST_ANSWER](:101) 검색 #CD_VOC_SEARCH #DS_SEARCH + 체크박스 FG_REQ_REPLY/FG_REQ_NONE/FG_SHARE_NONE/FG_CSTMR_PARTICIPATE(:105) 검색버튼 #searchBtn a(:115) 엑셀 #btnExcel a(:121) 그리드 #list(:126) 페이저 .ub-control.pagging[for=list](:130). 그리드 컬럼(app VOC1001.jsp:153~174): ID_VOC,DT_VOC_REG,NM_VOC_CENTER,NM_CD_VOC_CHANNEL,NM_TP_VOC_DEMAND,NM_VOC_CAUSE_3,NM_VISIT_STR,DS_VOC_TITLE,NM_VOC_RECV_EMP,REQ_CNT,FG_VOC_ANSWER,NM_CD_VOC_STTUS,FG_FILE — 셀은 td[aria-describedby='list_<컬럼>']. rowList [15,20,50] → Rows/Page select#listPaging.page-rows (uxl-jqgrid-3.0.0.starbucks_jq3.js:477), Total = .total-count(:458). 상세 더블클릭 → VOC1002(:181~184, form #detailForm).",
+  "_comment_popups": "page/js/popup.js: 접수자 POP0001(:26~28, 파트너검색 — 부서 #DEPT_NM #fnSearch_dept #showTree, 파트너찾기 #INCUMBENT_CD #NM_USER #fnSearch, 그리드 #list_dept/#list, 확인 #conFirm, 미선택 alert '부서 선택 후 직원목록에서 선택해 주세요.' POP0001.jsp:272) · 방문매장 POP1001(:62~64, 부서검색 — #DEPT_NM(필수) #fnSearch_dept #showTree #CD_STORE_CHK(폐점미포함, 기본 체크) #deptTree #list_dept #conFirm; 매장 아닌 부서 확인 시 서버 메시지 '선택한 부서는 매장이 아닙니다.' SearchDeptManageSO.java:316 → uxl.showMessage=alert) · 프로모션 POP1003(#NM_PROMOTION #YN_USE #searchBtn #list 더블클릭 선택) · 이벤트 POP1004(#NM_EVENT #YN_USE #searchBtn #list 더블클릭) · 제품 POP1002(#CD_PROD_CATE_1/#CD_PROD_CATE_2 chainCombo, #NO_SKU #NM_PRDUCT #YN_END(단종제외 기본체크) #searchBtn #list multiselect(allVoc 단일) #conFirm, 미선택 alert '선택된 항목이 없습니다.'). 모두 uxl.openWindow=window.open → popup:true.",
+  "_comment_messages": "message-voc.properties:43 '[{0}]의 종료일이 시작일보다 이전입니다.' · message-common_ko.properties:73 '[{0}] 은(는) 필수 항목입니다.' · VOC1001.jsp:327 alert('대분류를 선택해 주세요') :284/:336 alert('중복된 선택입니다') :277/:331 alert('같은 레벨의 분류를 선택해 주세요') — QA 문서의 마침표는 실제 문구에 없으므로 마침표 없이 매칭.",
+  "_comment_assumptions": "① 셀렉트 항목 목록은 dev DB 코드값 기준으로 QA 기대치와 다를 수 있음(옵션 누락 메시지에 실제 목록을 함께 남김). ② 필터 결과 검증은 '기간 2026-08-01~08-29' 데이터 기준. 특정 필터 결과가 0건이면 통과(빈 집합), 전체 검색이 0건이면 '데이터 없음' 으로 실패. ③ 팝업 검색 키워드(서초/2016/이벤트/카푸치노/SKU 9300000000913)는 QA 문서 예시값 — dev 데이터에 없으면 데이터 차이. ④ 분류 [삭제] 버튼은 forbidden('삭제') 에 걸리지만 화면 select 옵션만 지우는 클라이언트 동작이라 eval 로 클릭. ⑤ TC_146/165/179/188/196/197/199/233~235/237/239 는 페이지 이동 UI·스크롤·엑셀 파일 내용 확인이라 수동 또는 부분.",
+  "mask": [
+    "td[aria-describedby='list_DS_VOC_TITLE']"
+  ],
+  "menus": [
+    {
+      "name": "VC_TC_111,236,240 전체 VOC 화면 구성·검색결과 목록·상세 진입",
+      "url": "/screen/VOC1001.ub",
+      "expect": [
+        "#searchForm",
+        "#CD_VOC_SEARCH_2",
+        "#DT_VOC_REG_START",
+        "#DT_VOC_REG_END",
+        "#CD_VOC_STTUS",
+        "#vocChannelBox input[name=CD_VOC_CHANNEL_3]",
+        "#TP_VOC_DEMAND",
+        "#CD_VOC_CENTER",
+        "#NM_VOC_RECV_EMP",
+        "#btnEmpSearch",
+        "#NM_VOC_CAUSE_AUTO",
+        "#CD_VOC_CAUSE_1",
+        "#CauseAddBtn",
+        "#NM_VISIT_STR",
+        "#btnVisitStrSerach",
+        "#NM_PROMOTION",
+        "#btnPromotionSerach",
+        "#NM_CHARGE_DEPT",
+        "#NM_EVENT",
+        "#btnEventSearch",
+        "#NM_PRDUCT",
+        "#btnGoodsSearch",
+        "#FG_CUST_ANSWER",
+        "#CD_VOC_SEARCH",
+        "#DS_SEARCH",
+        "#FG_REQ_REPLY",
+        "#FG_REQ_NONE",
+        "#FG_SHARE_NONE",
+        "#FG_CSTMR_PARTICIPATE",
+        "#btnExcel",
+        "#searchBtn",
+        "#list",
+        ".ub-control.pagging[for='list'] .total-count",
+        "#listPaging"
+      ],
+      "inputs": {
+        "DT_VOC_REG_START": "{{dtFrom}}",
+        "DT_VOC_REG_END": "{{dtTo}}"
+      },
+      "search": "#searchBtn a",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow",
+        "rows": 1,
+        "expect": [
+          "#detailForm"
+        ]
+      },
+      "actions": [
+        {
+          "name": "VC_TC_138 접수자 검색 아이콘 → 파트너검색 팝업(부서/조직도/파트너찾기/목록)",
+          "click": "#btnEmpSearch",
+          "popup": true,
+          "expect": [
+            "#DEPT_NM",
+            "#fnSearch_dept",
+            "#showTree",
+            "#deptTree",
+            "#INCUMBENT_CD",
+            "#NM_USER",
+            "#fnSearch",
+            "#list",
+            "#conFirm"
+          ]
+        },
+        {
+          "name": "VC_TC_167 방문매장 검색 아이콘 → 부서검색 팝업(부서/검색/조직도/폐점미포함/조직트리)",
+          "click": "#btnVisitStrSerach",
+          "popup": true,
+          "expect": [
+            "#DEPT_NM",
+            "#fnSearch_dept",
+            "#showTree",
+            "#CD_STORE_CHK",
+            "#deptTree",
+            "#conFirm"
+          ],
+          "expectText": "스타벅스커피코리아"
+        },
+        {
+          "name": "VC_TC_174 프로모션명 검색 → 프로모션 목록 팝업",
+          "click": "#btnPromotionSerach",
+          "popup": true,
+          "expect": [
+            "#NM_PROMOTION",
+            "#YN_USE",
+            "#searchBtn",
+            "#list"
+          ]
+        },
+        {
+          "name": "VC_TC_183 이벤트명 검색 → 이벤트 목록 팝업",
+          "click": "#btnEventSearch",
+          "popup": true,
+          "expect": [
+            "#NM_EVENT",
+            "#YN_USE",
+            "#searchBtn",
+            "#list"
+          ]
+        },
+        {
+          "name": "VC_TC_190 제품명 검색 → 제품/상품 목록 팝업",
+          "click": "#btnGoodsSearch",
+          "popup": true,
+          "expect": [
+            "#CD_PROD_CATE_1",
+            "#CD_PROD_CATE_2",
+            "#NO_SKU",
+            "#NM_PRDUCT",
+            "#YN_END",
+            "#searchBtn",
+            "#list",
+            "#conFirm"
+          ]
+        },
+        {
+          "name": "VC_TC_229 엑셀다운로드 → Download Result 레이어(전체 선택·기본/선택 항목)",
+          "click": "#btnExcel a",
+          "expect": [
+            "#exportListViewer",
+            "#FG_ALL_CHK",
+            "#FG_TITLE",
+            "#FG_ANSWER_ALL",
+            "#FG_PARTNER"
+          ],
+          "expectText": "[기본 항목]",
+          "close": ".ui-dialog-titlebar-close",
+          "back": "none"
+        }
+      ]
+    }
+  ],
+  "crud": [
+    {
+      "name": "VC_TC_112,113 등록일 구분 항목(등록일/답변일/처리완료일)·기본 기간(7일 전~오늘)",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#CD_VOC_SEARCH_2" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH_2');const o=[...s.options].map(x=>x.text.trim());const need=['등록일','답변일','처리완료일'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));if(s.options[s.selectedIndex].text.trim()!=='등록일')throw new Error('기본 선택이 등록일이 아님: '+s.options[s.selectedIndex].text);})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const f=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');const t=new Date();const w=new Date();w.setDate(w.getDate()-7);const s=document.getElementById('DT_VOC_REG_START').value,e=document.getElementById('DT_VOC_REG_END').value;if(e!==f(t))throw new Error('종료일 기본값 불일치: '+e+' (오늘 '+f(t)+')');if(s!==f(w))throw new Error('시작일 기본값 불일치: '+s+' (7일 전 '+f(w)+')');})()"
+        },
+        { "action": "screenshot", "name": "등록일-기본값" }
+      ]
+    },
+    {
+      "name": "VC_TC_114~116 등록일/답변일/처리완료일 구분 검색 결과(정렬·답변여부Y·처리완료)",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "fill", "selector": "#DT_VOC_REG_START", "value": "{{dtFrom}}" },
+        { "action": "fill", "selector": "#DT_VOC_REG_END", "value": "{{dtTo}}" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list tr.jqgrow')];if(!rows.length)throw new Error('데이터 없음(등록일 기간 내 VOC 없음)');const d=rows.map(r=>r.querySelector('td[aria-describedby=\"list_DT_VOC_REG\"]').textContent.trim());for(let i=1;i<d.length;i++){if(d[i]>d[i-1])throw new Error('최신 등록일시 내림차순 아님: '+d[i-1]+' → '+d[i]);}})()"
+        },
+        { "action": "screenshot", "name": "등록일-검색" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH_2');const o=[...s.options].find(o=>o.text.trim()==='답변일');if(!o)throw new Error('옵션 없음: 답변일');s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list tr.jqgrow')];const bad=rows.filter(r=>r.querySelector('td[aria-describedby=\"list_FG_VOC_ANSWER\"]').textContent.trim()!=='Y');if(bad.length)throw new Error('답변일 검색인데 답변여부 Y 아닌 행 '+bad.length+'건 (예: '+bad[0].querySelector('td[aria-describedby=\"list_ID_VOC\"]').textContent.trim()+')');})()"
+        },
+        { "action": "screenshot", "name": "답변일-검색" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH_2');const o=[...s.options].find(o=>o.text.trim()==='처리완료일');if(!o)throw new Error('옵션 없음: 처리완료일');s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list tr.jqgrow')];const bad=rows.filter(r=>r.querySelector('td[aria-describedby=\"list_NM_CD_VOC_STTUS\"]').textContent.trim()!=='처리완료');if(bad.length)throw new Error('처리완료일 검색인데 진행상태가 처리완료 아닌 행 '+bad.length+'건 (예: '+bad[0].querySelector('td[aria-describedby=\"list_NM_CD_VOC_STTUS\"]').textContent.trim()+')');})()"
+        },
+        { "action": "screenshot", "name": "처리완료일-검색" }
+      ]
+    },
+    {
+      "name": "VC_TC_117~119 등록일/답변일/처리완료일 종료일이 시작일보다 이전 → 알림",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "fill", "selector": "#DT_VOC_REG_START", "value": "{{dtTo}}" },
+        { "action": "fill", "selector": "#DT_VOC_REG_END", "value": "{{dtFrom}}" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "wait", "ms": 800 },
+        { "action": "expectDialog", "text": "[등록일]의 종료일이 시작일보다 이전입니다" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH_2');const o=[...s.options].find(o=>o.text.trim()==='답변일');if(!o)throw new Error('옵션 없음: 답변일');s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "wait", "ms": 800 },
+        { "action": "expectDialog", "text": "[답변일]의 종료일이 시작일보다 이전입니다" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH_2');const o=[...s.options].find(o=>o.text.trim()==='처리완료일');if(!o)throw new Error('옵션 없음: 처리완료일');s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "wait", "ms": 800 },
+        { "action": "expectDialog", "text": "[처리완료일]의 종료일이 시작일보다 이전입니다" }
+      ]
+    },
+    {
+      "name": "VC_TC_120~124 진행단계 항목·필터(전체/접수대기/처리중/처리완료)",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_STTUS');const o=[...s.options].map(x=>x.text.trim());const need=['전체','접수대기','처리중','처리완료'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));if(s.value!=='')throw new Error('기본값이 전체가 아님: '+s.options[s.selectedIndex].text);})()"
+        },
+        { "action": "fill", "selector": "#DT_VOC_REG_START", "value": "{{dtFrom}}" },
+        { "action": "fill", "selector": "#DT_VOC_REG_END", "value": "{{dtTo}}" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!document.querySelectorAll('#list tr.jqgrow').length)throw new Error('데이터 없음(진행단계 전체 검색 0건)');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_STTUS');const o=[...s.options].find(o=>o.text.trim()==='접수대기');s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[...document.querySelectorAll('#list tr.jqgrow')].filter(r=>r.querySelector('td[aria-describedby=\"list_NM_CD_VOC_STTUS\"]').textContent.trim()!=='접수대기');if(bad.length)throw new Error('접수대기 필터에 다른 상태 '+bad.length+'건: '+bad[0].querySelector('td[aria-describedby=\"list_NM_CD_VOC_STTUS\"]').textContent.trim());})()"
+        },
+        { "action": "screenshot", "name": "진행단계-접수대기" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_STTUS');const o=[...s.options].find(o=>o.text.trim()==='처리중');s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[...document.querySelectorAll('#list tr.jqgrow')].filter(r=>r.querySelector('td[aria-describedby=\"list_NM_CD_VOC_STTUS\"]').textContent.trim()!=='처리중');if(bad.length)throw new Error('처리중 필터에 다른 상태 '+bad.length+'건: '+bad[0].querySelector('td[aria-describedby=\"list_NM_CD_VOC_STTUS\"]').textContent.trim());})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_STTUS');const o=[...s.options].find(o=>o.text.trim()==='처리완료');s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[...document.querySelectorAll('#list tr.jqgrow')].filter(r=>r.querySelector('td[aria-describedby=\"list_NM_CD_VOC_STTUS\"]').textContent.trim()!=='처리완료');if(bad.length)throw new Error('처리완료 필터에 다른 상태 '+bad.length+'건: '+bad[0].querySelector('td[aria-describedby=\"list_NM_CD_VOC_STTUS\"]').textContent.trim());})()"
+        },
+        { "action": "screenshot", "name": "진행단계-처리완료" }
+      ]
+    },
+    {
+      "name": "VC_TC_125~127 채널 체크 필터(1개/2개 이상/전체)",
+      "_note": "채널 체크박스는 CD_VOC_CHANNEL_3 코드로 동적 생성(VOC1001.jsp:65). 라벨 = 코드명, 그리드 채널 컬럼 NM_CD_VOC_CHANNEL 과 대조",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "fill", "selector": "#DT_VOC_REG_START", "value": "{{dtFrom}}" },
+        { "action": "fill", "selector": "#DT_VOC_REG_END", "value": "{{dtTo}}" },
+        {
+          "action": "eval",
+          "script": "(()=>{const cbs=[...document.querySelectorAll('#vocChannelBox input[name=CD_VOC_CHANNEL_3]')];if(cbs.length<2)throw new Error('채널 체크박스가 2개 미만: '+cbs.length);cbs.forEach(c=>c.checked=false);cbs[0].checked=true;window.__qaCh=[cbs[0].nextElementSibling.textContent.trim()];})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const ok=window.__qaCh;const bad=[...document.querySelectorAll('#list tr.jqgrow')].filter(r=>!ok.includes(r.querySelector('td[aria-describedby=\"list_NM_CD_VOC_CHANNEL\"]').textContent.trim()));if(bad.length)throw new Error('채널 1개('+ok.join(',')+') 필터에 다른 채널 '+bad.length+'건: '+bad[0].querySelector('td[aria-describedby=\"list_NM_CD_VOC_CHANNEL\"]').textContent.trim());})()"
+        },
+        { "action": "screenshot", "name": "채널-1개" },
+        {
+          "action": "eval",
+          "script": "(()=>{const cbs=[...document.querySelectorAll('#vocChannelBox input[name=CD_VOC_CHANNEL_3]')];cbs.forEach(c=>c.checked=false);cbs[0].checked=true;cbs[1].checked=true;window.__qaCh=[cbs[0].nextElementSibling.textContent.trim(),cbs[1].nextElementSibling.textContent.trim()];})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const ok=window.__qaCh;const bad=[...document.querySelectorAll('#list tr.jqgrow')].filter(r=>!ok.includes(r.querySelector('td[aria-describedby=\"list_NM_CD_VOC_CHANNEL\"]').textContent.trim()));if(bad.length)throw new Error('채널 2개('+ok.join(',')+') 필터에 다른 채널 '+bad.length+'건: '+bad[0].querySelector('td[aria-describedby=\"list_NM_CD_VOC_CHANNEL\"]').textContent.trim());})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{[...document.querySelectorAll('#vocChannelBox input[name=CD_VOC_CHANNEL_3]')].forEach(c=>c.checked=true);})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!document.querySelectorAll('#list tr.jqgrow').length)throw new Error('데이터 없음(채널 전체 체크 검색 0건)');})()"
+        },
+        { "action": "screenshot", "name": "채널-전체" }
+      ]
+    },
+    {
+      "name": "VC_TC_128~133 문의유형 항목·필터(전체/칭찬/제안/불만/문의)",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('TP_VOC_DEMAND');const o=[...s.options].map(x=>x.text.trim());const need=['전체','칭찬','제안','불만','문의'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));if(s.value!=='')throw new Error('기본값이 전체가 아님');})()"
+        },
+        { "action": "fill", "selector": "#DT_VOC_REG_START", "value": "{{dtFrom}}" },
+        { "action": "fill", "selector": "#DT_VOC_REG_END", "value": "{{dtTo}}" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!document.querySelectorAll('#list tr.jqgrow').length)throw new Error('데이터 없음(문의유형 전체 검색 0건)');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('TP_VOC_DEMAND');s.value=[...s.options].find(o=>o.text.trim()==='칭찬').value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[...document.querySelectorAll('#list tr.jqgrow')].filter(r=>!r.querySelector('td[aria-describedby=\"list_NM_TP_VOC_DEMAND\"]').textContent.includes('칭찬'));if(bad.length)throw new Error('칭찬 필터에 다른 유형 '+bad.length+'건');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('TP_VOC_DEMAND');s.value=[...s.options].find(o=>o.text.trim()==='제안').value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[...document.querySelectorAll('#list tr.jqgrow')].filter(r=>!r.querySelector('td[aria-describedby=\"list_NM_TP_VOC_DEMAND\"]').textContent.includes('제안'));if(bad.length)throw new Error('제안 필터에 다른 유형 '+bad.length+'건');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('TP_VOC_DEMAND');s.value=[...s.options].find(o=>o.text.trim()==='불만').value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[...document.querySelectorAll('#list tr.jqgrow')].filter(r=>!r.querySelector('td[aria-describedby=\"list_NM_TP_VOC_DEMAND\"]').textContent.includes('불만'));if(bad.length)throw new Error('불만 필터에 다른 유형 '+bad.length+'건');})()"
+        },
+        { "action": "screenshot", "name": "문의유형-불만" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('TP_VOC_DEMAND');s.value=[...s.options].find(o=>o.text.trim()==='문의').value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[...document.querySelectorAll('#list tr.jqgrow')].filter(r=>!r.querySelector('td[aria-describedby=\"list_NM_TP_VOC_DEMAND\"]').textContent.includes('문의'));if(bad.length)throw new Error('문의 필터에 다른 유형 '+bad.length+'건');})()"
+        }
+      ]
+    },
+    {
+      "name": "VC_TC_134~137 고객센터 항목·필터(전체/대표번호/딜리버스)",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_CENTER');const o=[...s.options].map(x=>x.text.trim());const need=['전체','대표번호','딜리버스'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));if(s.value!=='')throw new Error('기본값이 전체가 아님');})()"
+        },
+        { "action": "fill", "selector": "#DT_VOC_REG_START", "value": "{{dtFrom}}" },
+        { "action": "fill", "selector": "#DT_VOC_REG_END", "value": "{{dtTo}}" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!document.querySelectorAll('#list tr.jqgrow').length)throw new Error('데이터 없음(고객센터 전체 검색 0건)');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_CENTER');s.value=[...s.options].find(o=>o.text.trim()==='대표번호').value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[...document.querySelectorAll('#list tr.jqgrow')].filter(r=>r.querySelector('td[aria-describedby=\"list_NM_VOC_CENTER\"]').textContent.trim()!=='대표번호');if(bad.length)throw new Error('대표번호 필터에 다른 센터 '+bad.length+'건: '+bad[0].querySelector('td[aria-describedby=\"list_NM_VOC_CENTER\"]').textContent.trim());})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_CENTER');s.value=[...s.options].find(o=>o.text.trim()==='딜리버스').value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[...document.querySelectorAll('#list tr.jqgrow')].filter(r=>r.querySelector('td[aria-describedby=\"list_NM_VOC_CENTER\"]').textContent.trim()!=='딜리버스');if(bad.length)throw new Error('딜리버스 필터에 다른 센터 '+bad.length+'건: '+bad[0].querySelector('td[aria-describedby=\"list_NM_VOC_CENTER\"]').textContent.trim());})()"
+        },
+        { "action": "screenshot", "name": "고객센터-딜리버스" }
+      ]
+    },
+    {
+      "name": "VC_TC_139~145,147~149 파트너검색 팝업(부서검색·조직도·파트너찾기·미선택 알림·선택 반영)",
+      "_note": "POP0001.jsp. 부서 '서초' 와 파트너 이름 '김' 은 데이터 의존. 재직 기본값 = INCUMBENT_CD defaultValue 0(POP0001.jsp:76). 확인 미선택 alert POP0001.jsp:272",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "#btnEmpSearch", "popup": true },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#DEPT_NM" },
+        { "action": "wait", "ms": 1000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('INCUMBENT_CD');const o=[...s.options].map(x=>x.text.trim());const need=['전체','재직','퇴직','휴직'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('파트너찾기 옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));if(s.options[s.selectedIndex].text.trim()!=='재직')throw new Error('파트너찾기 기본값이 재직 아님: '+s.options[s.selectedIndex].text);})()"
+        },
+        { "action": "fill", "selector": "#DEPT_NM", "value": "ZZ존재하지않는부서QA" },
+        { "action": "click", "selector": "#fnSearch_dept" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list_dept tr.jqgrow').length;if(n)throw new Error('없는 부서명인데 부서 목록 '+n+'건 표시');})()"
+        },
+        { "action": "fill", "selector": "#DEPT_NM", "value": "서초" },
+        { "action": "click", "selector": "#fnSearch_dept" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list_dept tr.jqgrow').length;if(!n)throw new Error('부서 서초 검색결과 없음(데이터 확인)');const dl=document.getElementById('deptList');if(dl.offsetParent===null)throw new Error('부서 목록 영역이 보이지 않음');})()"
+        },
+        { "action": "screenshot", "name": "파트너검색-부서목록" },
+        { "action": "click", "selector": "#showTree a" },
+        { "action": "wait", "ms": 800 },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=document.getElementById('treeList');if(t.offsetParent===null)throw new Error('조직도 영역이 보이지 않음');if(!document.querySelector('#deptTree li, #deptTree .dynatree-node, #deptTree span'))throw new Error('조직도 트리 노드 없음');})()"
+        },
+        { "action": "screenshot", "name": "파트너검색-조직도" },
+        { "action": "click", "selector": "#fnSearch_dept" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "click", "selector": "#list_dept tr.jqgrow td[aria-describedby='list_dept_DEPT_NM']" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list tr.jqgrow').length;if(n>10)throw new Error('파트너 목록 한 페이지 10건 초과: '+n);const p=document.querySelector(\".ub-control.pagging[for='list'] .total-count\");if(!p)throw new Error('파트너 목록 페이징(Total) 미표시');})()"
+        },
+        { "action": "screenshot", "name": "파트너검색-부서선택결과" },
+        { "action": "click", "selector": "#conFirm a" },
+        { "action": "wait", "ms": 800 },
+        { "action": "expectDialog", "text": "부서 선택 후 직원목록에서 선택해 주세요" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('INCUMBENT_CD');const o=[...s.options].find(o=>o.text.trim()==='전체');s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "fill", "selector": "#NM_USER", "value": "김" },
+        { "action": "click", "selector": "#fnSearch" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list tr.jqgrow').length;if(!n)throw new Error('파트너 이름 검색결과 없음(데이터 확인)');if(n>10)throw new Error('한 페이지 10건 초과: '+n);if(!document.querySelector(\".ub-control.pagging[for='list'] .total-count\"))throw new Error('페이징 미표시');})()"
+        },
+        { "action": "screenshot", "name": "파트너검색-이름검색" },
+        { "action": "click", "selector": "#list tr.jqgrow td[aria-describedby='list_USER_NM']" },
+        { "action": "wait", "ms": 500 },
+        { "action": "click", "selector": "#conFirm a" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "closePopup" },
+        { "action": "wait", "ms": 500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=document.getElementById('NM_VOC_RECV_EMP').value;if(!v)throw new Error('접수자 입력필드에 선택한 파트너 이름이 들어가지 않음');})()"
+        },
+        { "action": "screenshot", "name": "접수자-선택반영" }
+      ]
+    },
+    {
+      "name": "VC_TC_150~164,166 분류 자동완성·대/중/소 연동·추가/중복/레벨 알림·삭제",
+      "_note": "자동완성 uxl.autocomplete(minLength 2, VOC1001.jsp:253) → jQuery UI .ui-autocomplete li. [삭제] 는 forbidden 매칭이라 eval 로 클릭(옵션만 제거, 서버 호출 없음). 알림 문구는 소스 기준(마침표 없음)",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_CAUSE_1');const o=[...s.options].map(x=>x.text.trim());if(o[0]!=='대분류 전체')throw new Error('첫 항목이 대분류 전체 아님: '+o[0]);const need=['회원','결제/환불','음료/푸드/상품/세트2','매장','딜리버스(배달)','이벤트/프로모션','파트너칭찬'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('대분류 옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s2=document.getElementById('CD_VOC_CAUSE_2'),s3=document.getElementById('CD_VOC_CAUSE_3');const v2=[...s2.options].filter(o=>o.value!=='').length,v3=[...s3.options].filter(o=>o.value!=='').length;if(v2)throw new Error('대분류 전체 상태인데 중분류 항목 '+v2+'개 표시');if(v3)throw new Error('중분류 전체 상태인데 소분류 항목 '+v3+'개 표시');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_CAUSE_1');s.selectedIndex=1;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s2=document.getElementById('CD_VOC_CAUSE_2');const v2=[...s2.options].filter(o=>o.value!=='').length;if(!v2)throw new Error('대분류 선택 후 중분류 항목이 표시되지 않음');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_CAUSE_2');s.selectedIndex=1;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s3=document.getElementById('CD_VOC_CAUSE_3');const v3=[...s3.options].filter(o=>o.value!=='').length;if(!v3)throw new Error('중분류 선택 후 소분류 항목이 표시되지 않음');})()"
+        },
+        { "action": "screenshot", "name": "분류-대중소연동" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_CAUSE_1');s.value='';s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "wait", "ms": 800 },
+        { "action": "click", "selector": "#CauseAddBtn a" },
+        { "action": "wait", "ms": 500 },
+        { "action": "expectDialog", "text": "대분류를 선택해 주세요" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_CAUSE_1');s.selectedIndex=1;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "wait", "ms": 1000 },
+        { "action": "click", "selector": "#CauseAddBtn a" },
+        { "action": "wait", "ms": 500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#CAUSE_CONTENT option').length;if(n!==1)throw new Error('대분류 추가 후 목록 1건이어야 하는데 '+n+'건');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_CAUSE_1');s.selectedIndex=2;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "wait", "ms": 1000 },
+        { "action": "click", "selector": "#CauseAddBtn a" },
+        { "action": "wait", "ms": 500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#CAUSE_CONTENT option').length;if(n!==2)throw new Error('두 번째 대분류 추가 후 목록 2건이어야 하는데 '+n+'건');})()"
+        },
+        { "action": "click", "selector": "#CauseAddBtn a" },
+        { "action": "wait", "ms": 500 },
+        { "action": "expectDialog", "text": "중복된 선택입니다" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_CAUSE_2');const opts=[...s.options].filter(o=>o.value!=='');if(!opts.length)throw new Error('중분류 항목 없음');s.value=opts[0].value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "wait", "ms": 1000 },
+        { "action": "click", "selector": "#CauseAddBtn a" },
+        { "action": "wait", "ms": 500 },
+        { "action": "expectDialog", "text": "같은 레벨의 분류를 선택해 주세요" },
+        { "action": "screenshot", "name": "분류-레벨알림" },
+        {
+          "action": "eval",
+          "script": "(()=>{const c=document.getElementById('CAUSE_CONTENT');[...c.options].forEach(o=>o.selected=true);const b=document.querySelector('#CauseDelBtn a');if(!b)throw new Error('분류 삭제 버튼 없음');b.click();const n=c.options.length;if(n!==0)throw new Error('삭제 후 목록이 비어야 하는데 '+n+'건');})()"
+        },
+        { "action": "click", "selector": "#CauseAddBtn a" },
+        { "action": "wait", "ms": 500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const c=document.getElementById('CAUSE_CONTENT');if(c.options.length!==1)throw new Error('중분류만 추가 시 목록 1건이어야 하는데 '+c.options.length+'건');if(!c.options[0].text.includes(' > '))throw new Error('중분류 항목 표기(대 > 중) 아님: '+c.options[0].text);})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_CAUSE_3');const opts=[...s.options].filter(o=>o.value!=='');if(!opts.length)throw new Error('소분류 항목 없음');s.value=opts[0].value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "wait", "ms": 500 },
+        { "action": "click", "selector": "#CauseAddBtn a" },
+        { "action": "wait", "ms": 500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const c=document.getElementById('CAUSE_CONTENT');if(c.options.length!==1)throw new Error('중분류 목록에 소분류 추가가 막혀야 하는데 '+c.options.length+'건 (같은 레벨 알림 기대)');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const c=document.getElementById('CAUSE_CONTENT');[...c.options].forEach(o=>o.selected=true);document.querySelector('#CauseDelBtn a').click();})()"
+        },
+        { "action": "click", "selector": "#CauseAddBtn a" },
+        { "action": "wait", "ms": 500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const c=document.getElementById('CAUSE_CONTENT');if(c.options.length!==1)throw new Error('소분류만 추가 시 목록 1건이어야 하는데 '+c.options.length+'건');if(c.options[0].text.split(' > ').length!==3)throw new Error('소분류 항목 표기(대 > 중 > 소) 아님: '+c.options[0].text);})()"
+        },
+        { "action": "screenshot", "name": "분류-소분류추가" },
+        {
+          "action": "eval",
+          "script": "(()=>{const c=document.getElementById('CAUSE_CONTENT');[...c.options].forEach(o=>o.selected=true);document.querySelector('#CauseDelBtn a').click();if(c.options.length)throw new Error('삭제 후에도 목록 '+c.options.length+'건');})()"
+        },
+        { "action": "type", "selector": "#NM_VOC_CAUSE_AUTO", "value": "회원" },
+        { "action": "wait", "ms": 1800 },
+        {
+          "action": "eval",
+          "script": "(()=>{const li=[...document.querySelectorAll('.ui-autocomplete li')].filter(l=>l.offsetParent!==null);if(!li.length)throw new Error('분류 자동완성 목록 미표시(키워드 회원)');})()"
+        },
+        { "action": "screenshot", "name": "분류-자동완성" },
+        { "action": "fill", "selector": "#NM_VOC_CAUSE_AUTO", "value": "" },
+        { "action": "press", "key": "Escape" },
+        { "action": "type", "selector": "#NM_VOC_CAUSE_AUTO", "value": "회사" },
+        { "action": "wait", "ms": 1800 },
+        {
+          "action": "eval",
+          "script": "(()=>{const li=[...document.querySelectorAll('.ui-autocomplete li')].filter(l=>l.offsetParent!==null);if(li.length)throw new Error('비유효 키워드(회사)인데 자동완성 '+li.length+'건 표시: '+li[0].textContent.trim());})()"
+        }
+      ]
+    },
+    {
+      "name": "VC_TC_168~173,181,182 부서검색 팝업(필수 알림·폐점미포함·매장 아님 알림·조직도·선택 반영·주관부서)",
+      "_note": "POP1001.jsp. '지역' 이 포함된 부서 행을 매장 아닌 부서로 간주(QA 예: 서초 지역). 매장 선택 시 콜백이 NM_VISIT_STR + NM_CHARGE_DEPT(주관부서) 를 채움(VOC1001.jsp:207~212) → TC_182. 주관부서 없는 매장(TC_181)은 데이터 의존이라 필드 readonly 여부만 확인",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.getElementById('NM_CHARGE_DEPT');if(!e.readOnly)throw new Error('주관부서 입력필드가 readonly(비활성) 아님');})()"
+        },
+        { "action": "click", "selector": "#btnVisitStrSerach", "popup": true },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#DEPT_NM" },
+        { "action": "wait", "ms": 1000 },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!document.getElementById('CD_STORE_CHK').checked)throw new Error('폐점미포함 기본 체크 아님');})()"
+        },
+        { "action": "click", "selector": "#fnSearch_dept" },
+        { "action": "wait", "ms": 800 },
+        { "action": "expectDialog", "text": "필수 항목입니다" },
+        { "action": "fill", "selector": "#DEPT_NM", "value": "서초" },
+        { "action": "click", "selector": "#fnSearch_dept" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list_dept tr.jqgrow').length;if(!n)throw new Error('폐점미포함 부서 검색결과 없음(데이터 확인)');window.__qaN1=n;})()"
+        },
+        { "action": "screenshot", "name": "부서검색-폐점미포함" },
+        { "action": "check", "selector": "#CD_STORE_CHK", "value": false },
+        { "action": "click", "selector": "#fnSearch_dept" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list_dept tr.jqgrow').length;if(n<window.__qaN1)throw new Error('폐점 포함 결과('+n+')가 폐점미포함 결과('+window.__qaN1+')보다 적음');})()"
+        },
+        { "action": "check", "selector": "#CD_STORE_CHK", "value": true },
+        { "action": "click", "selector": "#fnSearch_dept" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list_dept tr.jqgrow')];const r=rows.find(r=>r.textContent.includes('지역'));if(!r)throw new Error('매장이 아닌 부서(지역) 행이 검색결과에 없음 — 데이터 확인');(r.querySelector('input[type=checkbox]')||r.querySelector('td[aria-describedby=\"list_dept_DEPT_NM\"]')).click();})()"
+        },
+        { "action": "wait", "ms": 500 },
+        { "action": "click", "selector": "#conFirm a" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "expectDialog", "text": "선택한 부서는 매장이 아닙니다" },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list_dept tr.jqgrow')];rows.forEach(r=>{const c=r.querySelector('input[type=checkbox]');if(c&&c.checked)c.click();});const r=rows.find(r=>!r.textContent.includes('지역'));if(!r)throw new Error('매장 행이 검색결과에 없음');(r.querySelector('input[type=checkbox]')||r.querySelector('td[aria-describedby=\"list_dept_DEPT_NM\"]')).click();})()"
+        },
+        { "action": "wait", "ms": 500 },
+        { "action": "click", "selector": "#showTree a" },
+        { "action": "wait", "ms": 800 },
+        {
+          "action": "eval",
+          "script": "(()=>{if(document.getElementById('treeList').offsetParent===null)throw new Error('조직도 영역이 보이지 않음');if(!document.querySelector('#deptTree li, #deptTree .dynatree-node, #deptTree span'))throw new Error('조직도 트리 노드 없음');})()"
+        },
+        { "action": "screenshot", "name": "부서검색-조직도" },
+        { "action": "click", "selector": "#fnSearch_dept" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list_dept tr.jqgrow')];const r=rows.find(r=>!r.textContent.includes('지역'));if(!r)throw new Error('매장 행이 검색결과에 없음');(r.querySelector('input[type=checkbox]')||r.querySelector('td[aria-describedby=\"list_dept_DEPT_NM\"]')).click();})()"
+        },
+        { "action": "wait", "ms": 500 },
+        { "action": "click", "selector": "#conFirm a" },
+        { "action": "wait", "ms": 2000 },
+        { "action": "closePopup" },
+        { "action": "wait", "ms": 500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=document.getElementById('NM_VISIT_STR').value;if(!v)throw new Error('방문매장 입력필드에 선택한 매장명이 들어가지 않음');const d=document.getElementById('NM_CHARGE_DEPT').value;document.title='chargeDept='+(d||'(없음)');})()"
+        },
+        { "action": "screenshot", "name": "방문매장-주관부서-반영" }
+      ]
+    },
+    {
+      "name": "VC_TC_175~178,180 프로모션 목록 팝업(키워드/비유효/사용여부 항목/전체 검색/더블클릭 선택)",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "#btnPromotionSerach", "popup": true },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#NM_PROMOTION" },
+        { "action": "wait", "ms": 800 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('YN_USE');const o=[...s.options].map(x=>x.text.trim());const need=['전체','사용','미사용'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('사용여부 옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));if(s.value!=='')throw new Error('사용여부 기본값이 전체 아님');})()"
+        },
+        { "action": "fill", "selector": "#NM_PROMOTION", "value": "2016" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list tr.jqgrow').length;if(!n)throw new Error('프로모션 2016 검색결과 없음(데이터 확인)');const h=['list_NM_TP_PROMOTION','list_NM_PROMOTION','list_YN_USE','list_YMD_START','list_YMD_END'].filter(id=>!document.getElementById(id));if(h.length)throw new Error('컬럼 누락: '+h.join(','));})()"
+        },
+        { "action": "fill", "selector": "#NM_PROMOTION", "value": "ZZ없는프로모션QA" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list tr.jqgrow').length;if(n)throw new Error('비유효 키워드인데 결과 '+n+'건');})()"
+        },
+        { "action": "fill", "selector": "#NM_PROMOTION", "value": "" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list tr.jqgrow').length;if(!n)throw new Error('프로모션 전체 검색결과 없음');if(!document.querySelector(\".ub-control.pagging[for='list'] .total-count\"))throw new Error('페이징(Total) 미표시');})()"
+        },
+        { "action": "screenshot", "name": "프로모션-전체" },
+        { "action": "dblclick", "selector": "#list tr.jqgrow td[aria-describedby='list_NM_PROMOTION']" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "closePopup" },
+        { "action": "wait", "ms": 500 },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!document.getElementById('NM_PROMOTION').value)throw new Error('프로모션명 입력필드에 선택값이 들어가지 않음');})()"
+        }
+      ]
+    },
+    {
+      "name": "VC_TC_184~187,189 이벤트 목록 팝업(키워드/비유효/상태 항목/전체 검색/더블클릭 선택)",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "#btnEventSearch", "popup": true },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#NM_EVENT" },
+        { "action": "wait", "ms": 800 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('YN_USE');const o=[...s.options].map(x=>x.text.trim());const need=['전체','사용','미사용'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('상태 옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));if(s.value!=='')throw new Error('상태 기본값이 전체 아님');})()"
+        },
+        { "action": "fill", "selector": "#NM_EVENT", "value": "이벤트" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list tr.jqgrow').length;if(!n)throw new Error('이벤트 키워드 검색결과 없음(데이터 확인)');})()"
+        },
+        { "action": "fill", "selector": "#NM_EVENT", "value": "123" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list tr.jqgrow').length;if(n)throw new Error('비유효 키워드(123)인데 결과 '+n+'건');})()"
+        },
+        { "action": "fill", "selector": "#NM_EVENT", "value": "" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list tr.jqgrow').length;if(!n)throw new Error('이벤트 전체 검색결과 없음');if(!document.querySelector(\".ub-control.pagging[for='list'] .total-count\"))throw new Error('페이징(Total) 미표시');})()"
+        },
+        { "action": "screenshot", "name": "이벤트-전체" },
+        { "action": "dblclick", "selector": "#list tr.jqgrow td[aria-describedby='list_NM_EVENT']" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "closePopup" },
+        { "action": "wait", "ms": 500 },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!document.getElementById('NM_EVENT').value)throw new Error('이벤트명 입력필드에 선택값이 들어가지 않음');})()"
+        }
+      ]
+    },
+    {
+      "name": "VC_TC_191~195,198,200~206 제품/상품 목록 팝업(카테고리 연동·검색·Rows/Page 항목·SKU·제품명·단종제외·선택 반영)",
+      "_note": "POP1002.jsp. allVoc 파라미터로 단일 선택. Rows/Page 는 uxl 기본 rowList [10,20,50,100] → select#listPaging. 단종제외 해제(TC_205) 는 소스상 전체(Y+N) 조회라 QA 기대('Y만')와 다름 → 결과 존재만 확인",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "#btnGoodsSearch", "popup": true },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#CD_PROD_CATE_1" },
+        { "action": "wait", "ms": 1000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_PROD_CATE_1');const o=[...s.options].map(x=>x.text.trim());const need=['전체','음료','푸드','커피','상품'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('카테고리 옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));const s2=document.getElementById('CD_PROD_CATE_2');const v2=[...s2.options].filter(o=>o.value!=='').length;if(v2)throw new Error('카테고리 전체인데 오른쪽 셀렉트에 항목 '+v2+'개');if(!document.getElementById('YN_END').checked)throw new Error('단종제외 기본 체크 아님');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_PROD_CATE_1');s.selectedIndex=1;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s2=document.getElementById('CD_PROD_CATE_2');const v2=[...s2.options].filter(o=>o.value!=='').length;if(!v2)throw new Error('왼쪽 카테고리 선택 후 오른쪽 셀렉트 항목 없음');})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list tr.jqgrow').length;if(!n)throw new Error('카테고리 검색결과 없음');if(n>10)throw new Error('한 페이지 10건 초과: '+n);const h=['list_NM_CATE_1','list_NM_CATE_2','list_NO_SKU','list_YN_END','list_NM_PRDUCT'].filter(id=>!document.getElementById(id));if(h.length)throw new Error('컬럼 누락: '+h.join(','));if(!document.querySelector(\".ub-control.pagging[for='list'] .total-count\"))throw new Error('페이징 미표시');const rp=document.getElementById('listPaging');if(!rp)throw new Error('Rows/Page 셀렉트 없음');const o=[...rp.options].map(x=>x.text.trim());const miss=['10','20','50','100'].filter(x=>!o.includes(x));if(miss.length)throw new Error('Rows/Page 옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s2=document.getElementById('CD_PROD_CATE_2');const opts=[...s2.options].filter(o=>o.value!=='');s2.value=opts[0].value;s2.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list tr.jqgrow')];const s2=document.getElementById('CD_PROD_CATE_2');const nm=s2.options[s2.selectedIndex].text.trim();const bad=rows.filter(r=>r.querySelector('td[aria-describedby=\"list_NM_CATE_2\"]').textContent.trim()!==nm);if(bad.length)throw new Error('카테고리(중) '+nm+' 필터에 다른 값 '+bad.length+'건: '+bad[0].querySelector('td[aria-describedby=\"list_NM_CATE_2\"]').textContent.trim());})()"
+        },
+        { "action": "screenshot", "name": "제품-카테고리검색" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_PROD_CATE_1');s.value='';s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "wait", "ms": 800 },
+        { "action": "fill", "selector": "#NO_SKU", "value": "9300000000913" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list tr.jqgrow')];if(!rows.length)throw new Error('SKU 9300000000913 검색결과 없음(데이터 확인)');const bad=rows.filter(r=>!r.querySelector('td[aria-describedby=\"list_NO_SKU\"]').textContent.includes('9300000000913'));if(bad.length)throw new Error('SKU 불일치 행 '+bad.length+'건');})()"
+        },
+        { "action": "fill", "selector": "#NO_SKU", "value": "0000000000001" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list tr.jqgrow').length;if(n)throw new Error('비유효 SKU인데 결과 '+n+'건');})()"
+        },
+        { "action": "fill", "selector": "#NO_SKU", "value": "" },
+        { "action": "fill", "selector": "#NM_PRDUCT", "value": "카푸치노" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list tr.jqgrow')];if(!rows.length)throw new Error('제품명 카푸치노 검색결과 없음(데이터 확인)');const bad=rows.filter(r=>!r.querySelector('td[aria-describedby=\"list_NM_PRDUCT\"]').textContent.includes('카푸치노'));if(bad.length)throw new Error('제품명 불일치 행 '+bad.length+'건');})()"
+        },
+        { "action": "fill", "selector": "#NM_PRDUCT", "value": "ZZ없는제품QA" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list tr.jqgrow').length;if(n)throw new Error('비유효 제품명인데 결과 '+n+'건');})()"
+        },
+        { "action": "fill", "selector": "#NM_PRDUCT", "value": "" },
+        { "action": "check", "selector": "#YN_END", "value": true },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list tr.jqgrow')];if(!rows.length)throw new Error('단종제외 검색결과 없음');const bad=rows.filter(r=>r.querySelector('td[aria-describedby=\"list_YN_END\"]').textContent.trim()!=='N');if(bad.length)throw new Error('단종제외인데 단종여부 N 아닌 행 '+bad.length+'건');})()"
+        },
+        { "action": "check", "selector": "#YN_END", "value": false },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list tr.jqgrow')];if(!rows.length)throw new Error('단종제외 해제 검색결과 없음');})()"
+        },
+        { "action": "screenshot", "name": "제품-단종포함" },
+        { "action": "click", "selector": "#list tr.jqgrow td[aria-describedby='list_NM_PRDUCT']" },
+        { "action": "wait", "ms": 500 },
+        { "action": "click", "selector": "#conFirm a" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "closePopup" },
+        { "action": "wait", "ms": 500 },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!document.getElementById('NM_PRDUCT').value)throw new Error('제품명 입력필드에 선택값이 들어가지 않음');})()"
+        }
+      ]
+    },
+    {
+      "name": "VC_TC_207~213 답변진행 항목·필터(답변/미답변)·시간 초과 라디오(분홍 강조)",
+      "_note": "FG_CUST_ANSWER(전체/답변/미답변) → 그리드 FG_VOC_ANSWER Y/N 대조. 라디오 CD_CUST_ANSWER OVER_1/OVER_2(라벨 = CD_ANSWER_HOUR 코드명 + '시간 초과'). 초과 행 강조는 VOC1001.jsp:459~466 setRowData background #FFEB9C/#FFC0CB",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('FG_CUST_ANSWER');const o=[...s.options].map(x=>x.text.trim());const need=['전체','답변','미답변'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('답변진행 옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));if(s.value!=='')throw new Error('기본값이 전체 아님');const r=[...document.querySelectorAll('input[name=CD_CUST_ANSWER]')];if(r.length!==3)throw new Error('답변진행 라디오 3개 아님: '+r.length);if(!r.find(x=>x.value==='ALL').checked)throw new Error('라디오 기본값 전체 아님');})()"
+        },
+        { "action": "fill", "selector": "#DT_VOC_REG_START", "value": "{{dtFrom}}" },
+        { "action": "fill", "selector": "#DT_VOC_REG_END", "value": "{{dtTo}}" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!document.querySelectorAll('#list tr.jqgrow').length)throw new Error('데이터 없음(답변진행 전체 검색 0건)');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('FG_CUST_ANSWER');s.value=[...s.options].find(o=>o.text.trim()==='답변').value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[...document.querySelectorAll('#list tr.jqgrow')].filter(r=>r.querySelector('td[aria-describedby=\"list_FG_VOC_ANSWER\"]').textContent.trim()!=='Y');if(bad.length)throw new Error('답변 필터에 답변여부 Y 아닌 행 '+bad.length+'건');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('FG_CUST_ANSWER');s.value=[...s.options].find(o=>o.text.trim()==='미답변').value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[...document.querySelectorAll('#list tr.jqgrow')].filter(r=>r.querySelector('td[aria-describedby=\"list_FG_VOC_ANSWER\"]').textContent.trim()==='Y');if(bad.length)throw new Error('미답변 필터에 답변여부 Y 행 '+bad.length+'건');})()"
+        },
+        { "action": "screenshot", "name": "답변진행-미답변" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('FG_CUST_ANSWER');s.value='';s.dispatchEvent(new Event('change',{bubbles:true}));const r=[...document.querySelectorAll('input[name=CD_CUST_ANSWER]')].find(x=>x.value==='OVER_1');r.click();})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list tr.jqgrow')];const bad=rows.filter(r=>r.querySelector('td[aria-describedby=\"list_NM_CD_VOC_STTUS\"]').textContent.trim()!=='접수대기');if(bad.length)throw new Error('시간초과(OVER_1) 결과에 접수대기 아닌 행 '+bad.length+'건');const nocolor=rows.filter(r=>!/(255,\\s*235,\\s*156|255,\\s*192,\\s*203|#FFEB9C|#FFC0CB)/i.test(r.style.background+r.style.backgroundColor));if(rows.length&&nocolor.length===rows.length)throw new Error('시간초과 행에 강조색(분홍/노랑) 미적용');})()"
+        },
+        { "action": "screenshot", "name": "답변진행-30시간초과" },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=[...document.querySelectorAll('input[name=CD_CUST_ANSWER]')].find(x=>x.value==='OVER_2');r.click();})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list tr.jqgrow')];const bad=rows.filter(r=>r.querySelector('td[aria-describedby=\"list_NM_CD_VOC_STTUS\"]').textContent.trim()!=='접수대기');if(bad.length)throw new Error('시간초과(OVER_2) 결과에 접수대기 아닌 행 '+bad.length+'건');const nocolor=rows.filter(r=>!/(255,\\s*235,\\s*156|255,\\s*192,\\s*203|#FFEB9C|#FFC0CB)/i.test(r.style.background+r.style.backgroundColor));if(rows.length&&nocolor.length===rows.length)throw new Error('시간초과 행에 강조색(분홍) 미적용');})()"
+        },
+        { "action": "screenshot", "name": "답변진행-48시간초과" }
+      ]
+    },
+    {
+      "name": "VC_TC_214~216 검색 구분 항목·VOC번호/제목 키워드 검색",
+      "_note": "VOC번호·제목 키워드는 전체 검색 첫 행에서 가져와 재검색(데이터 자립). 옵션 value 는 DB 코드라 라벨 텍스트로 선택",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH');const o=[...s.options].map(x=>x.text.trim());const need=['VOC번호','제목','내용','답변','제목 + 내용','제목 + 내용 + 답변','고객ID','고객명','고객연락처','고객연락처(4자리)'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('검색 구분 옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));if(s.options[s.selectedIndex].text.trim()!=='VOC번호')throw new Error('기본 선택이 VOC번호 아님: '+s.options[s.selectedIndex].text);})()"
+        },
+        { "action": "fill", "selector": "#DT_VOC_REG_START", "value": "{{dtFrom}}" },
+        { "action": "fill", "selector": "#DT_VOC_REG_END", "value": "{{dtTo}}" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=document.querySelector('#list tr.jqgrow');if(!r)throw new Error('데이터 없음(기간 내 VOC 0건)');window.__qaId=r.querySelector('td[aria-describedby=\"list_ID_VOC\"]').textContent.trim();window.__qaTitle=r.querySelector('td[aria-describedby=\"list_DS_VOC_TITLE\"]').textContent.trim().split(/\\s+/)[0];document.getElementById('DS_SEARCH').value=window.__qaId;})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list tr.jqgrow')];if(!rows.length)throw new Error('VOC번호 '+window.__qaId+' 검색결과 없음');const bad=rows.filter(r=>r.querySelector('td[aria-describedby=\"list_ID_VOC\"]').textContent.trim()!==window.__qaId);if(bad.length)throw new Error('VOC번호 검색에 다른 번호 '+bad.length+'건');})()"
+        },
+        { "action": "screenshot", "name": "검색-VOC번호" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH');s.value=[...s.options].find(o=>o.text.trim()==='제목').value;s.dispatchEvent(new Event('change',{bubbles:true}));if(!window.__qaTitle)throw new Error('제목 키워드를 뽑지 못함(제목 빈 값)');document.getElementById('DS_SEARCH').value=window.__qaTitle;})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list tr.jqgrow')];if(!rows.length)throw new Error('제목 키워드 '+window.__qaTitle+' 검색결과 없음');const bad=rows.filter(r=>!r.querySelector('td[aria-describedby=\"list_DS_VOC_TITLE\"]').textContent.includes(window.__qaTitle));if(bad.length)throw new Error('제목에 키워드 없는 행 '+bad.length+'건(말줄임 컬럼일 수 있음 — 캡처 확인)');})()"
+        },
+        { "action": "screenshot", "name": "검색-제목" }
+      ]
+    },
+    {
+      "name": "VC_TC_217~224 검색 구분 내용/답변/제목+내용/제목+내용+답변/고객ID/고객명/고객연락처/4자리 키워드 검색(오류 없음)",
+      "_note": "본문·답변·고객정보는 그리드에 노출되지 않아 결과 일치 여부를 화면에서 판정할 수 없다 → 각 구분으로 검색이 오류 없이 수행되는지(alert/JS에러 없음)만 자동, 결과 적합성은 부분(수동 대조)",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "fill", "selector": "#DT_VOC_REG_START", "value": "{{dtFrom}}" },
+        { "action": "fill", "selector": "#DT_VOC_REG_END", "value": "{{dtTo}}" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH');s.value=[...s.options].find(o=>o.text.trim()==='내용').value;s.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('DS_SEARCH').value='문의';})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "expectVisible", "selector": "#list" },
+        { "action": "screenshot", "name": "검색-내용" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH');s.value=[...s.options].find(o=>o.text.trim()==='답변').value;s.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('DS_SEARCH').value='감사';})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "screenshot", "name": "검색-답변" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH');s.value=[...s.options].find(o=>o.text.trim()==='제목 + 내용').value;s.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('DS_SEARCH').value='문의';})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "screenshot", "name": "검색-제목내용" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH');s.value=[...s.options].find(o=>o.text.trim()==='제목 + 내용 + 답변').value;s.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('DS_SEARCH').value='문의';})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "screenshot", "name": "검색-제목내용답변" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH');s.value=[...s.options].find(o=>o.text.trim()==='고객ID').value;s.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('DS_SEARCH').value='test';})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "screenshot", "name": "검색-고객ID" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH');s.value=[...s.options].find(o=>o.text.trim()==='고객명').value;s.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('DS_SEARCH').value='홍길동';})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "screenshot", "name": "검색-고객명" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH');s.value=[...s.options].find(o=>o.text.trim()==='고객연락처').value;s.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('DS_SEARCH').value='010-0000-0000';})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "screenshot", "name": "검색-고객연락처" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH');s.value=[...s.options].find(o=>o.text.trim()==='고객연락처(4자리)').value;s.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('DS_SEARCH').value='0000';})()"
+        },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "expectVisible", "selector": "#list" },
+        { "action": "screenshot", "name": "검색-연락처4자리" }
+      ]
+    },
+    {
+      "name": "VC_TC_225~228 회신여부/업무요청여부/공유여부/만족도참여여부 체크 검색",
+      "_note": "회신·공유·만족도는 그리드 컬럼이 없어 결과 적합성은 부분(캡처 대조). 업무요청여부는 그리드 REQ_CNT(업무요청) 컬럼으로 대조",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "fill", "selector": "#DT_VOC_REG_START", "value": "{{dtFrom}}" },
+        { "action": "fill", "selector": "#DT_VOC_REG_END", "value": "{{dtTo}}" },
+        { "action": "check", "selector": "#FG_REQ_REPLY", "value": true },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "expectVisible", "selector": "#list" },
+        { "action": "screenshot", "name": "체크-회신여부" },
+        { "action": "check", "selector": "#FG_REQ_REPLY", "value": false },
+        { "action": "check", "selector": "#FG_REQ_NONE", "value": true },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=[...document.querySelectorAll('#list tr.jqgrow')];const bad=rows.filter(r=>{const v=r.querySelector('td[aria-describedby=\"list_REQ_CNT\"]').textContent.trim();return v===''||v==='0'});if(rows.length&&bad.length===rows.length)throw new Error('업무요청여부 체크 결과인데 업무요청 컬럼이 전부 0/빈값');})()"
+        },
+        { "action": "screenshot", "name": "체크-업무요청여부" },
+        { "action": "check", "selector": "#FG_REQ_NONE", "value": false },
+        { "action": "check", "selector": "#FG_SHARE_NONE", "value": true },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "screenshot", "name": "체크-공유여부" },
+        { "action": "check", "selector": "#FG_SHARE_NONE", "value": false },
+        { "action": "check", "selector": "#FG_CSTMR_PARTICIPATE", "value": true },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "expectVisible", "selector": "#list" },
+        { "action": "screenshot", "name": "체크-만족도참여여부" }
+      ]
+    },
+    {
+      "name": "VC_TC_230~232 엑셀다운로드 레이어 전체선택 토글·다운로드 링크 생성",
+      "_note": "fnexportExcelBtn(VOC1001.jsp:477) 레이어 → 전체 선택(FG_ALL_CHK) 토글(:529~559) → 내부 [엑셀다운로드](fnexportExcel :600) 는 서버에 엑셀 파일을 생성하고 링크만 만든다(DB 변경 없음, 파일 다운로드는 하지 않음). 개인정보조회로그가 남을 수 있음",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "fill", "selector": "#DT_VOC_REG_START", "value": "{{dtFrom}}" },
+        { "action": "fill", "selector": "#DT_VOC_REG_END", "value": "{{dtTo}}" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!document.querySelectorAll('#list tr.jqgrow').length)throw new Error('데이터 없음(다운로드할 목록 0건)');})()"
+        },
+        { "action": "click", "selector": "#btnExcel a" },
+        { "action": "wait", "ms": 1000 },
+        { "action": "waitFor", "selector": "#FG_ALL_CHK" },
+        { "action": "click", "selector": "#FG_ALL_CHK" },
+        { "action": "wait", "ms": 300 },
+        {
+          "action": "eval",
+          "script": "(()=>{const cbs=[...document.querySelectorAll('#excelChkForm > input[type=checkbox]')];const un=cbs.filter(c=>!c.checked).map(c=>c.id);if(un.length)throw new Error('전체 선택 후 미체크 항목: '+un.join(','));})()"
+        },
+        { "action": "screenshot", "name": "엑셀-전체선택" },
+        { "action": "click", "selector": "#FG_TITLE" },
+        { "action": "wait", "ms": 300 },
+        {
+          "action": "eval",
+          "script": "(()=>{if(document.getElementById('FG_ALL_CHK').checked)throw new Error('일부 해제했는데 전체 선택이 여전히 체크됨');})()"
+        },
+        { "action": "click", "selector": "#exportListViewer a[title='엑셀다운로드']" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 4000 },
+        { "action": "expectText", "text": "아래의 다운로드 link를 클릭하시면 파일을 다운로드 받을 수 있습니다" },
+        { "action": "expectText", "text": "다운로드 파일 1" },
+        { "action": "screenshot", "name": "엑셀-링크생성" }
+      ]
+    },
+    {
+      "name": "VC_TC_236,238,239 검색결과 컬럼 구성·15건/페이지·Rows/Page 항목(15/20/50)·변경 반영",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "fill", "selector": "#DT_VOC_REG_START", "value": "{{dtFrom}}" },
+        { "action": "fill", "selector": "#DT_VOC_REG_END", "value": "{{dtTo}}" },
+        { "action": "click", "selector": "#searchBtn a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const cols=['ID_VOC','DT_VOC_REG','NM_VOC_CENTER','NM_CD_VOC_CHANNEL','NM_TP_VOC_DEMAND','NM_VOC_CAUSE_3','NM_VISIT_STR','DS_VOC_TITLE','NM_VOC_RECV_EMP','REQ_CNT','FG_VOC_ANSWER','NM_CD_VOC_STTUS','FG_FILE'];const miss=cols.filter(c=>{const h=document.getElementById('list_'+c);return !h||h.offsetParent===null});if(miss.length)throw new Error('그리드 컬럼 누락/숨김: '+miss.join(','));const n=document.querySelectorAll('#list tr.jqgrow').length;if(!n)throw new Error('데이터 없음');if(n>15)throw new Error('한 페이지 15건 초과: '+n);if(!document.querySelector(\".ub-control.pagging[for='list'] .total-count\"))throw new Error('페이징(Total) 미표시');const rp=document.getElementById('listPaging');if(!rp)throw new Error('Rows/Page 셀렉트 없음');const o=[...rp.options].map(x=>x.text.trim());const miss2=['15','20','50'].filter(x=>!o.includes(x));if(miss2.length)throw new Error('Rows/Page 옵션 누락: '+miss2.join(',')+' / 실제: '+o.join('|'));if(rp.value!=='15')throw new Error('Rows/Page 기본값 15 아님: '+rp.value);window.__qaTotal=parseInt((document.querySelector(\".ub-control.pagging[for='list'] .total-count\").textContent.match(/[\\d,]+/)||['0'])[0].replace(/,/g,''));})()"
+        },
+        { "action": "screenshot", "name": "검색결과-15건" },
+        { "action": "select", "selector": "#listPaging", "value": "50" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list tr.jqgrow').length;const exp=Math.min(50,window.__qaTotal||50);if(n>50)throw new Error('Rows/Page 50인데 '+n+'건');if(window.__qaTotal>15&&n<=15)throw new Error('Rows/Page 50으로 바꿨는데 여전히 '+n+'건(총 '+window.__qaTotal+')');})()"
+        },
+        { "action": "screenshot", "name": "검색결과-50건" }
+      ]
+    }
+  ]
+}

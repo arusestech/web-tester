@@ -1,0 +1,62 @@
+{
+  "extends": "../_공통.json",
+  "name": "그룹사원변경이력 기준일자 조회 (5cfa9d6b3f)",
+  "_comment": "커밋 5cfa9d6b3f. 기준일자 시점의 권한그룹 구성원을 보는 모달(grpEmpSnapshotPop)과 엑셀 다운로드를 추가했다. 모달은 별도 URL 이 있어 직접 열어 확인한다",
+  "menus": [
+    {
+      "name": "그룹사원 변경이력 목록",
+      "url": "/grpEmpHst",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "[data-click=setAllmonth]"
+        },
+        {
+          "action": "click",
+          "selector": "a.btn-search, [data-click=search]"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        }
+      ],
+      "expect": [
+        "#frmSearch",
+        "#strtDt",
+        "#endDt"
+      ]
+    },
+    {
+      "name": "기준일자 시점 구성원 모달",
+      "url": "/grpEmpHst/snapshotPop",
+      "_note": "모달 URL 은 GrpEmpHstController.snapshotPop (클래스 매핑 grpEmpHst + snapshotPop). 최초 작성 시 /grpEmpSnapshotPop 로 잘못 넣어 실패했었다",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        },
+        {
+          "action": "eval",
+          "script": "(() => { const need = ['#baseDt', '#frmSearch', '#divGrid']; const miss = need.filter(s => !document.querySelector(s)); if (miss.length) throw new Error('모달 요소 없음: ' + miss.join(', ')); })()"
+        }
+      ],
+      "expect": [
+        "#baseDt",
+        "#divGrid"
+      ]
+    }
+  ],
+  "crud": []
+}

@@ -1,0 +1,168 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E03-1 [530 점장] 매장 VOC NOTE 등록",
+  "_comment": "E2E-03 1단계. 점장이 매장 VOC NOTE 등록",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat(SMTP 목업 localhost:1025 적용 war). 8888 = IntelliJ Tomcat(메일 host 내부망 IP → 발송 실패). CrossEditor 라이선스는 도메인 기준이라 포트 무관",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 가 컨텍스트 없는 /screen/POR0001.ub 로 보내는 알려진 현상(세션은 정상)",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R530"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "VOC1101 [Register] → VOC1102 등록",
+      "allowForbidden": [
+        "저장",
+        "Save",
+        "등록",
+        "Register"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1101.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#register"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC1102.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_REQEST_TY');if(!s)throw new Error('CD_REQEST_TY 없음');for(let i=0;i<s.options.length;i++){if(s.options[i].value){s.selectedIndex=i;s.dispatchEvent(new Event('change',{bubbles:true}));return;}}})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#DS_TITLE",
+          "value": "TEST_E2E01_NOTE"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{if(typeof object!=='undefined'&&object.SetBodyValue){object.SetBodyValue('<p>TEST_E2E01 매장 업무요청 내용(자동)</p>');}else{const t=document.getElementById('DS_CONTENT');if(t){t.value='TEST_E2E01 매장 업무요청 내용(자동)';}}})()"
+        },
+        {
+          "action": "note",
+          "_expected": "ID_DEPT(요청매장) 는 매장 사용자면 로그인 매장으로 자동 세팅(VOC1102.jsp 220행). 비어 있으면 매장검색(POP0017) 필요"
+        },
+        {
+          "action": "screenshot",
+          "name": "입력"
+        },
+        {
+          "action": "click",
+          "selector": "#save a, #save, #btnSave a"
+        },
+        {
+          "action": "expectDialog",
+          "text": "저장"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "screenshot",
+          "name": "저장결과"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC1101.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "#search a, #search"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectText",
+          "text": "TEST_E2E01_NOTE"
+        },
+        {
+          "action": "screenshot",
+          "name": "목록"
+        }
+      ]
+    },
+    {
+      "name": "로그아웃",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "click",
+          "selector": ".logout-button a"
+        },
+        {
+          "action": "expectDialog",
+          "text": "로그아웃"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectUrl",
+          "contains": "BCO0001"
+        }
+      ]
+    }
+  ]
+}

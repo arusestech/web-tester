@@ -1,0 +1,195 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E03-2 [250 고객서비스팀] NOTE 확인·수정·삭제",
+  "_comment": "E2E-03 2단계",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat(SMTP 목업 localhost:1025 적용 war). 8888 = IntelliJ Tomcat(메일 host 내부망 IP → 발송 실패). CrossEditor 라이선스는 도메인 기준이라 포트 무관",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 가 컨텍스트 없는 /screen/POR0001.ub 로 보내는 알려진 현상(세션은 정상)",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R250"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "VOC1101 → VOC1105 상세 → 수정 버튼(작성자 아님→미노출) → VOC1103 삭제(250 가능)",
+      "allowForbidden": [
+        "삭제",
+        "Delete",
+        "저장",
+        "Save"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1101.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "#search a, #search"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const td=[...document.querySelectorAll('table.ui-jqgrid-btable td')].find(t=>t.textContent.includes('TEST_E2E01_NOTE'));if(!td)throw new Error('행 없음: TEST_E2E01_NOTE');td.dispatchEvent(new MouseEvent('dblclick',{bubbles:true}));})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectUrl",
+          "contains": "VOC1105"
+        },
+        {
+          "action": "screenshot",
+          "name": "상세"
+        },
+        {
+          "action": "note",
+          "_verified": "8/25 실측: 고객서비스팀(250) 은 작성자가 아니어도 [수정](btnUpdate) 노출 (VOC1105 규칙: 작성자&상태01 또는 CSTMR_SRV/관리자)"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.getElementById('btnUpdate');if(!e||e.offsetParent===null)throw new Error('btnUpdate 미노출 — 250 은 노출 기대');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.getElementById('btnUpdate');if(!b)throw new Error('버튼 없음: btnUpdate');(b.querySelector('a')||b).click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectUrl",
+          "contains": "VOC1103"
+        },
+        {
+          "action": "screenshot",
+          "name": "VOC1103수정화면"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.getElementById('btnDelete');if(!e||e.offsetParent===null)throw new Error('btnDelete 미노출 — 250 은 노출 기대');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.getElementById('btnDelete');if(!b)throw new Error('버튼 없음: btnDelete');(b.querySelector('a')||b).click();})()"
+        },
+        {
+          "action": "expectDialog",
+          "text": "삭제"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "screenshot",
+          "name": "삭제후"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC1101.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "#search a, #search"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "TEST_E2E01_NOTE"
+        },
+        {
+          "action": "screenshot",
+          "name": "삭제확인"
+        }
+      ]
+    },
+    {
+      "name": "로그아웃",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "click",
+          "selector": ".logout-button a"
+        },
+        {
+          "action": "expectDialog",
+          "text": "로그아웃"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectUrl",
+          "contains": "BCO0001"
+        }
+      ]
+    }
+  ]
+}

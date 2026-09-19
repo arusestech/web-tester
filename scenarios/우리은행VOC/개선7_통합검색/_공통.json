@@ -1,0 +1,90 @@
+{
+  "name": "우리은행 VOC 공통(개선7)",
+  "baseUrl": "http://localhost:18081",
+  "browser": {
+    "channel": "chrome",
+    "headless": false,
+    "viewport": {
+      "width": 1600,
+      "height": 950
+    }
+  },
+  "timeout": 20000,
+  "expectTimeout": 10000,
+  "retry": 1,
+  "slowMs": 8000,
+  "evidence": {
+    "screenshotAll": true
+  },
+  "_comment_site": "Spring Boot 2.7 + Tiles + JSP, toastUI Grid. 대상 화면은 VOC 통합검색(/vocIntegrationList) 한 곳. 소스: D:/source/IdeaProjects/mr-voc-wrb_voc_current (커밋 dd82b030e7 [개선7], 3eaf506ce4 [레거시개선 08-27]). 로컬 기동은 프로젝트 CLAUDE.md 참조 — 포트 18081(사용자 IntelliJ 8081과 분리)",
+  "_comment_screen": "검색폼 구조: #vocSearchFrm(항상 보임) + #addtFrm > .moreBox(기본 display:none, .moreBtn '상세검색' 클릭으로 펼침). 개선7 로 추가된 14종은 전부 .moreBox 안 → 어떤 흐름이든 .moreBtn 을 먼저 눌러야 필드가 보인다. 조회 버튼 a.btn-search(onclick=loadGrid), 목록 그리드 #divGrid1(toastUI), 목록 AJAX 는 /vocIntegrationList/selectList",
+  "errorStatus": [
+    486,
+    487,
+    488
+  ],
+  "errorPatterns": [
+    "errorCode[^0-9]{0,4}4(6[234]|8[678])",
+    "권한이 없는 메뉴입니다",
+    "메뉴가 존재하지 않습니다",
+    "ORA-[0-9]{5}"
+  ],
+  "_comment_ignore": "/addMenuLog 488 은 CCCOWN 환경 기지 이슈(FN_VOC_AUTO_SEQ 누락, 매 화면 반복) — 개선7 과 무관해 제외. parent.customConfirm 은 iframe 밖에서 화면 URL 을 직접 열 때 나는 부수 현상(결함 아님)",
+  "ignore": {
+    "console": [
+      "parent[.]customConfirm is not a function",
+      "customConfirm is not a function"
+    ],
+    "resources": [
+      "/addMenuLog/",
+      "favicon"
+    ],
+    "dialogs": []
+  },
+  "_comment_forbidden": "프로젝트 CLAUDE.md '절대 하지 말 것' — 결재 상신/승인, 통보·메일·SMS 발송, 배치 실행, 엑셀 업로드, 실데이터 삭제. 개선7 검증은 조회 전용이라 저장까지 금지. 엑셀 다운로드는 _05 파일에서만(파일명이 _ 로 시작해 일괄 실행에서 제외됨)",
+  "forbidden": [
+    "삭제",
+    "상신",
+    "결재요청",
+    "결재",
+    "승인",
+    "반려",
+    "통보",
+    "발송",
+    "실행",
+    "업로드",
+    "저장",
+    "임시저장",
+    "연장"
+  ],
+  "_comment_login": "login.jsp: #loginId / #loginPwd / a[data-click=signIn]. AJAX 로그인 후 location.href='/' → 세션 경합으로 간헐 실패하므로 detect + 재시도. 계정 b00756(사전신고 상신자). 비밀번호는 파일에 두지 않고 실행 시 입력",
+  "login": {
+    "url": "/login",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#loginId",
+        "value": "b00756"
+      },
+      {
+        "action": "fill",
+        "selector": "#loginPwd",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "a[data-click=signIn]"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlNotContains": "login"
+    },
+    "detect": "#loginId",
+    "after": "/"
+  },
+  "menus": []
+}

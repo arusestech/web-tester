@@ -1,0 +1,312 @@
+{
+  "extends": "_공통.json",
+  "name": "SIT-VOC-0001-10 DCC_확인",
+  "_comment": "SIT v0.6 SIT-VOC-0001-10 — 흐름 이름의 S<n> 이 문서 스텝 번호",
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "userField": "#userid",
+    "logoutUrl": "/logout.ub",
+    "retries": 1,
+    "_comment_retries": "비밀번호 연속 실패 시 계정 잠금(maxFailPassword) → 재시도 1회",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "{{id_dcc}}"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001",
+      "selector": "#menu"
+    }
+  },
+  "menus": [],
+  "crud": [
+    {
+      "name": "S1 DCC 처리완료 건 확인 버튼",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_dcc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0005.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#procCheckBtn"
+        },
+        {
+          "action": "screenshot",
+          "name": "확인버튼"
+        }
+      ]
+    },
+    {
+      "name": "S2 확인(PC)",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_dcc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0005.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "click",
+          "selector": "#procCheckBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 6000
+        },
+        {
+          "action": "expectDialog",
+          "text": "확인 하시겠습니까"
+        },
+        {
+          "action": "expectDialog",
+          "text": "확인 되었습니다"
+        },
+        {
+          "action": "screenshot",
+          "name": "확인완료"
+        }
+      ]
+    },
+    {
+      "name": "S3 확인 후 담당자 읽기 전용",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_proc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0022.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=document.querySelector('.ub-layout.search-advanced');if(l&&l.classList.contains('close')){const b=l.querySelector('span.btn a')||l.querySelector('span.btn');if(b)b.click();}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[\"#procEndBtn\", \"#procRecvBtn\", \"#saveBtn\"].filter(s=>{const e=document.querySelector(s);return e&&!!(e.offsetWidth||e.offsetHeight)});if(bad.length)throw new Error('보이면 안 되는 버튼이 보임: '+bad.join(', '));})()"
+        },
+        {
+          "action": "screenshot",
+          "name": "담당자읽기전용"
+        }
+      ]
+    }
+  ]
+}

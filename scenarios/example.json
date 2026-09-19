@@ -1,0 +1,74 @@
+{
+  "name": "예제 프로젝트",
+  "baseUrl": "http://localhost:8080",
+  "browser": { "channel": "chrome", "headless": false, "slowMo": 0 },
+  "timeout": 10000,
+  "stepDelay": 300,
+  "evidence": { "screenshotAll": true },
+
+  "forbidden": ["삭제", "메일 발송", "SMS", "결제", "일괄"],
+
+  "login": {
+    "url": "/login.do",
+    "steps": [
+      { "action": "fill", "selector": "input[name=userId]", "value": "tester" },
+      { "action": "fill", "selector": "input[name=password]", "value": "1234" },
+      { "action": "click", "selector": "button[type=submit]" }
+    ],
+    "success": { "urlNotContains": "login" }
+  },
+
+  "menus": [
+    { "name": "메인",     "url": "/main.do",        "expect": ["#content"] },
+    { "name": "사원관리", "url": "/emp/list.do",    "expect": ["table"],
+      "detail": { "selector": "table tbody tr td a", "rows": 2, "expect": ["form"] } },
+    { "name": "부서관리", "url": "/dept/list.do",   "expect": ["table", "button:has-text('등록')"], "screenshot": false },
+    { "name": "급여(클릭 진입)", "steps": [
+        { "action": "goto", "url": "/main.do" },
+        { "action": "click", "text": "급여관리" },
+        { "action": "waitForLoad" }
+      ], "expect": ["table"] }
+  ],
+
+  "crawl": {
+    "enabled": false,
+    "startUrl": "/main.do",
+    "selector": "#sidebar a, .gnb a",
+    "exclude": ["logout", "download"],
+    "maxPages": 100
+  },
+
+  "crud": [
+    {
+      "name": "사원 등록→조회→수정",
+      "steps": [
+        { "action": "goto", "url": "/emp/list.do" },
+        { "action": "click", "text": "등록" },
+        { "action": "fill", "selector": "input[name=empName]", "value": "자동테스트" },
+        { "action": "select", "selector": "select[name=deptCd]", "value": "10" },
+        { "action": "click", "selector": "button:has-text('저장')" },
+        { "action": "expectDialog", "text": "저장" },
+        { "action": "goto", "url": "/emp/list.do" },
+        { "action": "fill", "selector": "input[name=searchText]", "value": "자동테스트" },
+        { "action": "press", "selector": "input[name=searchText]", "key": "Enter" },
+        { "action": "expectText", "text": "자동테스트" },
+        { "action": "click", "text": "자동테스트" },
+        { "action": "fill", "selector": "input[name=empName]", "value": "자동테스트2" },
+        { "action": "click", "selector": "button:has-text('저장')" },
+        { "action": "expectDialog", "text": "수정" }
+      ]
+    },
+    {
+      "name": "iframe/팝업 예시",
+      "steps": [
+        { "action": "goto", "url": "/main.do" },
+        { "action": "frame", "name": "contentFrame" },
+        { "action": "click", "text": "우편번호 찾기", "popup": true },
+        { "action": "fill", "selector": "input[name=keyword]", "value": "역삼" },
+        { "action": "press", "key": "Enter" },
+        { "action": "expectText", "text": "역삼동" },
+        { "action": "closePopup" }
+      ]
+    }
+  ]
+}

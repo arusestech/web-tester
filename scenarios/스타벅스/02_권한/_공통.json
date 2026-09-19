@@ -1,0 +1,91 @@
+{
+  "name": "스타벅스 권한 공통 (상속 전용)",
+  "_comment": "권한 페르소나 24개 공통 설정. auth-Pxx 는 이 파일을 extends 하고 계정(login.steps)·메뉴(menus)만 정의한다. 앞에 _ 가 붙어 목록·일괄 실행에서 제외됨.",
+  "_comment_env": "접속 URL·브라우저·stub 은 프로젝트 설정(scenarios/스타벅스/_project.json, 🔧 프로젝트 설정)이 우선한다(시나리오가 자기 파일에 직접 정하지 않는 한). 여기 baseUrl/browser 가 있어도 프로젝트 설정이 있으면 그 값으로 돈다 — fallback 용.",
+  "baseUrl": "http://dev-ivoc.istarbucks.co.kr:8888",
+  "browser": {
+    "channel": "chrome",
+    "headless": false,
+    "viewport": {
+      "width": 1600,
+      "height": 950
+    }
+  },
+  "timeout": 15000,
+  "evidence": {
+    "screenshotAll": true
+  },
+  "ignore": {
+    "console": [
+      "Content Security Policy",
+      "Failed to load resource: the server responded with a status of 404",
+      "jQuery Migrate"
+    ],
+    "resources": [
+      "cdnjs\\.cloudflare\\.com",
+      "/page/",
+      "/uxl/",
+      "/page/images/",
+      "/logout\\.ub",
+      "/login\\.ub"
+    ],
+    "dialogs": [
+      "승인되지 않은 도메인"
+    ]
+  },
+  "forbidden": [
+    "삭제",
+    "영구삭제",
+    "발송",
+    "강제실행",
+    "상신",
+    "승인",
+    "반려",
+    "마감",
+    "선정승인",
+    "기안",
+    "저장",
+    "Save",
+    "Delete",
+    "일괄",
+    "접수확인",
+    "처리완료",
+    "확인불가",
+    "로그인갱신",
+    "업로드"
+  ],
+  "_comment_error": "프레임워크 오류/권한 차단 신호. 본문·모달·iframe 에 매칭되면 ❌ 에러페이지로 기록.",
+  "errorPatterns": [
+    "시스템 오류",
+    "HTTP Status 5\\d\\d",
+    "Exception report",
+    "권한이 없는",
+    "접근권한이 없"
+  ],
+  "_comment_inputs": "조회 화면이 기간 조건 없이 조회하면 데이터가 안 뜨므로 공통 기간값 주입(있는 필드만 채움, 없으면 건너뜀). 31일 제한 화면 대비 약 1개월 범위. 형식 yyyy-MM-dd.",
+  "inputs": {
+    "common": {
+      "DT_START": "2026-08-01",
+      "DT_END": "2026-08-29",
+      "DT_START_REQ": "2026-08-01",
+      "DT_END_REQ": "2026-08-29",
+      "DT_VOC_REG_START": "2026-08-01",
+      "DT_VOC_REG_END": "2026-08-29"
+    },
+    "search": "#searchBtn a, #searchBtn",
+    "labels": {
+      "DT_START": "시작일",
+      "DT_END": "종료일",
+      "DT_START_REQ": "요청시작일",
+      "DT_END_REQ": "요청종료일",
+      "DT_VOC_REG_START": "등록시작일",
+      "DT_VOC_REG_END": "등록종료일"
+    }
+  },
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "success": {
+      "urlContains": "POR0001"
+    }
+  }
+}

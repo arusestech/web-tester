@@ -1,0 +1,286 @@
+{
+  "extends": "_공통.json",
+  "name": "SIT-VOC-0002-04 나의VOC조회",
+  "_comment": "SIT v0.6 SIT-VOC-0002-04 — 흐름 이름의 S<n> 이 문서 스텝 번호",
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "userField": "#userid",
+    "logoutUrl": "/logout.ub",
+    "retries": 1,
+    "_comment_retries": "비밀번호 연속 실패 시 계정 잠금(maxFailPassword) → 재시도 1회",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "{{id_proc}}"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001",
+      "selector": "#menu"
+    }
+  },
+  "menus": [
+    {
+      "name": "나의VOC조회",
+      "url": "/screen/VOC0022.ub",
+      "expect": [
+        "#gbox_list"
+      ]
+    }
+  ],
+  "crud": [
+    {
+      "name": "S1 화면 표시",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_proc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0022.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#gbox_list"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "screenshot",
+          "name": "화면"
+        }
+      ]
+    },
+    {
+      "name": "S2~S3 조건 입력 후 검색",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_proc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0022.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=document.querySelector('.ub-layout.search-advanced');if(l&&l.classList.contains('close')){const b=l.querySelector('span.btn a')||l.querySelector('span.btn');if(b)b.click();}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "screenshot",
+          "name": "검색결과"
+        }
+      ]
+    },
+    {
+      "name": "S ADVANCED 상세 조건",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_proc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0022.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=document.querySelector('.ub-layout.search-advanced');if(l&&l.classList.contains('close')){const b=l.querySelector('span.btn a')||l.querySelector('span.btn');if(b)b.click();}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#DS_TITLE"
+        },
+        {
+          "action": "screenshot",
+          "name": "ADVANCED"
+        }
+      ]
+    },
+    {
+      "name": "S 행 클릭 → 상세",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_proc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0022.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=document.querySelector('.ub-layout.search-advanced');if(l&&l.classList.contains('close')){const b=l.querySelector('span.btn a')||l.querySelector('span.btn');if(b)b.click();}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} 기본흐름"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "screenshot",
+          "name": "상세"
+        }
+      ]
+    }
+  ]
+}

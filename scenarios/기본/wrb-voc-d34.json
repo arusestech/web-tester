@@ -1,0 +1,738 @@
+{
+  "name": "우리은행VOC_결함34_결재임의종결",
+  "_comment": "결함34(사전신고 삭제 시 좀비 결재 잔존) + 결재 임의종결 기능(태그 [결함34]/[결재임의종결]) 검증용. 원본 절차: 결함34_사전신고_좀비결재_수정전후_검증결과_20260822.md, 산출물 README.txt (사내 분석 폴더)",
+  "_comment_env": "Claude 테스트 인스턴스 18081(profile=local, CCCOWN). 사용자 IntelliJ 인스턴스는 8081 → baseUrl 만 바꾸면 됨. CCCOWN 은 사전신고 등록(TB_VOC_DIR_* 0건 NPE)·결재요청 모달(SYS_APRV_LINE_BAS 없음 488) 자체가 안 되므로 '등록→상신' 은 DEV06 에서만 가능. CCCOWN 에서는 기존 좀비 5건(b00754 VB43 / b00756 VB62·63·182·193)으로 조회·모달 노출까지만 검증",
+  "baseUrl": "http://localhost:8081",
+  "browser": {
+    "channel": "chrome",
+    "headless": false,
+    "viewport": {
+      "width": 1600,
+      "height": 950
+    }
+  },
+  "timeout": 20000,
+  "evidence": {
+    "screenshotAll": true
+  },
+  "_comment_ignore": "CCCOWN 기지 이슈(2026-08-22 메뉴테스트): 매 화면 /addMenuLog/{menuId} 488(FN_VOC_AUTO_SEQ INVALID). 직접 URL 진입 시 iframe 밖이라 parent.customConfirm 미정의 경고는 부수현상. 실제 결함은 보고서에서 별도 확인",
+  "ignore": {
+    "console": [
+      "parent.customConfirm is not a function",
+      "Failed to load resource: the server responded with a status of 488",
+      "jQuery Migrate"
+    ],
+    "resources": [
+      "/addMenuLog/",
+      "favicon"
+    ],
+    "dialogs": []
+  },
+  "_comment_forbidden": "CLAUDE.md '절대 하지 말 것'. 결재 상신/승인/반려, 통보 발송, 배치, 엑셀 업로드 금지. '임의종결' 은 되돌릴 수 없어 기본 금지 — 실제 실행은 아래 crud '임의종결 실행(DEV06 전용)' 의 _allowForbidden 을 allowForbidden 으로 바꿔야 동작. '삭제' 는 TEST_ 접두어 사전신고 삭제 흐름에서만 allowForbidden 으로 허용",
+  "forbidden": [
+    "상신",
+    "승인",
+    "반려",
+    "결재요청",
+    "결재회수",
+    "발송",
+    "통보",
+    "마감",
+    "실행",
+    "업로드",
+    "임의종결",
+    "삭제",
+    "Delete"
+  ],
+  "_comment_login": "login.jsp: #loginId / #loginPwd, 버튼 <a data-click=signIn>. POST /login/login 성공 시 location.href='/'. 현 소스는 비밀번호 검증 분기가 주석 처리돼 존재하는 ID 면 로그인됨. b00756 = 사전신고 상신자 + A0001(결재 운영자) → 전체탭에서 전체 결재 조회 + 상세 모달 임의종결 버튼 노출 대상. 미로그인 시 302 가 아니라 200+로그인폼이므로 success 는 요소로 판정",
+  "login": {
+    "url": "/login",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#loginId",
+        "value": "b00756"
+      },
+      {
+        "action": "fill",
+        "selector": "#loginPwd",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "a[data-click=\"signIn\"]"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "selector": "a[data-click=\"logout\"]"
+    }
+  },
+  "_comment_menus": "메인은 탭+iframe(#jsContent) 구조지만 화면 URL 직접 진입으로 동일 렌더링. 결함34 관련 화면만 대상",
+  "menus": [
+    {
+      "name": "결재관리 > 결재 목록(결재함)",
+      "url": "/aprvBas",
+      "expect": [
+        "ul.tab-process-box",
+        "#strtDt",
+        "#aprvTp"
+      ]
+    },
+    {
+      "name": "VOC 관리 > 사전신고 접수",
+      "url": "/vocPreNoticeRegList",
+      "expect": [
+        "#vocSearchFrm",
+        "a[data-click=\"deleteVocList\"]"
+      ]
+    },
+    {
+      "name": "VOC 관리 > 사전신고 처리",
+      "url": "/vocPreNoticePrcList"
+    },
+    {
+      "name": "VOC 관리 > 사전신고 신규등록(조회만)",
+      "url": "/vocPreNoticeRegistration",
+      "expect": [
+        "#vocTtl",
+        "a[data-click=\"save\"]",
+        "a[data-click=\"sendAprv\"]"
+      ]
+    },
+    {
+      "name": "시스템관리 > 공통코드(CPA005 CPACLOSE 확인용)",
+      "url": "/code"
+    }
+  ],
+  "crawl": {
+    "enabled": false
+  },
+  "crud": [
+    {
+      "name": "1. 결재함 전체탭 — VPRAPRV 좀비/임의종결 건 조회 (운영자 전체 조회)",
+      "_comment": "결재함 기본 조회기간은 당월 1일~오늘이라 시작일을 2024-01-01 로 넓힘. b00756 은 A0001 이므로 전체탭 = 운영자 전체 결재(탭명에 '(운영자: 전체 결재)' 표시, README [B] 항목). 기대: 좀비(원본 VOC 없음) 건이 '결재대기' 로, 임의종결된 건은 '임의종결' 로 노출",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/aprvBas"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectText",
+          "text": "운영자: 전체 결재"
+        },
+        {
+          "action": "click",
+          "selector": "li.gridTab[data-grid=\"divGrid4\"] a"
+        },
+        {
+          "action": "eval",
+          "script": "document.querySelector('#strtDt').value = '2024-01-01'; document.querySelector('#strtDt').dispatchEvent(new Event('change', {bubbles:true}));"
+        },
+        {
+          "action": "select",
+          "selector": "#aprvTp",
+          "value": "VPRAPRV"
+        },
+        {
+          "action": "click",
+          "selector": "a.btn-search"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#divGrid4 .tui-grid-container"
+        },
+        {
+          "action": "expectNotText",
+          "text": "데이터가 없습니다"
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_01_aprvBas_allTab_VPRAPRV"
+        }
+      ]
+    },
+    {
+      "name": "2. 결재기안 탭 — 상신자 본인 기안건 조회 (수정 전 증적 01_before 와 대조)",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/aprvBas"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "li.gridTab[data-grid=\"divGrid1\"] a"
+        },
+        {
+          "action": "eval",
+          "script": "document.querySelector('#strtDt').value = '2024-01-01'; document.querySelector('#strtDt').dispatchEvent(new Event('change', {bubbles:true}));"
+        },
+        {
+          "action": "select",
+          "selector": "#aprvTp",
+          "value": "VPRAPRV"
+        },
+        {
+          "action": "click",
+          "selector": "a.btn-search"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#divGrid1 .tui-grid-container"
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_02_aprvBas_draftTab_VPRAPRV"
+        }
+      ]
+    },
+    {
+      "name": "3. 좀비 결재 상세 모달 — 열림 + 운영자 '임의종결' 버튼 노출 확인 (클릭 안 함)",
+      "_comment": "그리드 첫 행 더블클릭 → onGridCellDblClick → Utilities.openModal(fancybox iframe). 테스터에 dblclick 액션이 없어 eval 로 MouseEvent 발생. 첫 행이 CPADRAFT(결재대기) 건이어야 버튼이 보임 — 1번 흐름 조회 결과 첫 행이 완료/반려 건이면 버튼 미노출이 정상(README 4항). 모달 내용은 iframe.fancybox-iframe 안",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/aprvBas"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "li.gridTab[data-grid=\"divGrid4\"] a"
+        },
+        {
+          "action": "eval",
+          "script": "document.querySelector('#strtDt').value = '2024-01-01'; document.querySelector('#strtDt').dispatchEvent(new Event('change', {bubbles:true}));"
+        },
+        {
+          "action": "select",
+          "selector": "#aprvTp",
+          "value": "VPRAPRV"
+        },
+        {
+          "action": "click",
+          "selector": "a.btn-search"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "var cell = document.querySelector('#divGrid4 .tui-grid-rside-area .tui-grid-body-area .tui-grid-cell'); if (!cell) throw new Error('그리드 행 없음'); cell.dispatchEvent(new MouseEvent('dblclick', {bubbles: true, cancelable: true}));"
+        },
+        {
+          "action": "waitFor",
+          "selector": "iframe.fancybox-iframe",
+          "state": "visible"
+        },
+        {
+          "action": "wait",
+          "ms": 2000
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_03_aprvDtlModal_opened"
+        },
+        {
+          "action": "frame",
+          "selector": "iframe.fancybox-iframe"
+        },
+        {
+          "action": "expectNotText",
+          "text": "errorCode"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#aprvDtlViewBtn"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#aprvForceCloseBtn"
+        },
+        {
+          "action": "expectText",
+          "text": "임의종결"
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_04_aprvDtlModal_forceCloseBtn"
+        },
+        {
+          "action": "mainFrame"
+        },
+        {
+          "action": "press",
+          "key": "Escape"
+        }
+      ]
+    },
+    {
+      "name": "4. 임의종결(CPACLOSE) 건 상세 — 읽기전용 + 안내 문구 확인",
+      "_comment": "전체탭에서 임의종결 건이 있을 때만 의미 있음(DEV06 B건 삭제 후, 또는 5번 흐름 실행 후). 기대: 결재/반려/임의종결 버튼 없음, 문구 '원본(VOC) 삭제로 임의종결된 결재입니다.' 첫 행이 임의종결 건이 아니면 문구 검증은 실패로 기록되니 스크린샷으로 판단",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/aprvBas"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "li.gridTab[data-grid=\"divGrid4\"] a"
+        },
+        {
+          "action": "eval",
+          "script": "document.querySelector('#strtDt').value = '2024-01-01'; document.querySelector('#strtDt').dispatchEvent(new Event('change', {bubbles:true}));"
+        },
+        {
+          "action": "select",
+          "selector": "#aprvTp",
+          "value": "VPRAPRV"
+        },
+        {
+          "action": "click",
+          "selector": "a.btn-search"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "임의종결"
+        },
+        {
+          "action": "eval",
+          "script": "var cells = Array.from(document.querySelectorAll('#divGrid4 .tui-grid-rside-area .tui-grid-body-area .tui-grid-cell')); var hit = cells.find(function(c){ return c.textContent.trim() === '임의종결'; }); if (!hit) throw new Error('임의종결 건 없음'); hit.dispatchEvent(new MouseEvent('dblclick', {bubbles: true, cancelable: true}));"
+        },
+        {
+          "action": "waitFor",
+          "selector": "iframe.fancybox-iframe",
+          "state": "visible"
+        },
+        {
+          "action": "wait",
+          "ms": 2000
+        },
+        {
+          "action": "frame",
+          "selector": "iframe.fancybox-iframe"
+        },
+        {
+          "action": "expectText",
+          "text": "원본(VOC) 삭제로 임의종결된 결재입니다."
+        },
+        {
+          "action": "eval",
+          "script": "if (document.querySelector('#aprvForceCloseBtn')) throw new Error('임의종결 건인데 임의종결 버튼이 노출됨(읽기전용 아님)');"
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_05_aprvDtlModal_CPACLOSE_readonly"
+        },
+        {
+          "action": "mainFrame"
+        },
+        {
+          "action": "press",
+          "key": "Escape"
+        }
+      ]
+    },
+    {
+      "name": "5. 임의종결 실행 (DEV06 전용 — 기본 비활성)",
+      "_comment": "되돌릴 수 없음. 선행: 06_결함34 SQL STEP0(CPA005 CPACLOSE 코드) 반영 + 대상 DB 가 DEV06(또는 정리해도 되는 좀비). CCCOWN 좀비 5건은 사용자 검증 데이터라 임의 정리 금지. 실행하려면 _allowForbidden → allowForbidden 으로 키명 변경. 확인 모달은 CpaUtils.checkConfirm(커스텀 HTML) 이라 expectDialog 가 아니라 모달 안 확인 버튼 클릭 필요 — 버튼 텍스트는 실행 전 화면에서 확인해 selector 보정",
+      "_allowForbidden": [
+        "임의종결"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/aprvBas"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "li.gridTab[data-grid=\"divGrid4\"] a"
+        },
+        {
+          "action": "eval",
+          "script": "document.querySelector('#strtDt').value = '2024-01-01'; document.querySelector('#strtDt').dispatchEvent(new Event('change', {bubbles:true}));"
+        },
+        {
+          "action": "select",
+          "selector": "#aprvTp",
+          "value": "VPRAPRV"
+        },
+        {
+          "action": "click",
+          "selector": "a.btn-search"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "var cells = Array.from(document.querySelectorAll('#divGrid4 .tui-grid-rside-area .tui-grid-body-area .tui-grid-cell')); var hit = cells.find(function(c){ return c.textContent.trim() === '결재대기'; }); if (!hit) throw new Error('결재대기(CPADRAFT) 건 없음'); hit.dispatchEvent(new MouseEvent('dblclick', {bubbles: true, cancelable: true}));"
+        },
+        {
+          "action": "waitFor",
+          "selector": "iframe.fancybox-iframe",
+          "state": "visible"
+        },
+        {
+          "action": "wait",
+          "ms": 2000
+        },
+        {
+          "action": "frame",
+          "selector": "iframe.fancybox-iframe"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#aprvForceCloseBtn"
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_10_before_forceClose"
+        },
+        {
+          "action": "click",
+          "selector": "#aprvForceCloseBtn"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_11_forceClose_confirm"
+        },
+        {
+          "action": "click",
+          "selector": ".customConfirm a.btn-blue, .customConfirm button.btn-blue, a:has-text('확인')"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_12_after_forceClose"
+        },
+        {
+          "action": "mainFrame"
+        },
+        {
+          "action": "press",
+          "key": "Escape"
+        },
+        {
+          "action": "click",
+          "selector": "a.btn-search"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "임의종결"
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_13_allTab_after_forceClose"
+        }
+      ]
+    },
+    {
+      "name": "6. B건 — TEST_ 사전신고 화면 삭제 → 결재 자동 임의종결 (DEV06 전용)",
+      "_comment": "선행(수동 또는 별도 실행): DEV06 기동 + CPACLOSE 코드 + b00756 으로 /vocPreNoticeRegistration 에서 의견요지 'TEST_결함34_B' 로 등록 후 결재요청(상신)까지 — 상신은 금지 항목이라 시나리오에 넣지 않음(고객조회 팝업·관련부점 등 필수값도 수동). 이 흐름은 접수 목록에서 TEST_ 건을 체크 → VOC삭제 → 결재함 전체탭에 '임의종결' 전환을 확인. '삭제' 는 TEST_ 데이터 한정으로 allowForbidden. deleteVocList 는 confirm 없이 바로 삭제하고 alert 'N건이 삭제되었습니다'",
+      "allowForbidden": [
+        "삭제"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/vocPreNoticeRegList"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "a[data-click=\"setAllmonth\"]"
+        },
+        {
+          "action": "fill",
+          "selector": "#ttlOrCtntInput",
+          "value": "TEST_결함34_B"
+        },
+        {
+          "action": "click",
+          "selector": "a[data-click=\"loadGrid\"]"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "TEST_결함34_B"
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_20_regList_B_before_delete"
+        },
+        {
+          "action": "eval",
+          "script": "var chk = document.querySelector('#divGrid .tui-grid-lside-area .tui-grid-body-area input[type=checkbox], .tui-grid-lside-area .tui-grid-body-area input[type=checkbox]'); if (!chk) throw new Error('행 체크박스 없음'); chk.click();"
+        },
+        {
+          "action": "wait",
+          "ms": 500
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_21_regList_B_checked"
+        },
+        {
+          "action": "click",
+          "selector": "a[data-click=\"deleteVocList\"]"
+        },
+        {
+          "action": "expectDialog",
+          "text": "삭제되었습니다"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "TEST_결함34_B"
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_22_regList_B_after_delete"
+        },
+        {
+          "action": "goto",
+          "url": "/aprvBas"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "li.gridTab[data-grid=\"divGrid4\"] a"
+        },
+        {
+          "action": "select",
+          "selector": "#aprvTp",
+          "value": "VPRAPRV"
+        },
+        {
+          "action": "click",
+          "selector": "a.btn-search"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "TEST_결함34_B"
+        },
+        {
+          "action": "expectText",
+          "text": "임의종결"
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_23_aprvBas_allTab_B_CPACLOSE"
+        },
+        {
+          "action": "click",
+          "selector": "li.gridTab[data-grid=\"divGrid2\"] a"
+        },
+        {
+          "action": "click",
+          "selector": "a.btn-search"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "TEST_결함34_B"
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_24_aprvBas_procTab_B_not_pending"
+        }
+      ]
+    },
+    {
+      "name": "7. C건 — 결재 이력 없는 TEST_ 사전신고(임시저장만) 삭제 → 오류 없이 삭제만 (DEV06 전용)",
+      "_comment": "선행: 의견요지 'TEST_결함34_C' 로 임시저장만 한 건. 기대: 'N건이 삭제되었습니다' alert, 488 없음(closePendingAprvForVoc 스킵)",
+      "allowForbidden": [
+        "삭제"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/vocPreNoticeRegList"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "a[data-click=\"setAllmonth\"]"
+        },
+        {
+          "action": "fill",
+          "selector": "#ttlOrCtntInput",
+          "value": "TEST_결함34_C"
+        },
+        {
+          "action": "click",
+          "selector": "a[data-click=\"loadGrid\"]"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "TEST_결함34_C"
+        },
+        {
+          "action": "eval",
+          "script": "var chk = document.querySelector('.tui-grid-lside-area .tui-grid-body-area input[type=checkbox]'); if (!chk) throw new Error('행 체크박스 없음'); chk.click();"
+        },
+        {
+          "action": "wait",
+          "ms": 500
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_30_regList_C_checked"
+        },
+        {
+          "action": "click",
+          "selector": "a[data-click=\"deleteVocList\"]"
+        },
+        {
+          "action": "expectDialog",
+          "text": "삭제되었습니다"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "TEST_결함34_C"
+        },
+        {
+          "action": "screenshot",
+          "name": "d34_31_regList_C_after_delete"
+        }
+      ]
+    }
+  ]
+}

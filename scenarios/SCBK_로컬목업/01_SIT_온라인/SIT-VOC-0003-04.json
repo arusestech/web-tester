@@ -1,0 +1,145 @@
+{
+  "extends": "_공통.json",
+  "name": "SIT-VOC-0003-04 부서별민원현황",
+  "_comment": "SIT v0.6 SIT-VOC-0003-04 — 흐름 이름의 S<n> 이 문서 스텝 번호",
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "userField": "#userid",
+    "logoutUrl": "/logout.ub",
+    "retries": 1,
+    "_comment_retries": "비밀번호 연속 실패 시 계정 잠금(maxFailPassword) → 재시도 1회",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "{{id_master}}"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001",
+      "selector": "#menu"
+    }
+  },
+  "_manual_steps": [
+    "S4 통계 수치 ↔ 원천 VOC 건수 대조(통계 배치 실행 후)"
+  ],
+  "menus": [
+    {
+      "name": "통계/레포트 > 부서별 민원 현황",
+      "url": "/screen/ANA3301.ub",
+      "expect": [
+        "#gbox_list1",
+        "#searchBtn"
+      ]
+    }
+  ],
+  "crud": [
+    {
+      "name": "S1~S3 조회",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/ANA3301.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 5000
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#gbox_list1"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#gbox_list2"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "screenshot",
+          "name": "부서별민원"
+        }
+      ]
+    },
+    {
+      "name": "S5 엑셀",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/ANA3301.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "click",
+          "selector": "#excelBtn1"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "screenshot",
+          "name": "엑셀"
+        }
+      ]
+    }
+  ]
+}

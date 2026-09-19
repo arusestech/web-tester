@@ -1,0 +1,53 @@
+{
+  "name": "우리은행 VOC 공통",
+  "timeout": 20000,
+  "expectTimeout": 10000,
+  "retry": 1,
+  "slowMs": 10000,
+  "evidence": {
+    "screenshotAll": true
+  },
+  "_comment_site": "Spring Boot 2.7 + Tiles + JSP, toastUI Grid. 브랜치 feature/org-succ-lineage 의 커밋을 주제별로 검증한다. 각 폴더가 커밋 1건(또는 한 주제)에 대응. 소스: D:/source/IdeaProjects/mr-voc-wrb_voc_current",
+  "_comment_판정": "화면 로드 + 오류응답(486/487/488)·ORA 오류·콘솔 에러 없음 + 커밋이 넣은 요소가 실제로 있는지를 본다. 업무 데이터가 필요한 항목은 개선7 테스트 데이터(TESTVOC001~006)를 전제로 한다",
+  "errorStatus": [
+    486,
+    487,
+    488
+  ],
+  "errorPatterns": [
+    "errorCode[^0-9]{0,4}4(6[234]|8[678])",
+    "권한이 없는 메뉴입니다",
+    "ORA-[0-9]{5}"
+  ],
+  "_comment_ignore": "/addMenuLog 488 은 CCCOWN 기지 이슈(FN_VOC_AUTO_SEQ INVALID) — 매 화면 반복이라 제외. parent.customConfirm 은 iframe 밖에서 화면 URL 을 직접 열 때 나는 부수 현상",
+  "ignore": {
+    "console": [
+      "parent[.]customConfirm is not a function",
+      "customConfirm is not a function"
+    ],
+    "resources": [
+      "/addMenuLog/",
+      "favicon"
+    ],
+    "dialogs": []
+  },
+  "_comment_forbidden": "프로젝트 CLAUDE.md '절대 하지 말 것'. 결재 상신·승인·임의종결, 통보·발송, 배치 실행, 엑셀 업로드, 실데이터 삭제. 조회 전용이라 저장까지 금지",
+  "forbidden": [
+    "삭제",
+    "상신",
+    "결재요청",
+    "결재",
+    "승인",
+    "반려",
+    "종결",
+    "통보",
+    "발송",
+    "실행",
+    "업로드",
+    "저장",
+    "임시저장",
+    "연장"
+  ],
+  "menus": [],
+  "_comment_env": "접속 URL·브라우저·로그인은 🔧 프로젝트 설정(_project.json)에 있다. 여기에 다시 넣지 말 것 — 프로젝트 값이 우선이라 헷갈린다"
+}

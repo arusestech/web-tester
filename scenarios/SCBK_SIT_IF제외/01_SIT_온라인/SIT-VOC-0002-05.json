@@ -1,0 +1,259 @@
+{
+  "extends": "_공통.json",
+  "name": "SIT-VOC-0002-05 업무협조TAT조회",
+  "_comment": "SIT v0.6 SIT-VOC-0002-05 — 흐름 이름의 S<n> 이 문서 스텝 번호",
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "userField": "#userid",
+    "logoutUrl": "/logout.ub",
+    "retries": 1,
+    "_comment_retries": "비밀번호 연속 실패 시 계정 잠금(maxFailPassword) → 재시도 1회",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "{{id_master}}"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001",
+      "selector": "#menu"
+    }
+  },
+  "_manual_steps": [
+    "S5 0001-08 업무협조 건의 요청·접수·완료 일시와 TAT(영업일) 계산값 수동 대조"
+  ],
+  "menus": [
+    {
+      "name": "VOC > 업무협조 TAT조회",
+      "url": "/screen/VRE0013.ub",
+      "expect": [
+        "#gbox_list"
+      ]
+    }
+  ],
+  "crud": [
+    {
+      "name": "S1 화면 표시",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VRE0013.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#gbox_list"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#deptSearchBtn"
+        },
+        {
+          "action": "screenshot",
+          "name": "TAT"
+        }
+      ]
+    },
+    {
+      "name": "S2 부서 찾기 팝업(POP0002)",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VRE0013.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "click",
+          "selector": "#deptSearchBtn",
+          "popup": true
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2000
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#DEPT_NM"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#conFirm"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "closePopup"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        }
+      ]
+    },
+    {
+      "name": "S3~S4 조회",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VRE0013.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#gbox_list"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "screenshot",
+          "name": "조회"
+        }
+      ]
+    },
+    {
+      "name": "S6 초기화",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VRE0013.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "click",
+          "selector": "#clearBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "screenshot",
+          "name": "초기화"
+        }
+      ]
+    },
+    {
+      "name": "S7 엑셀",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VRE0013.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "click",
+          "selector": "#excelBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "screenshot",
+          "name": "엑셀"
+        }
+      ]
+    }
+  ]
+}

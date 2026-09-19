@@ -1,0 +1,779 @@
+{
+  "name": "스타벅스 VOC",
+  "timeout": 15000,
+  "evidence": {
+    "screenshotAll": true
+  },
+  "_comment_ignore": "환경 노이즈. 컨텍스트(/voc) 빠진 정적 리소스 404, CDN 차단(CSP), CrossEditor 도메인 라이선스 alert 는 매 화면 반복되므로 제외. 실제 버그 목록은 report 에서 한 번 확인함",
+  "ignore": {
+    "console": [
+      "Content Security Policy",
+      "Failed to load resource: the server responded with a status of 404",
+      "jQuery Migrate"
+    ],
+    "resources": [
+      "cdnjs\\.cloudflare\\.com",
+      "/page/",
+      "/uxl/",
+      "/page/images/",
+      "/logout\\.ub",
+      "/login\\.ub"
+    ],
+    "dialogs": [
+      "승인되지 않은 도메인"
+    ]
+  },
+  "_comment_forbidden": "CLAUDE.md '절대 하지 말 것' 반영. 버튼 텍스트가 매칭되면 클릭하지 않고 실패 처리",
+  "forbidden": [
+    "삭제",
+    "영구삭제",
+    "발송",
+    "강제실행",
+    "상신",
+    "승인",
+    "반려",
+    "마감",
+    "선정승인",
+    "저장",
+    "Save",
+    "Delete"
+  ],
+  "_comment_stubServer": "서버 stub(외부연동 목업)은 _project.json 로 이관 — 전 시나리오(01_메뉴회귀/02_권한/03_프로세스) 공통 상속(PROJECT_KEYS). 로컬 등 외부연동 미연결 환경에서만 _project.json 의 stubServer.enabled=true 로 켠다. 라우트/근거는 _project.json 참고.",
+  "_comment_login": "BCO0001.jsp: #userid/#userpw, 로그인 버튼은 <div id=login>. 비번은 클라이언트에서 SHA256 처리되므로 평문 입력. loginSuccess.jsp 가 컨텍스트 없는 /screen/POR0001.ub 로 보내는 버그 때문에 포털로 직접 이동",
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "test01"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001"
+    }
+  },
+  "_comment_menus": "scripts/menu/menu_dump.csv (AP_MENU, STATUS=A) 기준. 포털은 탭+iframe 구조라 화면 URL로 직접 진입 (CLAUDE.md 권장). POP0007(문자발송 팝업), EXP8001(소스 없음) 제외",
+  "menus": [
+    {
+      "name": "포털 메인",
+      "url": "/screen/POR0001.ub",
+      "expect": [
+        "#menu",
+        "#tabs"
+      ]
+    },
+    {
+      "name": "VOC 업무 > VOC등록",
+      "url": "/screen/VOC0001.ub",
+      "expect": [
+        "#registForm"
+      ]
+    },
+    {
+      "name": "VOC 업무 > 전체 VOC",
+      "url": "/screen/VOC1001.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 업무 > My VOC",
+      "url": "/screen/VRE1101.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 업무 > Team VOC",
+      "url": "/screen/VRE1111.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 업무 > 업무요청 VOC",
+      "url": "/screen/VOC1401.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 업무 > 업무요청/공유(매장)",
+      "url": "/screen/VOC1101.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 업무 > VOC업무문의(매장)",
+      "url": "/screen/VOC1301.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 조회 > Vital Few",
+      "url": "/screen/VOC1025.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 조회 > 칭찬 파트너",
+      "url": "/screen/VOC1019.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search"
+    },
+    {
+      "name": "VOC 조회 > 삭제 VOC",
+      "url": "/screen/VOC1017.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "스토어 케어 > 접수현황",
+      "url": "/screen/STC0103.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search"
+    },
+    {
+      "name": "스토어 케어 > 처리",
+      "url": "/screen/STC0101.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#Search a, #Search"
+    },
+    {
+      "name": "CE > 고객의견 조회",
+      "url": "/screen/VOC1034.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn"
+    },
+    {
+      "name": "CE > 고객의견 관리",
+      "url": "/screen/VOC1021.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn"
+    },
+    {
+      "name": "CE > CE 마감 (조회만)",
+      "url": "/screen/VOC1035.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "detail": {
+        "dblclick": true,
+        "popup": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "통계 > VOC 업무 통계(처리부서)",
+      "url": "/screen/ANA0021.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "search": "#searchBtn a, #searchBtn"
+    },
+    {
+      "name": "통계 > 문항별 스토어 케어 현황",
+      "url": "/screen/ANA0024.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "search": "#searchBtn a, #searchBtn"
+    },
+    {
+      "name": "통계 > 매장별 스토어 케어 현황",
+      "url": "/screen/ANA0025.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "search": "#searchBtn a, #searchBtn"
+    },
+    {
+      "name": "통계 > 고객별 스토어 케어 현황",
+      "url": "/screen/ANA0026.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "search": "#searchBtn a, #searchBtn"
+    },
+    {
+      "name": "VOC 설정 > VOC 분류관리",
+      "url": "/screen/VOC1026.ub",
+      "expect": [
+        "#vocCauseTree"
+      ]
+    },
+    {
+      "name": "VOC 설정 > 스토어 케어 분류관리",
+      "url": "/screen/STC0102.ub",
+      "expect": [
+        "#storecareCauseTree"
+      ]
+    },
+    {
+      "name": "VOC 설정 > VOC 배분관리",
+      "url": "/screen/VOC1024.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ]
+    },
+    {
+      "name": "VOC 설정 > 순차배분예외설정",
+      "url": "/screen/VOC1022.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search",
+      "detail": {
+        "dblclick": true,
+        "popup": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 설정 > 상용구관리",
+      "url": "/screen/VOC0023.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 설정 > 업무요청/공유 양식",
+      "url": "/screen/VOC1104.ub",
+      "expect": [
+        "#registForm"
+      ]
+    },
+    {
+      "name": "VOC 설정 > VOC업무문의 양식",
+      "url": "/screen/VOC1114.ub",
+      "expect": [
+        "#registForm"
+      ]
+    },
+    {
+      "name": "VOC 설정 > 외부 참조자 관리",
+      "url": "/screen/VOC1029.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search",
+      "detail": {
+        "dblclick": true,
+        "popup": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 설정 > 안내팝업 관리 (조회만)",
+      "url": "/screen/VOC1207.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 설정 > 상담사 관리",
+      "url": "/screen/VOC0029.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search"
+    },
+    {
+      "name": "VOC 설정 > 콜센터(KPI) 입력 (조회만)",
+      "url": "/screen/VOC0030.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search"
+    },
+    {
+      "name": "VOC 설정 > 상담지원 업무",
+      "url": "/screen/VOC1201.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 설정 > 문자 발송 이력",
+      "url": "/screen/VOC0028.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search"
+    },
+    {
+      "name": "VOC 설정 > 고객 메모 관리",
+      "url": "/screen/VOC1501.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 컨텐츠 > 공지사항",
+      "url": "/screen/INF4001.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#btnSearch a, #btnSearch",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 컨텐츠 > 지식관리",
+      "url": "/screen/INF0011.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#btnSearch a, #btnSearch",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 컨텐츠 > Web VOC FAQ",
+      "url": "/screen/INF0201.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#btnSearch a, #btnSearch",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "VOC 컨텐츠 > Web VOC FAQ 베스트",
+      "url": "/screen/INF0204.ub",
+      "expect": [
+        "#registForm"
+      ]
+    },
+    {
+      "name": "시스템 > 부서관리",
+      "url": "/screen/SYS0159.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ]
+    },
+    {
+      "name": "시스템 > 매장 관리",
+      "url": "/screen/SYS0168.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "시스템 > 사용자 관리 (조회만)",
+      "url": "/screen/SYS0021.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "시스템 > 권한 관리 (조회만)",
+      "url": "/screen/SYS0022.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search",
+      "detail": {
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "시스템 > 공통 코드 관리",
+      "url": "/screen/SYS0002.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search",
+      "detail": {
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "시스템 > VOC 메일관리 (조회만)",
+      "url": "/screen/SYS0313.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ]
+    },
+    {
+      "name": "시스템 > 로그인 관리",
+      "url": "/screen/SYS0027.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search"
+    },
+    {
+      "name": "시스템 > 휴무일관리",
+      "url": "/screen/SYS0140.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#btnSearch a, #btnSearch",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "시스템 > 사용자접속로그",
+      "url": "/screen/SYS0157.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#btnSearch a, #btnSearch"
+    },
+    {
+      "name": "시스템 > 프로그램사용로그",
+      "url": "/screen/SYS0158.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#btnSearch a, #btnSearch"
+    },
+    {
+      "name": "시스템 > 권한변경로그",
+      "url": "/screen/SYS0165.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#btnSearch a, #btnSearch"
+    },
+    {
+      "name": "시스템 > 배치실행로그",
+      "url": "/screen/SYS0167.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#btnSearch a, #btnSearch"
+    },
+    {
+      "name": "시스템 > 통보실행로그",
+      "url": "/screen/SYS0170.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn"
+    },
+    {
+      "name": "시스템 > 개인정보조회로그",
+      "url": "/screen/SYS0171.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "screenshot": false
+    },
+    {
+      "name": "시스템 > 배치관리 (조회만)",
+      "url": "/screen/SYS0040.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "시스템 > 템플릿 관리",
+      "url": "/screen/SYS0143.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "시스템 > 메세지룰관리",
+      "url": "/screen/SYS0059.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow"
+      }
+    },
+    {
+      "name": "시스템 > 메뉴 관리 (조���만)",
+      "url": "/screen/SYS0011.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ]
+    },
+    {
+      "name": "시스템 > 프로그램 권한 관리(XML) (조회만)",
+      "url": "/screen/APM0066.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ]
+    },
+    {
+      "name": "시스템 > IP 관리 (조회만)",
+      "url": "/screen/SYS9999.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ]
+    },
+    {
+      "name": "결재관리 > 결재함 (조회만)",
+      "url": "/screen/APP0005.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#SEARCH a, #SEARCH",
+      "detail": {
+        "selector": "#LIST tr.jqgrow"
+      }
+    },
+    {
+      "name": "결재관리 > 상신함 (조회만)",
+      "url": "/screen/APP0001.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#SEARCH a, #SEARCH",
+      "detail": {
+        "selector": "#LIST tr.jqgrow"
+      }
+    },
+    {
+      "name": "결재관리 > 결재선관리 (조회만)",
+      "url": "/screen/APP0008.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search"
+    }
+  ],
+  "_comment_crawl": "메뉴 목록이 CSV 기준으로 완전하므로 자동 수집은 끔. 켜면 #menu a 로 렌더된 링크를 추가 방문",
+  "crawl": {
+    "enabled": false,
+    "startUrl": "/screen/POR0001.ub",
+    "selector": "#menu a[menuUrl]",
+    "exclude": [
+      "logout",
+      "POP0007",
+      "APP0003",
+      "EXP8001"
+    ],
+    "maxPages": 100
+  },
+  "_comment_crud": "저장/삭제는 forbidden 으로 막혀 있음. 조회 흐름(검색)만 예시로 둠. 등록 테스트가 필요하면 TEST_ 접두어 데이터로 별도 시나리오 작성",
+  "crud": [
+    {
+      "name": "전체 VOC 조회 → 검색 → 상세 열기",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "table.ui-jqgrid-btable"
+        },
+        {
+          "action": "screenshot",
+          "name": "목록"
+        },
+        {
+          "action": "click",
+          "selector": "a[title='Search'], a[title='조회'], #searchBtn a"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception"
+        },
+        {
+          "action": "screenshot",
+          "name": "검색결과"
+        }
+      ]
+    },
+    {
+      "_note": "앱이 컨텍스트 없는 /logout.ub 를 호출(404)한 뒤 로그인 화면(BCO0001?login_flag=)으로 돌아옴 — 알려진 버그. 로그인 화면 복귀를 성공으로 봄",
+      "name": "로그아웃",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "click",
+          "selector": ".logout-button a"
+        },
+        {
+          "action": "expectDialog",
+          "text": "로그아웃"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectUrl",
+          "contains": "BCO0001"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#userid"
+        }
+      ]
+    }
+  ],
+  "_comment_inputs": "조회 조건 공통값. 소스(meta/*R00.jsp) 기준 날짜 필드는 DT_*_START/END (yyyy-MM-dd, 달력이지만 readonly 아님). DT_START/END 는 통계(ANA0021)가 31일 제한, VOC1501 이 3개월 제한이라 30일로. 부서/매장 같은 팝업 선택 필드(NM_*)는 readonly 라 넣지 않음. 조회 버튼 id 가 화면마다 달라 후보를 나열",
+  "inputs": {
+    "common": {
+      "DT_START": "2026-08-01",
+      "DT_END": "2026-08-29",
+      "DT_START_REQ": "2026-08-01",
+      "DT_END_REQ": "2026-08-29",
+      "DT_VOC_REG_START": "2026-08-01",
+      "DT_VOC_REG_END": "2026-08-29"
+    },
+    "search": "#searchBtn a, #searchBtn",
+    "labels": {
+      "DT_START": "시작일",
+      "DT_END": "종료일"
+    }
+  },
+  "_comment_detail": "상세 진입(detail): 소스의 ondblClickRow/onSelectRow 기준. 첫 행 1건만. 행 클릭이 DB 를 바꾸는 화면(SYS0011, APM0066 권한 토글 / SYS0027 잠금해제 / STC0101 접수확인·처리완료 / VOC1024 규칙 저장 / SYS9999, APP0008 편집)은 넣지 않음. 통계(ANA*)는 그리드 없음",
+  "_comment_baseUrl": "8080=배포 war(컨텍스트 /voc). 이전엔 8888(IDE Tomcat, 컨텍스트 없음)이었으나 권한/E2E 시나리오와 통일. 사내 환경 포트/컨텍스트가 다르면 이 줄만 변경.",
+  "errorPatterns": [
+    "시스템 오류",
+    "HTTP Status 5\\d\\d",
+    "Exception report",
+    "권한이 없는",
+    "접근권한이 없"
+  ],
+  "_comment_changes": "2026-08-29: ANA 통계(매장/고객/문항별 스토어케어·업무처리부서)는 ROLLUP 총계행 정렬 수정으로 합계행이 마지막에 정상 표시됨(커밋 b95ce12). VOC1024 배분관리는 AS KEY 예약어 수정 반영(bbc9805).",
+  "stepDelay": 300,
+  "_comment_env": "2026-09-01: 자기 파일의 baseUrl 을 뺐다. 시나리오 own > 프로젝트 설정 순서라 여기 baseUrl 이 있으면 🔧 프로젝트 설정(_project.json)을 바꿔도 이 시나리오만 안 따라온다. 접속 URL·브라우저·stub 은 프로젝트 설정에서 상속한다."
+}

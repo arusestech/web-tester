@@ -1,0 +1,113 @@
+{
+  "extends": "../_공통.json",
+  "name": "결재 회수 정책 통일 (64921b71b6)",
+  "_comment": "커밋 64921b71b6 [S102602230934]. CPA 화면 12개 모달에서 선행 결재 가드를 제거해 회수 정책을 통일했다. 모달은 fancybox 로 목록에서 행을 열어야 뜨므로, 여기서는 모달을 띄우는 목록 화면들이 오류 없이 뜨는지까지 본다. 회수 버튼 실클릭은 결재 상태를 바꾸므로 하지 않는다",
+  "_comment_대상": "제도개선포켓(사전/처리/회수) · 제도개선(사전/처리) · 위법계약해지(사전/처리/통보) · 자료열람 · 교육 계열 모달",
+  "menus": [
+    {
+      "name": "제도개선포켓 등록",
+      "url": "/ideaSuggestion/regList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "제도개선포켓 검토",
+      "url": "/ideaSuggestion/procList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "제도개선 등록",
+      "url": "/improvement/regList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "제도개선 처리",
+      "url": "/improvement/processList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "위법계약해지 등록",
+      "url": "/illegalContract/regList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "위법계약해지 처리",
+      "url": "/illegalContract/procList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "위법계약해지 통보 (조회만)",
+      "url": "/illegalContract/dspcList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "자료열람 요구",
+      "url": "/reqRefRead/regList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    }
+  ],
+  "crud": []
+}

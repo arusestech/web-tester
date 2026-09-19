@@ -1,0 +1,36 @@
+{
+  "_comment": "계정 전환(switchUser) + 개인정보 마스킹(mask) 검증용. 실행: npm run mock 후 npm run test:switch",
+  "name": "switch 자체검증",
+  "baseUrl": "http://localhost:3999",
+  "browser": { "channel": "chrome", "headless": true },
+  "mask": ["#secret"],
+  "login": {
+    "url": "/login",
+    "userField": "input[name=userId]",
+    "logoutUrl": "/logout",
+    "steps": [
+      { "action": "fill", "selector": "input[name=userId]", "value": "tester" },
+      { "action": "fill", "selector": "input[name=password]", "value": "1234" },
+      { "action": "click", "selector": "button[type=submit]" }
+    ],
+    "success": { "urlNotContains": "login" }
+  },
+  "menus": [
+    { "name": "메인", "url": "/main", "expect": ["#content"] }
+  ],
+  "crud": [
+    {
+      "name": "계정 전환 흐름 (tester → test05 → tester)",
+      "steps": [
+        { "action": "goto", "url": "/main" },
+        { "action": "expectText", "text": "환영합니다 tester" },
+        { "action": "switchUser", "user": "test05", "url": "/main" },
+        { "action": "expectText", "text": "환영합니다 test05" },
+        { "action": "expectNotText", "text": "환영합니다 tester" },
+        { "action": "switchUser", "user": "tester", "url": "/main" },
+        { "action": "expectText", "text": "환영합니다 tester" },
+        { "action": "screenshot", "name": "마스킹확인" }
+      ]
+    }
+  ]
+}

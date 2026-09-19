@@ -1,0 +1,57 @@
+{
+  "extends": "../_공통.json",
+  "name": "결재 임의종결·중복상신 (e305a2cb38)",
+  "_comment": "커밋 e305a2cb38 [결재임의종결/결함34/결함44]. 결재함 전체조회(운영자 A0001)·임의종결 버튼·중복상신 차단. 임의종결과 상신은 금지 행위라 누르지 않고 '있어야 할 것이 있는지'까지만 본다. 가드 자체의 동작 검증은 결함분석/결함44_중복상신_검증결과_20260829.docx 참조",
+  "menus": [
+    {
+      "name": "결재함 로드 + 운영자 전체조회 배선",
+      "url": "/aprvBas",
+      "_note": "aprvAdminYn(A0001 그룹) 이 JSP 에서 _APRV_ADMIN_YN 상수로 내려오고, 운영자면 전체탭 라벨에 '(운영자: 전체 결재)' 가 붙는다",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "eval",
+          "script": "(() => { if (typeof _APRV_ADMIN_YN === 'undefined') throw new Error('_APRV_ADMIN_YN 상수 없음 — 결재임의종결 커밋 미반영'); if (typeof _LOGIN_EMP_ID === 'undefined') throw new Error('_LOGIN_EMP_ID 상수 없음'); const tabs = document.querySelectorAll('.gridTab').length; if (tabs < 4) throw new Error('결재함 탭이 ' + tabs + '개 (기대 4 이상)'); })()"
+        }
+      ],
+      "expect": [
+        "#searchFrm",
+        ".gridTab"
+      ]
+    },
+    {
+      "name": "결재함 조회기간 전체로 조회",
+      "url": "/aprvBas",
+      "_note": "기본 조회기간은 당월 1일~오늘이라 과거 건이 안 보인다. '전체' 버튼으로 넓혀 조회 — 오류 없이 도는지 확인",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "[data-click=setAllmonth]"
+        },
+        {
+          "action": "click",
+          "selector": "a.btn-search, [data-click=search]"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        }
+      ],
+      "expect": [
+        "#searchFrm"
+      ]
+    }
+  ],
+  "crud": []
+}

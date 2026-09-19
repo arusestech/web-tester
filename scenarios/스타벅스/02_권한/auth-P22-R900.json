@@ -1,0 +1,59 @@
+{
+  "extends": "_공통.json",
+  "name": "권한테스트 P22 900 VOC조회",
+  "_comment": "활성 메뉴 1개 중 접근 가능 1개. 계정 TEST_R900 (비번은 실행 시 입력). 근거: 권한별 통합테스트 시나리오 엑셀(2026-08-25) (6.시트 P22)",
+  "_expected_landing": "초기 탭 POR0003",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat(SMTP 목업 적용). IDE Tomcat 은 8888(컨텍스트 없음)",
+  "_detail_reference": "상세 화면 버튼·폼·상태 규칙: 엑셀 8.9 시트 (detail_screens_20260825.json)",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R900"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "menus": [
+    {
+      "name": "포털 메인 (랜딩 탭 확인)",
+      "url": "/screen/POR0001.ub",
+      "expect": [
+        "#menu",
+        "#tabs"
+      ],
+      "_expected": "초기 탭 POR0003, 노출 메뉴 1개"
+    },
+    {
+      "name": "VOC 업무 > 전체 VOC (조회만)",
+      "url": "/screen/VOC1001.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "screenshot": false,
+      "_note": "개인정보 화면 — 캡처 제외"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "speed": "느림",
+  "retries": 2,
+  "headless": false,
+  "reuseSession": true
+}

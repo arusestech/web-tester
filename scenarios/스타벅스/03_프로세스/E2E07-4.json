@@ -1,0 +1,92 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E07-4 [220 VOC관리자] 시스템 메뉴 불일치",
+  "_comment": "E2E-07 4단계. 220 은 SYS9999 권한 보유·메뉴 없음, 메뉴는 SYS0140 만",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R220"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "메뉴",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const m=[...document.querySelectorAll('#menu a[menuurl]')].map(a=>a.getAttribute('menuurl'));const miss=[\"SYS0140\"].filter(x=>!m.includes(x));const extra=[\"SYS9999\", \"SYS0011\"].filter(x=>m.includes(x));if(miss.length||extra.length)throw new Error('메뉴 불일치 누락:'+miss+' 불필요:'+extra);})()"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/SYS9999.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "note",
+          "_note": "SYS9999 는 메뉴 없이 직접 접근 가능 = 메뉴-DB권한 불일치 기록"
+        }
+      ]
+    }
+  ]
+}

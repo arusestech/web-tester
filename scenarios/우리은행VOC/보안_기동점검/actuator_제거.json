@@ -1,0 +1,47 @@
+{
+  "extends": "../_공통.json",
+  "name": "보안·기동 점검 (81ddb4fb3c, 72fd20da39)",
+  "_comment": "커밋 81ddb4fb3c(CVE-2026-40984 actuator 의존성 제거)와 72fd20da39(FINES API 미기동 시에도 기동). actuator 엔드포인트가 사라졌는지, 앱이 정상 기동 상태인지 본다",
+  "_comment_판정": "/actuator/health 는 404 가 정상이다(제거됨). 200 이나 503 이면 actuator 가 살아 있는 것 — CVE 조치 회귀",
+  "errorPatterns": [],
+  "errorStatus": [],
+  "menus": [
+    {
+      "name": "actuator 제거 확인 (fetch 404)",
+      "url": "/vocIntegrationList",
+      "_note": "직접 이동하면 404 자체가 실패로 집계되므로, 로그인된 화면에서 fetch 로 상태만 확인한다. 404 가 정상(제거됨), 200/503 이면 actuator 가 살아 있는 것 = CVE-2026-40984 조치 회귀",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "eval",
+          "script": "(async () => { const r = await fetch('/actuator/health'); if (r.status !== 404) throw new Error('actuator/health 가 ' + r.status + ' 응답 — 제거되지 않았다(CVE-2026-40984 회귀)'); })()"
+        }
+      ],
+      "expect": [
+        "#divGrid1"
+      ]
+    },
+    {
+      "name": "금감원 목록 (FINES 미기동에도 화면 정상)",
+      "url": "/finesList",
+      "_note": "커밋 72fd20da39 — FINES API 서버가 안 떠 있어도 앱이 기동되고 화면이 뜨는지. 로컬은 fake 연동",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    }
+  ],
+  "crud": []
+}

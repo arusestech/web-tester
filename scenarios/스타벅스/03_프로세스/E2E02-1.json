@@ -1,0 +1,92 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E02-1 [230 Web접수자] 스토어케어 접수현황",
+  "_comment": "E2E-02 1단계. 사전에 _mock/e2e02_storecare_insert.sql 실행(매장 9024 목업 6건)",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R230"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "STC0103 접수현황 조회",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/STC0103.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "expectText",
+          "text": "TEST_E2E02매장"
+        },
+        {
+          "action": "note",
+          "_note": "집계가 실제 6건의 ×3 으로 나오면 결함(매장코드-부서 다중 매핑 조인 중복)"
+        },
+        {
+          "action": "screenshot",
+          "name": "접수현황"
+        }
+      ]
+    }
+  ]
+}

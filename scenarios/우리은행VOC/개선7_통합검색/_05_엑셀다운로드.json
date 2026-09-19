@@ -1,0 +1,44 @@
+{
+  "extends": "_공통.json",
+  "name": "개선7-05 엑셀 다운로드 조건 반영",
+
+  "_comment_보류": "파일명이 _ 로 시작해 목록·일괄 실행에서 제외된다. 실행하려면 터미널에서 파일을 직접 지정: run.bat scenarios/우리은행VOC/개선7_통합검색/_05_엑셀다운로드.json",
+  "_comment_주의": "엑셀 다운로드는 실제 파일을 내려받고 addExcelLog 로 '엑셀다운로드이력'에 행이 남는다. 프로젝트 CLAUDE.md 가 금지하는 것은 엑셀 '업로드'라 다운로드 자체는 허용 범위지만, 이력이 남으므로 사용자가 필요하다고 판단할 때만 돌린다",
+  "_comment_목적": "개선7 이 고친 구조(조회와 엑셀이 SEARCH_WRAPPER_IDS 하나를 공유)를 확인한다. 예전에는 두 함수에 wrapper 목록이 따로 있어 엑셀 경로에서 조건이 빠졌다(08-27 귀책대상 건)",
+
+  "menus": [
+    {
+      "name": "05-1 조회·엑셀 파라미터 동일성 (다운로드 없음)",
+      "url": "/vocIntegrationList",
+      "_note": "실제로 내려받지 않고, 두 경로가 만드는 param 을 페이지에서 그대로 만들어 비교한다. 안전하므로 이 메뉴만 돌려도 구조 회귀는 잡힌다",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#tipOffYnWrapper select" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "eval", "script": "(() => { SEARCH_WRAPPER_IDS.forEach(id => { const s = document.querySelector('#' + id + ' select'); if (!s || s.options.length < 2) return; s.selectedIndex = 1; s.dispatchEvent(new Event('change', { bubbles: true })); }); ['cpesCenterYn','finesExpectYn','problemBehaviorConsumerCd','lawInquiryYn','issueVocYn'].forEach(n => { const s = document.querySelector('select[name=' + n + ']'); if (s) s.value = 'Y'; }); })()" },
+        { "action": "wait", "ms": 2000 },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "eval", "script": "(() => { const p = Utilities.formToMap($('#vocSearchFrm')); if (!$('.moreBox').hasClass('clicked')) Object.assign(p, Utilities.formToMap($('#addtFrm'))); p.recordCountPerPage = 10; getWrapperValToParam(p, SEARCH_WRAPPER_IDS); setParamValue(p); const selected = SEARCH_WRAPPER_IDS.map(id => document.getElementById(id)).filter(Boolean).filter(w => { const s = w.querySelector('select'); return s && s.value; }); if (!selected.length) throw new Error('선택된 wrapper 가 없다 — 관리코드 로딩 확인'); const lost = selected.filter(w => !p[w.dataset.name]).map(w => w.dataset.name); if (lost.length) throw new Error('엑셀 파라미터에 빠진 조건: ' + lost.join(', ')); ['cpesCenterYn','finesExpectYn','problemBehaviorConsumerCd','lawInquiryYn','issueVocYn'].forEach(n => { if (document.querySelector('select[name=' + n + ']') && p[n] !== 'Y') throw new Error('엑셀 파라미터에 빠진 조건(Y/N select): ' + n); }); })()" }
+      ],
+      "expect": ["#divGrid1"]
+    },
+    {
+      "name": "05-2 엑셀 다운로드 실행 (이력 남음)",
+      "url": "/vocIntegrationList",
+      "_note": "실제 다운로드. 결과 0건이면 '다운로드할 내역이 없습니다.', 있으면 '다운로드 되었습니다.' alert 가 뜬다. 둘 다 정상이며 오류는 488/ORA 로 잡힌다",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#tipOffYnWrapper select" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "eval", "script": "(() => { SEARCH_WRAPPER_IDS.forEach(id => { const s = document.querySelector('#' + id + ' select'); if (!s || s.options.length < 2) return; s.selectedIndex = 1; s.dispatchEvent(new Event('change', { bubbles: true })); }); })()" },
+        { "action": "wait", "ms": 2000 },
+        { "action": "click", "selector": "a[data-click=excelDownload]" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 3000 },
+        { "action": "expectDialog", "text": "다운로드" }
+      ],
+      "expect": ["#divGrid1"]
+    }
+  ],
+  "crud": []
+}

@@ -1,0 +1,237 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E01-2 [250 고객서비스팀] 업무요청 확정→회신",
+  "_comment": "E2E-01 2단계. 250 이 My VOC 에서 요청건 확정 → 회신",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat(SMTP 목업 localhost:1025 적용 war). 8888 = IntelliJ Tomcat(메일 host 내부망 IP → 발송 실패). CrossEditor 라이선스는 도메인 기준이라 포트 무관",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 가 컨텍스트 없는 /screen/POR0001.ub 로 보내는 알려진 현상(세션은 정상)",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R250"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "VRE1101 My VOC → VRE1102 확정(R1→P1)",
+      "allowForbidden": [
+        "확정",
+        "저장",
+        "Save"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VRE1101.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn a, #searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const td=[...document.querySelectorAll('table.ui-jqgrid-btable td')].find(t=>t.textContent.includes('TEST_E2E01'));if(!td)throw new Error('행 없음: TEST_E2E01');td.dispatchEvent(new MouseEvent('dblclick',{bubbles:true}));})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectUrl",
+          "contains": "VRE1102"
+        },
+        {
+          "action": "screenshot",
+          "name": "업무요청상세"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const tr=document.querySelector('#processList tr.jqgrow');if(!tr)throw new Error('processList 행 없음');tr.querySelector('td:nth-child(2)').click();})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "screenshot",
+          "name": "VRE1010"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#btnAccept"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.getElementById('btnAccept');if(!b)throw new Error('버튼 없음: btnAccept');(b.querySelector('a')||b).click();})()"
+        },
+        {
+          "action": "expectDialog",
+          "text": "확정"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "screenshot",
+          "name": "확정후"
+        }
+      ]
+    },
+    {
+      "name": "VRE1102 회신(P1→P3)",
+      "allowForbidden": [
+        "회신",
+        "저장",
+        "Save"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VRE1101.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn a, #searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const td=[...document.querySelectorAll('table.ui-jqgrid-btable td')].find(t=>t.textContent.includes('TEST_E2E01'));if(!td)throw new Error('행 없음: TEST_E2E01');td.dispatchEvent(new MouseEvent('dblclick',{bubbles:true}));})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const tr=document.querySelector('#processList tr.jqgrow');if(!tr)throw new Error('processList 행 없음');tr.querySelector('td:nth-child(2)').click();})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#DS_PROCESS_CN"
+        },
+        {
+          "action": "fill",
+          "selector": "#DS_PROCESS_CN",
+          "value": "TEST_E2E01 회신내용(자동, 고객서비스팀)"
+        },
+        {
+          "action": "screenshot",
+          "name": "회신입력"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.getElementById('btnAnswer');if(!b)throw new Error('버튼 없음: btnAnswer');(b.querySelector('a')||b).click();})()"
+        },
+        {
+          "action": "expectDialog",
+          "text": "회신"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "screenshot",
+          "name": "회신후"
+        },
+        {
+          "action": "note",
+          "_expected": "상태 P3, [회신] 버튼 사라지고 [회신내용수정](btnUpdateAnswer) 1회 노출"
+        }
+      ]
+    },
+    {
+      "name": "로그아웃",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "click",
+          "selector": ".logout-button a"
+        },
+        {
+          "action": "expectDialog",
+          "text": "로그아웃"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectUrl",
+          "contains": "BCO0001"
+        }
+      ]
+    }
+  ]
+}

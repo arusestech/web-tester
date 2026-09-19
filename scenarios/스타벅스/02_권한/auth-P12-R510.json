@@ -1,0 +1,121 @@
+{
+  "extends": "_공통.json",
+  "name": "권한테스트 P12 510 영업팀장",
+  "_comment": "활성 메뉴 9개 중 접근 가능 9개. 하위 지역·매장 데이터 범위(hasTeam). 계정 TEST_R510 (비번은 실행 시 입력). 근거: 권한별 통합테스트 시나리오 엑셀(2026-08-25) (6.시트 P12)",
+  "_expected_landing": "초기 탭 POR0003",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat(SMTP 목업 적용). IDE Tomcat 은 8888(컨텍스트 없음)",
+  "_detail_reference": "상세 화면 버튼·폼·상태 규칙: 엑셀 8.9 시트 (detail_screens_20260825.json)",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R510"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "menus": [
+    {
+      "name": "포털 메인 (랜딩 탭 확인)",
+      "url": "/screen/POR0001.ub",
+      "expect": [
+        "#menu",
+        "#tabs"
+      ],
+      "_expected": "초기 탭 POR0003, 노출 메뉴 9개"
+    },
+    {
+      "name": "CE > CE 고객의견 조회",
+      "url": "/screen/VOC1034.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn"
+    },
+    {
+      "name": "VOC 업무 > My VOC",
+      "url": "/screen/VRE1101.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn"
+    },
+    {
+      "name": "VOC 업무 > Team VOC",
+      "url": "/screen/VRE1111.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn"
+    },
+    {
+      "name": "VOC 업무 > 업무요청/공유(매장)",
+      "url": "/screen/VOC1101.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search"
+    },
+    {
+      "name": "스토어 케어 > 스토어 케어 접수현황",
+      "url": "/screen/STC0103.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search"
+    },
+    {
+      "name": "스토어 케어 > 스토어 케어 처리",
+      "url": "/screen/STC0101.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#Search a, #Search"
+    },
+    {
+      "name": "통계 > 스토어 케어 통계 > 고객별 스토어 케어 현황",
+      "url": "/screen/ANA0026.ub",
+      "search": "#searchBtn a, #searchBtn",
+      "expect": [
+        "#searchForm"
+      ]
+    },
+    {
+      "name": "통계 > 스토어 케어 통계 > 매장별 스토어 케어 현황",
+      "url": "/screen/ANA0025.ub",
+      "search": "#searchBtn a, #searchBtn",
+      "expect": [
+        "#searchForm"
+      ]
+    },
+    {
+      "name": "통계 > 스토어 케어 통계 > 문항별 스토어 케어 현황",
+      "url": "/screen/ANA0024.ub",
+      "search": "#searchBtn a, #searchBtn",
+      "expect": [
+        "#searchForm"
+      ]
+    }
+  ]
+}

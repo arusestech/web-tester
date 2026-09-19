@@ -1,0 +1,107 @@
+{
+  "name": "SCBK SIT 온라인 공통 (상속 전용)",
+  "_comment": "SIT v0.6 온라인 케이스 공통. 각 SIT-VOC-xxxx-yy.json 이 extends. 회차·환경 값은 아래 vars 에서만 바꾼다(GUI 편집 탭 '테스트 데이터(변수)'). 비밀번호·고객 생년월일/휴대폰은 실행 시 입력",
+  "vars": {
+    "mark": "TEST_SIT01",
+    "dept_proc": "검사부",
+    "dept_cause": "고객컨택센터",
+    "nm_leader": "SIT리더",
+    "new_plan": "2026-12-31",
+    "id_user": "sit_user",
+    "id_leader": "sit_leader",
+    "id_dept": "sit_dept",
+    "id_master": "sit_master",
+    "id_crt": "sit_crt",
+    "id_crt869": "sit_crt869",
+    "id_dcc": "sit_dcc",
+    "id_proc": "sit_proc",
+    "id_branch": "sit_branch",
+    "id_brmgr": "sit_brmgr",
+    "id_cpt": "sit_cpt",
+    "id_admin": "admin"
+  },
+  "_vars_설명": {
+    "mark": "회차 마커 — 테스트 VOC 제목 접두어. 회차마다 바꾼다(이전 회차 데이터와 섞임 방지)",
+    "dept_cause": "원인부서/지점 검색어 — 등록 시 원인부서로 추가(확정·민원팀 전달 필수 항목)",
+    "nm_leader": "리더 계정(id_leader)의 사용자 이름 — 직원팝업은 이름으로 검색",
+    "dept_proc": "처리부서명(DCC·처리담당 소속, DCC 권한자 있는 부서) — 직원팝업 부서 검색어",
+    "new_plan": "기한변경 요청일(yyyy-MM-dd, 현재 처리예정일보다 뒤)",
+    "id_user": "계정 ID — 컨택센터(074) 일반 900",
+    "id_leader": "계정 ID — 컨택센터(074) 리더 900",
+    "id_dept": "계정 ID — 컨택센터(074) 부서장 400+900",
+    "id_master": "계정 ID — 금소부(869) VOC마스터 200",
+    "id_crt": "계정 ID — 컨택센터(074) CRT 210+900",
+    "id_crt869": "계정 ID — 금소부(869) CRT 210+900",
+    "id_dcc": "계정 ID — 처리부서 DCC 220",
+    "id_proc": "계정 ID — 처리부서 처리담당 900 (DCC 와 같은 부서)",
+    "id_branch": "계정 ID — 영업점(상위 00B) 일반 900",
+    "id_brmgr": "계정 ID — 영업점(상위 00B) 부서장 400+900",
+    "id_cpt": "계정 ID — 금소부(869) 소비자보호 총괄 300+900",
+    "id_admin": "계정 ID — 시스템관리자 100"
+  },
+  "timeout": 30000,
+  "expectTimeout": 10000,
+  "evidence": {
+    "screenshotAll": true
+  },
+  "crawl": {
+    "enabled": false
+  },
+  "retry": 0,
+  "forbidden": [
+    "발송",
+    "재발송",
+    "전송",
+    "삭제",
+    "폐기",
+    "강제실행",
+    "반려",
+    "반송",
+    "즉시처리",
+    "마스터 전달",
+    "일괄",
+    "Delete",
+    "Send"
+  ],
+  "_comment_forbidden": "메일/SMS 발송·삭제·폐기·반려·반송·마스터 전달·강제실행은 누르지 않는다. SIT 스텝의 폐기/반송/마스터 전달은 expectFail(차단이 정상). 등록·확정·배정·접수처리·처리완료·확인·종결·승인·저장은 SIT 흐름상 허용(TEST 데이터만)",
+  "errorPatterns": [
+    "시스템 오류가 발생",
+    "시스템 오류입니다",
+    "HTTP Status 5\\d\\d",
+    "Exception report",
+    "Internel Server Error",
+    "Page not found!!",
+    "ORA-\\d{5}"
+  ],
+  "blocked": [
+    "접근권한이 없",
+    "서비스 실행을 위한 권한이 없"
+  ],
+  "ignore": {
+    "console": [
+      "jQuery Migrate",
+      "Content Security Policy",
+      "reading 'USER_ID'",
+      "reading 'split'"
+    ],
+    "resources": [
+      "highCharts/themes/default\\.js",
+      "ico_emergency\\.gif",
+      "favicon"
+    ],
+    "dialogs": []
+  },
+  "_comment_ignore": "개발 환경 메뉴순회에서 확인된 환경 404(하이차트 테마·비상 아이콘). 기존 결함(AS-IS 부터, 기능 영향 없음) 2건의 JS 예외: VOC0004.jsp:2206 DCC 처리자 콤보 반복문 i<=rowCount(reading 'USER_ID'), VRE0012/VRE0015 메타 h2 hfold 에 for 속성 없음(uxl-ui setSubTitleHolder reading 'split'). 폐쇄망 첫 실행 후 그 환경의 노이즈만 추가",
+  "mask": [
+    "#NM_CUST",
+    "#YMD_BIRTH",
+    "#NO_MOBILE",
+    "#NO_HOME",
+    "#DS_EMAIL",
+    "#NO_ETC",
+    "#CUST_ID_SEG",
+    "#__wwt_var",
+    ".gnb-util .login-user em"
+  ],
+  "_comment_mask": "고객 식별정보 입력칸·MCI 결과·로그인 사용자명은 스크린샷에서 가린다(증적은 망 내부 보관·ADO 첨부)"
+}

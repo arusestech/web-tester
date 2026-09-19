@@ -1,0 +1,381 @@
+{
+  "extends": "../_공통.json",
+  "name": "QA 업무요청/공유(매장)",
+  "_comment_source": "QA 시나리오.md VC_TC_639~698. 목록 VOC1101 (meta/voc/VOC1101R00.jsp: #DT_REG_START/#DT_REG_END :55, #CD_REQEST_STATUS :57, #CD_REQEST_TY :59, #DS_TITLE :63, #NM_REG_EMP+#regEmptPop :65, #NM_DEPT+#btnDeptSearch :70-71, #search :80, #btnExcel :86, #list :91, #register :34). 등록 VOC1102 (meta VOC1102R00.jsp: #list :32, #CD_REQEST_TY :44, #NM_DEPT/#btnDeptSearch :65-66, #DS_TITLE :75, #EDITOR_DS_CONTENT :79, #btnUpload_file :83, #save :90). 상세 VOC1105 (#detailTable :46, #btnUpdate :107). 수정 VOC1103 (#DS_TITLE :117, #CD_REQEST_STATUS :134, #INDVDLINFO :137, #VOC_NOTE_MEMO :141, #btnSvae/#btnDelete/#btnCancel :167-175).",
+  "_comment_popup": "요청매장/작성자 검색은 page/js/popup.js fnSearchStoreTreePopup(POP0017 :19-22)/fnSearchUserPopup(POP0001 :26-29) → uxl.openWindow(window.open) → click popup:true. POP0017: #DEPT_NM, #fnSearch_dept, #showTree, #deptTree, #list_dept, #conFirm (app/standard/pop/POP0017.jsp :54-73). POP0001: #DEPT_NM, #fnSearch_dept, #showTree, #NM_USER, #INCUMBENT_CD, #fnSearch, #list, #conFirm (POP0001.jsp :51-96).",
+  "_comment_eval_click": "[등록](VOC1102 #save '등록')·[수정](VOC1105 #btnUpdate '수정') 은 _공통 forbidden(^등록$/^수정$) 에 걸려 click 스텝이 차단되므로 eval 로 누른다. 두 경우 모두 데이터 변경 없음 — 빈 폼 [등록] 은 요청매장 필수 알림에서 멈추고(VOC1102.jsp:178 checkRequiredFields), [수정] 은 수정 화면 이동만(VOC1105.jsp:131-133).",
+  "_comment_data": "dev DB 에 업무요청/공유 데이터가 있어야 상세·수정 화면 항목이 돈다(0건이면 ⚠️ 데이터 부족). 상태 코드: 01 요청중 / 02 반려 / 99 완료 (VOC1103R00.jsp:59-61). 그리드 rowList 는 소스가 [20,30,50]·rowNum 20 (VOC1101.jsp:102-104) 인데 QA 문서(TC_669/671)는 15(Default)/15·20·50 을 기대 — 실행 결과 ❌ 면 문서·소스 어느 쪽이 맞는지 확인 필요.",
+  "mask": [
+    "td[aria-describedby='list_NM_REG_EMP']",
+    "#INDVDLINFO",
+    "#VIEW_INDVDLINFO"
+  ],
+  "menus": [
+    {
+      "name": "VC_TC_639 업무요청/공유(매장) 화면 구성(신규등록·작성일자·상태·요청유형·검색·제목·작성자·요청매장·엑셀·목록)",
+      "url": "/screen/VOC1101.ub",
+      "expect": [
+        "#register",
+        "#DT_REG_START",
+        "#DT_REG_END",
+        "#CD_REQEST_STATUS",
+        "#CD_REQEST_TY",
+        "#search",
+        "#DS_TITLE",
+        "#NM_REG_EMP",
+        "#regEmptPop",
+        "#NM_DEPT",
+        "#btnDeptSearch",
+        "#btnExcel",
+        "#list"
+      ],
+      "search": "#search a",
+      "actions": [
+        {
+          "name": "VC_TC_640 [신규등록] → 등록 화면(목록·요청유형·요청매장·제목·내용·첨부 Upload·등록)",
+          "click": "#register a",
+          "expectUrl": "VOC1102",
+          "expect": [
+            "#list",
+            "#CD_REQEST_TY",
+            "#NM_DEPT",
+            "#btnDeptSearch",
+            "#DS_TITLE",
+            "#EDITOR_DS_CONTENT",
+            "#btnUpload_file",
+            "#save"
+          ],
+          "back": "goto"
+        },
+        {
+          "name": "VC_TC_644 요청매장(목록 검색조건) 검색 아이콘 → 부서검색 팝업(부서·검색·조직도·트리)",
+          "click": "#btnDeptSearch",
+          "popup": true,
+          "expect": [
+            "#DEPT_NM",
+            "#fnSearch_dept",
+            "#showTree",
+            "#deptTree"
+          ]
+        },
+        {
+          "name": "VC_TC_665 작성자 검색 아이콘 → 파트너검색 팝업(부서·조직도·파트너찾기·목록)",
+          "click": "#regEmptPop",
+          "popup": true,
+          "expect": [
+            "#DEPT_NM",
+            "#showTree",
+            "#NM_USER",
+            "#fnSearch",
+            "#list",
+            "#conFirm"
+          ]
+        },
+        {
+          "name": "VC_TC_667 [엑셀다운로드] → Download Result 다이얼로그",
+          "click": "#btnExcel a",
+          "expect": [
+            "#exportViewer"
+          ],
+          "_note": "파일 자체의 내용 비교는 수동. 다이얼로그(uxl.excelDaolog, uxl-ui-3.0.0_starbucks.js:2113) 가 뜨는지까지 자동"
+        }
+      ],
+      "detail": {
+        "dblclick": true,
+        "selector": "#list tr.jqgrow",
+        "expect": [
+          "#detailTable",
+          "#btnUpdate"
+        ],
+        "_note": "VC_TC_673 상세 진입(VOC1105). 상세 항목 검증은 crud 흐름에서"
+      }
+    }
+  ],
+  "crud": [
+    {
+      "name": "VC_TC_641 등록 화면 [목록] → 목록 화면 복귀",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1102.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#list" },
+        { "action": "click", "selector": "#list a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "expectUrl", "contains": "VOC1101" },
+        { "action": "expectVisible", "selector": "#search" }
+      ]
+    },
+    {
+      "name": "VC_TC_642,643 등록 화면 요청유형 셀렉트 항목(고객정보 요청·쿠폰발행 요청·칭찬 파트너 등록) + 선택 시 상용구 변경",
+      "_note": "'컴플레인 공유' 는 소스에서 제외(VOC1102R00.jsp:53). 상용구 변경은 hidden #DS_CONTENT 값이 유형별로 바뀌는지로 판정(에디터 본문 대조는 캡처로) → 부분",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1102.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const o=[...document.querySelectorAll('#CD_REQEST_TY option')].map(x=>x.text.trim());const need=['고객정보 요청','쿠폰발행 요청','칭찬 파트너 등록'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('요청유형 옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));if(o.includes('컴플레인 공유'))throw new Error('컴플레인 공유 가 노출됨(제외 대상)');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_REQEST_TY');const opts=[...s.options].map(o=>o.value);const seen=[];for(const v of opts){s.value=v;s.dispatchEvent(new Event('change',{bubbles:true}));seen.push((document.getElementById('DS_CONTENT').value||'').length);}document.title='tmpl='+seen.join('/');if(seen.every(n=>n===0))throw new Error('요청유형을 바꿔도 상용구(DS_CONTENT)가 비어 있음: '+seen.join('/'));})()"
+        },
+        { "action": "screenshot", "name": "요청유형-상용구" }
+      ]
+    },
+    {
+      "name": "VC_TC_645 등록 화면 요청매장 팝업에서 부서 검색·선택·[확인] → 요청매장 입력",
+      "_note": "부서명 '서초'(QA 예시) 가 dev DB 에 있어야 함. 없으면 '행 없음' 으로 ❌ → 데이터 문제. 부분",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1102.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#btnDeptSearch" },
+        { "action": "click", "selector": "#btnDeptSearch", "popup": true },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#DEPT_NM" },
+        { "action": "fill", "selector": "#DEPT_NM", "value": "서초" },
+        { "action": "click", "selector": "#fnSearch_dept" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=document.querySelector('#list_dept tr.jqgrow');if(!r)throw new Error('부서 검색결과 행 없음(서초)');r.querySelector('td').click();})()"
+        },
+        { "action": "wait", "ms": 500 },
+        { "action": "click", "selector": "#conFirm a" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "closePopup" },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=document.getElementById('NM_DEPT').value;if(!v)throw new Error('요청매장 입력필드가 비어 있음(팝업 선택 미반영)');})()"
+        },
+        { "action": "screenshot", "name": "요청매장선택" }
+      ]
+    },
+    {
+      "name": "VC_TC_652 등록 화면 요청매장 미설정 [등록] → \"[요청매장*] 은(는) 필수 항목입니다.\"",
+      "_note": "빈 폼이라 필수 체크에서 멈춤(데이터 변경 없음). [등록] 은 forbidden(^등록$) 이라 eval 로 클릭. 제목/내용 필수 알림(653/654)은 요청매장을 채운 뒤라 등록 성공 가능성이 있어 _보류_CRUD 로",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1102.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{if(document.getElementById('ID_DEPT').value)throw new Error('요청매장이 이미 채워져 있음(권한 자동세팅) — 이 TC 는 관리자 계정 전제');const b=document.querySelector('#save a');if(!b)throw new Error('버튼 없음: #save a');b.click();})()"
+        },
+        { "action": "wait", "ms": 1000 },
+        { "action": "expectDialog", "text": "요청매장" },
+        { "action": "expectDialog", "text": "필수 항목입니다" }
+      ]
+    },
+    {
+      "name": "VC_TC_658,659 작성일자 기간 검색(정상) + 시작일>종료일 알림 \"[등록일]의 종료일이 시작일보다 이전입니다.\"",
+      "_note": "알림 문구는 VOC1101.jsp:193 @message.voc.search.date.target('등록일'). 정상 검색은 그리드가 그려지는지까지(정렬·기간 필터 정확성은 캡처 대조) → 658 부분, 659 자동",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1101.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#search" },
+        {
+          "action": "eval",
+          "script": "(()=>{for(const [id,v] of [['DT_REG_START','{{dtFrom}}'],['DT_REG_END','{{dtTo}}']]){const e=document.getElementById(id);e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));}})()"
+        },
+        { "action": "click", "selector": "#search a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "expectVisible", "selector": "#list" },
+        { "action": "screenshot", "name": "기간검색" },
+        {
+          "action": "eval",
+          "script": "(()=>{for(const [id,v] of [['DT_REG_START','2026-08-20'],['DT_REG_END','2026-08-10']]){const e=document.getElementById(id);e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));}})()"
+        },
+        { "action": "click", "selector": "#search a" },
+        { "action": "wait", "ms": 800 },
+        { "action": "expectDialog", "text": "[등록일]의 종료일이 시작일보다 이전입니다" }
+      ]
+    },
+    {
+      "name": "VC_TC_660,661 상태 셀렉트 항목(전체 Default·요청중·반려·완료) + 항목별 검색 결과 상태 일치",
+      "_note": "결과 0건이면 그 상태는 '건수 0' 으로 기록만(데이터 부족). 661 부분",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1101.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#CD_REQEST_STATUS" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_REQEST_STATUS');const o=[...s.options].map(x=>x.text.trim());const need=['전체','요청중','반려','완료'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('상태 옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));if(s.value!=='')throw new Error('상태 기본값이 전체가 아님: '+s.value);})()"
+        },
+        {
+          "action": "eval",
+          "script": "new Promise((res,rej)=>{const s=document.getElementById('CD_REQEST_STATUS');const opts=[...s.options].filter(o=>o.value!=='');let i=0;const bad=[];const info=[];const next=()=>{if(i>=opts.length){document.title='status='+info.join(',');return bad.length?rej(new Error('상태 필터 불일치: '+bad.join(' | '))):res('ok');}const o=opts[i++];s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));document.querySelector('#search a').click();setTimeout(()=>{const cells=[...document.querySelectorAll('#list tr.jqgrow td[aria-describedby=\"list_NM_REQEST_STATUS\"]')].map(c=>c.textContent.trim());info.push(o.text+':'+cells.length);const wrong=cells.filter(t=>t!==o.text.trim());if(wrong.length)bad.push(o.text+'→'+[...new Set(wrong)].join('/'));next();},2500);};next();})"
+        },
+        { "action": "screenshot", "name": "상태필터" }
+      ]
+    },
+    {
+      "name": "VC_TC_662,663 요청유형 셀렉트 항목(전체 Default·고객정보 요청·쿠폰발행 요청·칭찬 파트너 등록) + 항목별 검색 결과 일치",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1101.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#CD_REQEST_TY" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_REQEST_TY');const o=[...s.options].map(x=>x.text.trim());const need=['전체','고객정보 요청','쿠폰발행 요청','칭찬 파트너 등록'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('요청유형 옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));if(s.value!=='')throw new Error('요청유형 기본값이 전체가 아님: '+s.value);})()"
+        },
+        {
+          "action": "eval",
+          "script": "new Promise((res,rej)=>{const s=document.getElementById('CD_REQEST_TY');const opts=[...s.options].filter(o=>o.value!=='');let i=0;const bad=[];const info=[];const next=()=>{if(i>=opts.length){document.title='type='+info.join(',');return bad.length?rej(new Error('요청유형 필터 불일치: '+bad.join(' | '))):res('ok');}const o=opts[i++];s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));document.querySelector('#search a').click();setTimeout(()=>{const cells=[...document.querySelectorAll('#list tr.jqgrow td[aria-describedby=\"list_NM_REQEST_TY\"]')].map(c=>c.textContent.trim());info.push(o.text+':'+cells.length);const wrong=cells.filter(t=>t!==o.text.trim());if(wrong.length)bad.push(o.text+'→'+[...new Set(wrong)].join('/'));next();},2500);};next();})"
+        },
+        { "action": "screenshot", "name": "요청유형필터" }
+      ]
+    },
+    {
+      "name": "VC_TC_664 제목 키워드 Like 검색 → 결과 제목에 키워드 포함",
+      "_note": "키워드 'test'(QA 예시). 0건이면 데이터 부족으로 기록. 부분",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1101.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#DS_TITLE" },
+        { "action": "fill", "selector": "#DS_TITLE", "value": "test" },
+        { "action": "click", "selector": "#search a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const cells=[...document.querySelectorAll('#list tr.jqgrow td[aria-describedby=\"list_DS_TITLE\"]')].map(c=>c.textContent);document.title='rows='+cells.length;const bad=cells.filter(t=>!t.toLowerCase().includes('test'));if(bad.length)throw new Error('키워드 미포함 제목 '+bad.length+'건: '+bad.slice(0,3).join(' | '));})()"
+        }
+      ]
+    },
+    {
+      "name": "VC_TC_666 파트너검색 팝업에서 부서(서초) 검색 → 부서 선택 → 파트너 선택 → [확인] → 작성자 입력",
+      "_note": "'서초'·재직 파트너 데이터 전제. 부분",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1101.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#regEmptPop" },
+        { "action": "click", "selector": "#regEmptPop", "popup": true },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#DEPT_NM" },
+        { "action": "fill", "selector": "#DEPT_NM", "value": "서초" },
+        { "action": "click", "selector": "#fnSearch_dept" },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=document.querySelector('#list_dept tr.jqgrow');if(!r)throw new Error('부서 검색결과 없음(서초)');r.querySelector('td').click();})()"
+        },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=document.querySelector('#list tr.jqgrow');if(!r)throw new Error('파트너 검색결과 없음');r.querySelector('td').click();})()"
+        },
+        { "action": "wait", "ms": 500 },
+        { "action": "click", "selector": "#conFirm a" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "closePopup" },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!document.getElementById('NM_REG_EMP').value)throw new Error('작성자 입력필드가 비어 있음(팝업 선택 미반영)');})()"
+        },
+        { "action": "screenshot", "name": "작성자선택" }
+      ]
+    },
+    {
+      "name": "VC_TC_668,669,671 검색결과 컬럼(요청유형·제목·작성일·요청매장·작성자·상태) + 페이징 UI + Rows/Page 항목",
+      "_note": "QA 기대 Rows/Page 15(Default)/15·20·50 vs 소스 rowList [20,30,50]·rowNum 20 (VOC1101.jsp:102-104). 소스 기준으로 판정하고 불일치는 문서 확인 요청. 페이지 이동(670)·Rows 변경 후 목록 재확인(672)은 수동",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1101.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const h=[...document.querySelectorAll('#gview_list .ui-jqgrid-htable th')].map(t=>t.textContent.replace(/\\s+/g,''));const need=['요청유형','제목','작성일','요청매장','작성자','상태'];const miss=need.filter(n=>!h.includes(n));if(miss.length)throw new Error('그리드 컬럼 누락: '+miss.join(',')+' / 실제: '+h.filter(Boolean).join('|'));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const pg=document.querySelector('.ui-jqgrid-pager, .ub-control.pagging');if(!pg||pg.offsetParent===null)throw new Error('페이징 영역 없음');const sb=document.querySelector('#gview_list ~ * select.ui-pg-selbox, select.ui-pg-selbox');if(!sb)throw new Error('Rows/Page 셀렉트 없음');const o=[...sb.options].map(x=>x.value);document.title='rows='+sb.value+' opts='+o.join('/');const need=['20','30','50'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('Rows/Page 항목 불일치(소스 기준 20/30/50): 실제 '+o.join('/')+' — QA 문서는 15/20/50 기대');if(sb.value!=='20')throw new Error('Rows/Page 기본값 불일치(소스 20): '+sb.value);})()"
+        },
+        { "action": "screenshot", "name": "목록-페이징" }
+      ]
+    },
+    {
+      "name": "VC_TC_673,674 상세 화면 항목(목록·작성매장·작성자·작성일시·요청유형·제목·내용·첨부파일·상태·수정) + [목록] 복귀",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1101.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=document.querySelector('#list tr.jqgrow');if(!r)throw new Error('목록에 데이터가 없어 상세 진입 불가(데이터 부족)');})()"
+        },
+        { "action": "dblclick", "selector": "#list tr.jqgrow" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "expectUrl", "contains": "VOC1105" },
+        {
+          "action": "eval",
+          "script": "(()=>{const th=[...document.querySelectorAll('#detailTable th')].map(t=>t.textContent.replace(/\\s+/g,''));const need=['작성매장','작성자','작성일시','요청유형','제목','내용','첨부파일','상태'];const miss=need.filter(n=>!th.includes(n));if(miss.length)throw new Error('상세 항목 누락: '+miss.join(','));if(!document.querySelector('#list a'))throw new Error('[목록] 버튼 없음');if(!document.getElementById('btnUpdate'))throw new Error('[수정] 버튼 없음');})()"
+        },
+        { "action": "screenshot", "name": "상세" },
+        { "action": "click", "selector": "#list a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "expectUrl", "contains": "VOC1101" }
+      ]
+    },
+    {
+      "name": "VC_TC_675~678,680~685,698 수정 화면(요청중 건) 항목·수정가능·상태 항목·상태별 고객정보/메모 노출·[목록]/[취소] 이동",
+      "_note": "상태 '요청중' 으로 검색해 첫 행 → 상세 → [수정](eval, forbidden ^수정$ 우회, 이동만) → VOC1103. 고객 정보 입력창은 요청유형=고객정보 요청(2) 이면서 상태=완료(99) 일 때만 노출(VOC1103.jsp:104-108,179-196) — 다른 유형이면 682 의 '고객 정보 노출' 은 판정에서 제외하고 title 에 기록. 저장/삭제는 누르지 않음. 676(완료 건 수정 화면)은 데이터가 있으면 같은 판정 → 부분. 679 첨부 업로드/삭제는 수동",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1101.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#CD_REQEST_STATUS" },
+        { "action": "select", "selector": "#CD_REQEST_STATUS", "value": "01" },
+        { "action": "click", "selector": "#search a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!document.querySelector('#list tr.jqgrow'))throw new Error('요청중 상태 데이터 없음(데이터 부족)');})()"
+        },
+        { "action": "dblclick", "selector": "#list tr.jqgrow" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "expectUrl", "contains": "VOC1105" },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#btnUpdate a');if(!b||document.getElementById('btnUpdate').offsetParent===null)throw new Error('[수정] 버튼이 보이지 않음');b.click();})()"
+        },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        { "action": "expectUrl", "contains": "VOC1103" },
+        {
+          "action": "eval",
+          "script": "(()=>{const th=[...document.querySelectorAll('#detailTable th')].map(t=>t.textContent.replace(/\\s+/g,''));const need=['작성매장','작성자','작성일시','요청유형','제목','내용','첨부파일','상태'];const miss=need.filter(n=>!th.includes(n));if(miss.length)throw new Error('수정 화면 항목 누락: '+miss.join(','));for(const id of ['btnSvae','btnDelete','btnCancel','list']){const e=document.getElementById(id);if(!e||e.offsetParent===null)throw new Error('버튼 미노출: '+id);}const t=document.getElementById('DS_TITLE');if(!t||t.readOnly||t.disabled)throw new Error('제목이 수정 불가 상태');const ed=document.querySelector('#layout-1_4_12 iframe, #EDITOR_DS_CONTENT');if(!ed)throw new Error('내용 편집기 없음');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_REQEST_STATUS');if(!s||s.tagName!=='SELECT')throw new Error('상태 셀렉트 없음(관리자 아님?)');const o=[...s.options].map(x=>x.text.trim());const need=['요청중','반려','완료'];const miss=need.filter(n=>!o.includes(n));if(miss.length)throw new Error('상태 옵션 누락: '+miss.join(',')+' / 실제: '+o.join('|'));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_REQEST_STATUS');const type=document.getElementById('CD_REQEST_TY').value;const vis=id=>{const e=document.getElementById(id);return !!e&&e.offsetParent!==null};const set=v=>{s.value=v;s.dispatchEvent(new Event('change',{bubbles:true}));};const bad=[];set('02');if(!vis('layout-1_7'))bad.push('반려: 메모 미노출');if(vis('INDVDLINFO'))bad.push('반려: 고객정보 노출');set('99');if(!vis('layout-1_7'))bad.push('완료: 메모 미노출');if(type==='2'&&!vis('INDVDLINFO'))bad.push('완료: 고객정보 미노출');set('01');if(vis('layout-1_7'))bad.push('요청중: 메모 노출');if(vis('INDVDLINFO'))bad.push('요청중: 고객정보 노출');document.title='type='+type;if(bad.length)throw new Error(bad.join(' / ')+(type!=='2'?' (요청유형≠고객정보요청이라 고객정보 노출은 미판정)':''));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_REQEST_STATUS');s.value='99';s.dispatchEvent(new Event('change',{bubbles:true}));const m=document.getElementById('VOC_NOTE_MEMO');if(!m||m.readOnly||m.disabled)throw new Error('메모 수정 불가');const c=document.getElementById('INDVDLINFO');if(c&&c.offsetParent!==null&&(c.readOnly||c.disabled))throw new Error('고객 정보 수정 불가');s.value='01';s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "screenshot", "name": "수정화면" },
+        { "action": "click", "selector": "#btnCancel a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "expectUrl", "contains": "VOC1105" },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#btnUpdate a');if(!b)throw new Error('[수정] 버튼 없음');b.click();})()"
+        },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "expectUrl", "contains": "VOC1103" },
+        { "action": "click", "selector": "#list a" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "expectUrl", "contains": "VOC1101" }
+      ]
+    }
+  ]
+}

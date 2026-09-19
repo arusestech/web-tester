@@ -1,0 +1,452 @@
+{
+  "extends": "_공통.json",
+  "name": "SIT-VOC-0004-02 E2E_권한별메뉴노출",
+  "_comment": "SIT v0.6 SIT-VOC-0004-02 — 계정별 대메뉴 노출 + 미권한 화면 URL 직접 접근 시 '접근권한이 없습니다' 확인. 기대 메뉴는 SIT DB 권한(AP_AUTH) 기준으로 첫 실행 후 보정",
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "userField": "#userid",
+    "logoutUrl": "/logout.ub",
+    "retries": 1,
+    "_comment_retries": "비밀번호 연속 실패 시 계정 잠금(maxFailPassword) → 재시도 1회",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "{{id_admin}}"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001",
+      "selector": "#menu"
+    }
+  },
+  "_manual_steps": [
+    "하위 메뉴 전체 대조는 권한별메뉴목록 엑셀과 수동 대조"
+  ],
+  "menus": [],
+  "crud": [
+    {
+      "name": "S1 시스템관리자 100 메뉴 노출·URL 직접 접근",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_admin}}",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "expectText",
+          "text": "My job"
+        },
+        {
+          "action": "expectText",
+          "text": "VOC"
+        },
+        {
+          "action": "expectText",
+          "text": "소비자보호"
+        },
+        {
+          "action": "expectText",
+          "text": "정보마당"
+        },
+        {
+          "action": "expectText",
+          "text": "통계/레포트"
+        },
+        {
+          "action": "expectText",
+          "text": "시스템 관리"
+        },
+        {
+          "action": "screenshot",
+          "name": "메뉴_admin"
+        }
+      ]
+    },
+    {
+      "name": "S2 금소부(869) VOC마스터 200 메뉴 노출·URL 직접 접근",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_master}}",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "expectText",
+          "text": "My job"
+        },
+        {
+          "action": "expectText",
+          "text": "VOC"
+        },
+        {
+          "action": "expectText",
+          "text": "소비자보호"
+        },
+        {
+          "action": "expectText",
+          "text": "정보마당"
+        },
+        {
+          "action": "expectText",
+          "text": "통계/레포트"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 관리"
+        },
+        {
+          "action": "screenshot",
+          "name": "메뉴_master"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/SYS0021.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "접근권한이 없"
+        },
+        {
+          "action": "screenshot",
+          "name": "차단_master"
+        }
+      ]
+    },
+    {
+      "name": "S3 금소부(869) 소비자보호 총괄 300+900 메뉴 노출·URL 직접 접근",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_cpt}}",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "expectText",
+          "text": "My job"
+        },
+        {
+          "action": "expectText",
+          "text": "VOC"
+        },
+        {
+          "action": "expectText",
+          "text": "소비자보호"
+        },
+        {
+          "action": "expectText",
+          "text": "정보마당"
+        },
+        {
+          "action": "expectText",
+          "text": "통계/레포트"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 관리"
+        },
+        {
+          "action": "screenshot",
+          "name": "메뉴_cpt"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/SYS0021.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "접근권한이 없"
+        },
+        {
+          "action": "screenshot",
+          "name": "차단_cpt"
+        }
+      ]
+    },
+    {
+      "name": "S4 처리부서 DCC 220 메뉴 노출·URL 직접 접근",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_dcc}}",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "expectText",
+          "text": "My job"
+        },
+        {
+          "action": "expectText",
+          "text": "VOC"
+        },
+        {
+          "action": "expectText",
+          "text": "소비자보호"
+        },
+        {
+          "action": "expectText",
+          "text": "정보마당"
+        },
+        {
+          "action": "expectText",
+          "text": "통계/레포트"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 관리"
+        },
+        {
+          "action": "screenshot",
+          "name": "메뉴_dcc"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/SYS0022.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "접근권한이 없"
+        },
+        {
+          "action": "screenshot",
+          "name": "차단_dcc"
+        }
+      ]
+    },
+    {
+      "name": "S5 컨택센터(074) 부서장 400+900 메뉴 노출·URL 직접 접근",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_dept}}",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "expectText",
+          "text": "My job"
+        },
+        {
+          "action": "expectText",
+          "text": "VOC"
+        },
+        {
+          "action": "expectText",
+          "text": "소비자보호"
+        },
+        {
+          "action": "expectText",
+          "text": "정보마당"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 관리"
+        },
+        {
+          "action": "screenshot",
+          "name": "메뉴_dept"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0019.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "접근권한이 없"
+        },
+        {
+          "action": "screenshot",
+          "name": "차단_dept"
+        }
+      ]
+    },
+    {
+      "name": "S6 컨택센터(074) 일반 900 메뉴 노출·URL 직접 접근",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_user}}",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "expectText",
+          "text": "My job"
+        },
+        {
+          "action": "expectText",
+          "text": "VOC"
+        },
+        {
+          "action": "expectText",
+          "text": "소비자보호"
+        },
+        {
+          "action": "expectText",
+          "text": "정보마당"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 관리"
+        },
+        {
+          "action": "expectNotText",
+          "text": "통계/레포트"
+        },
+        {
+          "action": "screenshot",
+          "name": "메뉴_user"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0019.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "접근권한이 없"
+        },
+        {
+          "action": "screenshot",
+          "name": "차단_user"
+        }
+      ]
+    },
+    {
+      "name": "S7 영업점(상위 00B) 일반 900 메뉴 노출·URL 직접 접근",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_branch}}",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "expectText",
+          "text": "My job"
+        },
+        {
+          "action": "expectText",
+          "text": "VOC"
+        },
+        {
+          "action": "expectText",
+          "text": "소비자보호"
+        },
+        {
+          "action": "expectText",
+          "text": "정보마당"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 관리"
+        },
+        {
+          "action": "expectNotText",
+          "text": "통계/레포트"
+        },
+        {
+          "action": "screenshot",
+          "name": "메뉴_branch"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/SYS0040.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "접근권한이 없"
+        },
+        {
+          "action": "screenshot",
+          "name": "차단_branch"
+        }
+      ]
+    }
+  ]
+}

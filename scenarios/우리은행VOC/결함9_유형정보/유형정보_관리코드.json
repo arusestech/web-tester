@@ -1,0 +1,59 @@
+{
+  "extends": "../_공통.json",
+  "name": "결함9 유형정보 관리코드 환원 (71357c2229)",
+  "_comment": "커밋 71357c2229 [결함9]. 제보성·중반복·고객통지회신 라디오 저장값을 'Y'/'N' 에서 관리코드로 환원하고 기존 'Y'/'N' 저장분 표시 호환을 넣었다. 라디오가 있는 곳은 VOC 처리 상세 모달(vocRegisteredModal_wrb.jsp) 이다",
+  "_comment_전제": "개선7 테스트 데이터(TESTVOC001 / TESTVOCD001)가 있어야 한다. DB반영/20_개선7_통합검색_테스트데이터_260829.sql",
+  "menus": [
+    {
+      "name": "VOC 처리 상세 모달 — 유형정보 라디오가 관리코드인가",
+      "url": "/vocProcessList/openVocRegisteredModal?vocId=TESTVOC001&vocDtlId=TESTVOCD001",
+      "_note": "모달은 기본정보/고객정보/유형정보/진행이력 탭 구조다. 라디오는 '유형정보' 탭 안에 있어 기본정보 탭이 활성인 상태에서는 숨겨져 있다 — 탭을 먼저 클릭해야 한다. 제보성 예=CODE0080000038 / 아니오=CODE0080000039, 중반복 예=CODE0080000306 / 아니오=CODE0080000307. 'Y'/'N' 이 나오면 결함9 회귀",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "click",
+          "text": "유형정보"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        },
+        {
+          "action": "eval",
+          "script": "(() => { const pick = n => Array.from(document.querySelectorAll('input[type=radio][name=' + n + ']')).map(e => e.value); const bad = [], miss = []; [['tipOffYn','제보성'], ['vitalRepeatYn','중반복']].forEach(([n, label]) => { const v = pick(n); if (!v.length) { miss.push(label + '(' + n + ')'); return; } if (!v.every(x => /^CODE[0-9]+$/.test(x))) bad.push(label + ': ' + JSON.stringify(v)); }); if (miss.length) throw new Error('라디오가 없다: ' + miss.join(', ') + ' — 모달이 안 열렸거나 VOC 유형에 따라 영역이 숨겨졌을 수 있다'); if (bad.length) throw new Error('관리코드가 아닌 값(결함9 회귀) -> ' + bad.join(' | ')); })()"
+        }
+      ],
+      "expect": [
+        "input[type=radio][name=tipOffYn]"
+      ]
+    },
+    {
+      "name": "VOC 처리 목록 (모달 진입 화면 회귀)",
+      "url": "/vocProcessList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        }
+      ],
+      "expect": [
+        "#vocSearchFrm"
+      ]
+    }
+  ],
+  "crud": [],
+  "_comment_진입": "모달은 /vocProcessList 그리드 셀 더블클릭(onGridCellDblClick → VocListUtil.openVocRegisteredModal) 으로 fancybox iframe 에 뜬다. 다만 그 경로는 거래중단고객 검증(endCustSearchValidation)과 목록 노출 조건을 타므로 검증 목적에는 불안정하다. 모달 자체가 GET 매핑(VocAbstractController:162 openVocRegisteredModal)이라 URL 로 직접 열어 라디오 값만 본다 — fancybox 가 로드하는 것과 같은 페이지다",
+  "_comment_현황": "2026-08-29 기준 이 메뉴는 실패한다. 배선(모달 URL·탭 클릭·라디오 검사)은 맞고, 남은 장애물은 테스트 데이터다. 유형정보 탭이 POST /wrbProcessList/selectCpesTpShow 를 부르는데 서버에서 NullPointerException: applyPrcdDtl is null -> 488 이 난다. SQL 로 직접 만든 TESTVOC 데이터가 이 쿼리의 전제(진행 절차 상세)를 못 채우기 때문. **실제 업무 흐름으로 등록된 VOC 를 하나 지정하면 그대로 통과할 구조**다 — menus[0].url 의 vocId/vocDtlId 를 그런 건으로 바꿔서 쓰면 된다.",
+  "_comment_진척": "여기까지 확인됨 — ①모달 URL 직접 열기 성공(초기에는 등록 단계 절차 행이 없어 488 이었고 20c 스크립트로 해소) ②모달이 기본정보/고객정보/유형정보/진행이력 탭 구조이고 라디오는 유형정보 탭 안에 있음 ③탭 클릭까지 정상, 그 다음 AJAX 에서 막힘"
+}

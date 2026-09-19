@@ -1,0 +1,65 @@
+{
+  "name": "스타벅스 E2E 공통 (상속 전용)",
+  "_comment": "E2E 프로세스 33개 공통. 각 E2Exx-y 는 이 파일을 extends 하고 계정(login.steps)·흐름(crud)만 정의. E2E 는 흐름상 저장/등록을 실제로 하므로 forbidden 에 저장·삭제를 넣지 않는다(위험 동작만 차단).",
+  "_comment_env": "접속 URL·브라우저·stub 은 프로젝트 설정(_project.json, 🔧)이 우선(시나리오가 자기 파일에 직접 정하지 않는 한). 여기 값은 fallback.",
+  "baseUrl": "http://dev-ivoc.istarbucks.co.kr:8888",
+  "browser": {
+    "channel": "chrome",
+    "headless": false,
+    "viewport": {
+      "width": 1600,
+      "height": 950
+    }
+  },
+  "timeout": 20000,
+  "evidence": {
+    "screenshotAll": true
+  },
+  "ignore": {
+    "console": [
+      "Content Security Policy",
+      "Failed to load resource: the server responded with a status of 404",
+      "jQuery Migrate"
+    ],
+    "resources": [
+      "cdnjs\\.cloudflare\\.com",
+      "/page/",
+      "/uxl/",
+      "/page/images/",
+      "/logout\\.ub",
+      "/login\\.ub"
+    ],
+    "dialogs": [
+      "승인되지 않은 도메인"
+    ]
+  },
+  "crawl": {
+    "enabled": false
+  },
+  "forbidden": [
+    "발송",
+    "상신",
+    "승인",
+    "반려",
+    "마감",
+    "선정승인",
+    "기안",
+    "강제실행",
+    "영구삭제",
+    "일괄"
+  ],
+  "_comment_forbidden": "발송·결재(상신/승인/반려)·강제실행·마감·영구삭제·일괄 등 되돌릴 수 없는 동작만 차단. 저장/등록/삭제(TEST_ 데이터)는 흐름 검증에 필요하므로 허용.",
+  "errorPatterns": [
+    "시스템 오류",
+    "HTTP Status 5\\d\\d",
+    "Exception report",
+    "권한이 없는",
+    "접근권한이 없"
+  ],
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "success": {
+      "urlContains": "POR0001"
+    }
+  }
+}

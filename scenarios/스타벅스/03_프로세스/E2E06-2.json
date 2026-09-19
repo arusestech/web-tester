@@ -1,0 +1,117 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E06-2 [210 운영지원팀장] 버튼 숨김 + 서버 강제 여부",
+  "_comment": "E2E-06 2단계. 버튼 hide 확인 후 /function 직접 호출. 서버가 차단해야 정상 → 현재는 실행됨(결함: AP_SCREEN_AUTH 화면권한만 검사) → 수정 전까지 이 흐름은 ❌ 가 정상",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R210"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "버튼 숨김",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1026.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"addNewNode\", \"updateBtn\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==false});if(bad.length)throw new Error('버튼 노출 불일치(기대 숨김): '+bad.join(','));})()"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC1024.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"btnAddNormal\", \"btnSaveNormal\", \"btnAddVital\", \"btnSaveVital\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==false});if(bad.length)throw new Error('버튼 노출 불일치(기대 숨김): '+bad.join(','));})()"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC1022.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"btnOpenRegist\", \"btnDelete\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==false});if(bad.length)throw new Error('버튼 노출 불일치(기대 숨김): '+bad.join(','));})()"
+        }
+      ]
+    },
+    {
+      "name": "서버 강제(기대: 권한 차단)",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1024.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(async()=>{const r=await fetch(uxl.getFunctionUrl('VOC1024','MODIFY'),{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest'},body:\"gridData=TEST_NONE_E2E06%2C1%2C1%2Cfalse&FG_DIVID_SE=N\"});const t=await r.text();const st=(t.match(/\"resultStatus\":\"(\\w+)\"/)||[])[1]||'';const denied=t.includes('권한이 없습니다');if(!denied)throw new Error('VOC1024 MODIFY 기대 권한차단, 실제 '+st+' (서버 미강제)');})()"
+        },
+        {
+          "action": "note",
+          "_note": "사번 TEST_NONE_E2E06 은 존재하지 않아 UPDATE 0행 — 데이터 변경 없음"
+        }
+      ]
+    }
+  ]
+}

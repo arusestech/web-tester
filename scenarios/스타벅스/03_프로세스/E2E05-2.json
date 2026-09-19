@@ -1,0 +1,95 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E05-2 [999 일반사용자] 공지 열람 차단",
+  "_comment": "E2E-05 2단계",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat(SMTP 목업 localhost:1025 적용 war). 8888 = IntelliJ Tomcat(메일 host 내부망 IP → 발송 실패). CrossEditor 라이선스는 도메인 기준이라 포트 무관",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 가 컨텍스트 없는 /screen/POR0001.ub 로 보내는 알려진 현상(세션은 정상)",
+  "_comment_block": "999 는 INF4001 접근 시 accessDenied.jsp(본문에 '권한')로 차단 — 의도된 차단. 공통 errorPatterns('접근권한이 없')를 ignore.text 로 무시하고 아래 expectText '권한' 으로 차단을 양성 확인",
+  "ignore": { "text": ["접근권한이 없"] },
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R999"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "INF4001 직접 접근 → 차단(XML 100/110/210/220/230/240)",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/INF4001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "screenshot",
+          "name": "접근"
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectText",
+          "text": "권한"
+        },
+        {
+          "action": "note",
+          "_expected": "accessDenied.jsp(본문 '권한')로 차단됨을 expectText 로 양성 확인. 공지 제목이 보이면 결함"
+        }
+      ]
+    },
+    {
+      "name": "로그아웃",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "click",
+          "selector": ".logout-button a"
+        },
+        {
+          "action": "expectDialog",
+          "text": "로그아웃"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectUrl",
+          "contains": "BCO0001"
+        }
+      ]
+    }
+  ]
+}

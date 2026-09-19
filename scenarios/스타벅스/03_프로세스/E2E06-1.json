@@ -1,0 +1,96 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E06-1 [220 VOC관리자] 분류/배분/예외 버튼 노출",
+  "_comment": "E2E-06 1단계",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R220"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "버튼 노출",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1026.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"addNewNode\", \"updateBtn\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==true});if(bad.length)throw new Error('버튼 노출 불일치(기대 표시): '+bad.join(','));})()"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC1024.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"btnAddNormal\", \"btnSaveNormal\", \"btnAddVital\", \"btnSaveVital\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==true});if(bad.length)throw new Error('버튼 노출 불일치(기대 표시): '+bad.join(','));})()"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC1022.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"btnOpenRegist\", \"btnDelete\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==true});if(bad.length)throw new Error('버튼 노출 불일치(기대 표시): '+bad.join(','));})()"
+        },
+        {
+          "action": "screenshot",
+          "name": "220"
+        }
+      ]
+    }
+  ]
+}

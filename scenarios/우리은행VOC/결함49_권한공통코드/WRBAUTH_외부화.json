@@ -1,0 +1,65 @@
+{
+  "extends": "../_공통.json",
+  "name": "결함49 권한 공통코드 외부화 (33de44d4c1)",
+  "_comment": "커밋 33de44d4c1. 부점코드·사번 하드코딩을 공통코드(WRBAUTH)로 외부화했다. 공통코드 등록 여부와, 권한 판정을 쓰는 화면들이 오류 없이 뜨는지 본다",
+  "menus": [
+    {
+      "name": "공통코드관리에서 WRBAUTH 조회",
+      "url": "/code",
+      "_note": "WRBAUTH 상위코드가 없으면 권한 판정이 전부 비어 KPI·마일리지 권한이 막힌다",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "KPI 현황",
+      "url": "/vocDtlRelOrg/kpi",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "마일리지 현황 (업로드 금지)",
+      "url": "/vocDtlRelOrg/mileage",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "VOC 통합검색 (조직코드 매퍼 include 회귀)",
+      "url": "/vocIntegrationList",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        }
+      ],
+      "expect": [
+        "#divGrid1"
+      ]
+    }
+  ],
+  "crud": []
+}

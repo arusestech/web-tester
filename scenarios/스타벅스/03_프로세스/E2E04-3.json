@@ -1,0 +1,80 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E04-3 [520 DM] CE 고객의견 조회 hasDm",
+  "_comment": "E2E-04 3단계",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R520"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "VOC1034",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1034.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{if($('#YMD_STND_START').length){$('#YMD_STND_START').val('2026-08-01');$('#YMD_STND_END').val('2026-08-31');}if($('#YY_STD').length){$('#YY_STD').val('2026');$('#MM_STD').val('08');}})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"btnDeptSearch\", \"btnChargeDept\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==true});if(bad.length)throw new Error('버튼 노출 불일치(기대 표시): '+bad.join(','));})()"
+        },
+        {
+          "action": "screenshot",
+          "name": "DM"
+        }
+      ]
+    }
+  ]
+}

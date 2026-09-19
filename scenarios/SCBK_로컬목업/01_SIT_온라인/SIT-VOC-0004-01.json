@@ -1,0 +1,1954 @@
+{
+  "extends": "_공통.json",
+  "name": "SIT-VOC-0004-01 E2E_VOC생명주기_등록부터종결",
+  "_comment": "SIT v0.6 SIT-VOC-0004-01 — 역할을 바꿔 가며 한 VOC 로 등록→확정→배정→접수→업무협조→기한변경→처리완료→확인→종결→수정권한 연속 수행. 앞 흐름이 실패하면 뒤도 연쇄 실패하므로 앞의 실패부터 본다. 고객정보는 수기 입력(MCI 제외)",
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "userField": "#userid",
+    "logoutUrl": "/logout.ub",
+    "retries": 1,
+    "_comment_retries": "비밀번호 연속 실패 시 계정 잠금(maxFailPassword) → 재시도 1회",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "{{id_crt}}"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001",
+      "selector": "#menu"
+    }
+  },
+  "_manual_steps": [
+    "통보 발송·통계 반영은 배치 SIT-VOCB-0007 에서 확인"
+  ],
+  "menus": [],
+  "crud": [
+    {
+      "name": "S1 [컨택센터 CRT] 고객정보 수기 입력 후 등록(RE)",
+      "_comment": "인터페이스 구축 중이라 MCI 고객정보확인은 생략(수기 입력). MCI 는 02_SIT_인터페이스 폴더에서 별도 수행",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_crt}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#TP_BIZ_1\");if(!e)throw new Error('콤보 없음: '+\"#TP_BIZ_1\");const p=\"02\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#TP_BIZ_1\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#TP_CHNN_SYSTEM\");if(!e)throw new Error('콤보 없음: '+\"#TP_CHNN_SYSTEM\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#TP_CHNN_SYSTEM\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#TP_CHNN_METHOD\");if(!e)throw new Error('콤보 없음: '+\"#TP_CHNN_METHOD\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#TP_CHNN_METHOD\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#FG_REVOC\");if(!e)throw new Error('콤보 없음: '+\"#FG_REVOC\");const p=\"N\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#FG_REVOC\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#CD_DNGR\");if(!e)throw new Error('콤보 없음: '+\"#CD_DNGR\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#CD_DNGR\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#TP_CHNN_1\");if(!e)throw new Error('콤보 없음: '+\"#TP_CHNN_1\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#TP_CHNN_1\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#TP_CHNN_2\");if(!e)throw new Error('콤보 없음: '+\"#TP_CHNN_2\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#TP_CHNN_2\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"TEST_고객\";const e=document.querySelector(\"#NM_CUST\");if(!e)throw new Error('입력칸 없음: '+\"#NM_CUST\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"test@test.invalid\";const e=document.querySelector(\"#DS_EMAIL\");if(!e)throw new Error('입력칸 없음: '+\"#DS_EMAIL\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#COMBO_CAUSE_1\");if(!e)throw new Error('콤보 없음: '+\"#COMBO_CAUSE_1\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#COMBO_CAUSE_1\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#COMBO_CAUSE_2\");if(!e)throw new Error('콤보 없음: '+\"#COMBO_CAUSE_2\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#COMBO_CAUSE_2\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#COMBO_CAUSE_3\");if(!e)throw new Error('콤보 없음: '+\"#COMBO_CAUSE_3\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#COMBO_CAUSE_3\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#CD_PRODUCT\");if(!e)throw new Error('콤보 없음: '+\"#CD_PRODUCT\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#CD_PRODUCT\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"TEST 상품\";const e=document.querySelector(\"#NM_PRODUCT\");if(!e)throw new Error('입력칸 없음: '+\"#NM_PRODUCT\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const d=new Date();while(d.getDay()===0||d.getDay()===6)d.setDate(d.getDate()-1);const v=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');const e=document.querySelector('#RECV_YMD');e.readOnly=false;e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#RECV_CD_TIME\");if(!e)throw new Error('콤보 없음: '+\"#RECV_CD_TIME\");const p=\"00\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#RECV_CD_TIME\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#RECV_CD_MINUTE\");if(!e)throw new Error('콤보 없음: '+\"#RECV_CD_MINUTE\");const p=\"00\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#RECV_CD_MINUTE\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E — SIT 자동 테스트 (고객정보 더미, 통보 없음)"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_CONT\");if(!e)throw new Error('입력칸 없음: '+\"#DS_CONT\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#FG_RECV_NONE\");if(!e)throw new Error('체크박스 없음: '+\"#FG_RECV_NONE\");if(!e.checked)e.click();})()"
+        },
+        {
+          "action": "wait",
+          "ms": 600
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"SIT 자동 테스트 - 통보없음\";const e=document.querySelector(\"#DS_RECV_NONE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_RECV_NONE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#deptAdd",
+          "popup": true
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2000
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{dept_cause}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DEPT_NM\");if(!e)throw new Error('입력칸 없음: '+\"#DEPT_NM\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#fnSearch_dept"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{dept_cause}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const rows=[...document.querySelectorAll('#list_dept tr.jqgrow')];const r=rows.length===1?rows[0]:rows.find(r=>r.innerText.includes(t));if(!r)throw new Error('원인부서 검색 결과 없음: '+t+' ('+rows.length+'건, 부서 STATUS 가 A 인지 확인)');(r.querySelectorAll('td')[1]||r).click();})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "click",
+          "selector": "#conFirm"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "closePopup"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{if(!document.querySelectorAll('#deptList option').length)throw new Error('원인부서가 추가되지 않음');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[].filter(s=>{const e=document.querySelector(s);return e&&!!(e.offsetWidth||e.offsetHeight)});if(bad.length)throw new Error('보이면 안 되는 버튼이 보임: '+bad.join(', '));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const m=\"SIT 자동 테스트\";const vis=e=>!!(e.offsetWidth||e.offsetHeight);const ymd=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();document.querySelectorAll('[metaessential=\"1\"]').forEach(e=>{if(!vis(e)||e.readOnly||e.disabled)return;const id=e.id||'';if(e.tagName==='SELECT'){if(!e.value){const o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(o){e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));}}}else if(e.type==='radio'){const g=document.querySelectorAll('input[type=radio][name=\"'+e.name+'\"]');if(![...g].some(x=>x.checked))g[0].click();}else if(e.type==='checkbox'){}else if(e.tagName==='TEXTAREA'){if(!e.value.trim()){e.value=m;e.dispatchEvent(new Event('change',{bubbles:true}));}}else if(e.tagName==='INPUT'&&!e.value.trim()){let v=m;if(/YMD|DT_|DATE/i.test(id))v=ymd;if(/TIME|HH/i.test(id))v='10';if(/MINUTE|MI$/i.test(id))v='00';e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));}});})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelector('#FG_RECV_NONE');if(!n||!n.checked)throw new Error('접수회신 통보없음 미체크 — 고객 통보 위험');})()"
+        },
+        {
+          "action": "click",
+          "selector": "#registBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 6000
+        },
+        {
+          "action": "expectDialog",
+          "text": "저장이 완료되었습니다"
+        },
+        {
+          "action": "screenshot",
+          "name": "등록"
+        }
+      ]
+    },
+    {
+      "name": "S2 [VOC마스터] 처리부서 지정 후 확정(CO)",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_master}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0019.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=document.querySelector('.ub-layout.search-advanced');if(l&&l.classList.contains('close')){const b=l.querySelector('span.btn a')||l.querySelector('span.btn');if(b)b.click();}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "click",
+          "selector": "span#processEmp",
+          "popup": true
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2000
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{dept_proc}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DEPT_NM\");if(!e)throw new Error('입력칸 없음: '+\"#DEPT_NM\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#fnSearch_dept"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{dept_proc}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const rows=[...document.querySelectorAll('#list_dept tr.jqgrow')];const r=rows.length===1?rows[0]:rows.find(r=>r.innerText.includes(t));if(!r)throw new Error('부서 행 없음: '+t+' ('+rows.length+'건, 부서 STATUS 가 A 인지 확인)');(r.querySelectorAll('td')[1]||r).click();})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "click",
+          "selector": "#conFirm"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "closePopup"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "click",
+          "selector": "#confirmBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 6000
+        },
+        {
+          "action": "expectDialog",
+          "text": "확정처리가 완료되었습니다"
+        },
+        {
+          "action": "screenshot",
+          "name": "확정"
+        }
+      ]
+    },
+    {
+      "name": "S3 [DCC] 배정(AS)",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_dcc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0005.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{id_proc}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const p=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"select#ID_VOC_ACT_EMP\");if(!e)throw new Error('콤보 없음: '+\"select#ID_VOC_ACT_EMP\");const o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)throw new Error('옵션 없음: '+p+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#assignBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 6000
+        },
+        {
+          "action": "expectDialog",
+          "text": "배정이 완료되었습니다"
+        },
+        {
+          "action": "screenshot",
+          "name": "배정"
+        }
+      ]
+    },
+    {
+      "name": "S4 [처리담당자] 접수처리(PR)",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_proc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0005.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "click",
+          "selector": "#procRecvBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 6000
+        },
+        {
+          "action": "expectDialog",
+          "text": "처리접수가 완료되었습니다"
+        },
+        {
+          "action": "screenshot",
+          "name": "접수처리"
+        }
+      ]
+    },
+    {
+      "name": "S5 [처리담당자→협조담당] 업무협조 요청·접수·완료",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_proc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0005.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "click",
+          "selector": "#requestBtn",
+          "popup": true
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2000
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#TP_REQ\");if(!e)throw new Error('콤보 없음: '+\"#TP_REQ\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#TP_REQ\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E 협조"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_REQ_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_REQ_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"E2E 협조 요청(자동)\";const e=document.querySelector(\"#DS_REQ_CONT\");if(!e)throw new Error('입력칸 없음: '+\"#DS_REQ_CONT\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{id_crt869}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const s=document.querySelector('#requestEmpList');if(!s)throw new Error('처리자 목록 없음');s.innerHTML='';s.add(new Option(v,v,true,true));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const m=\"SIT 자동 테스트\";const vis=e=>!!(e.offsetWidth||e.offsetHeight);const ymd=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();document.querySelectorAll('[metaessential=\"1\"]').forEach(e=>{if(!vis(e)||e.readOnly||e.disabled)return;const id=e.id||'';if(e.tagName==='SELECT'){if(!e.value){const o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(o){e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));}}}else if(e.type==='radio'){const g=document.querySelectorAll('input[type=radio][name=\"'+e.name+'\"]');if(![...g].some(x=>x.checked))g[0].click();}else if(e.type==='checkbox'){}else if(e.tagName==='TEXTAREA'){if(!e.value.trim()){e.value=m;e.dispatchEvent(new Event('change',{bubbles:true}));}}else if(e.tagName==='INPUT'&&!e.value.trim()){let v=m;if(/YMD|DT_|DATE/i.test(id))v=ymd;if(/TIME|HH/i.test(id))v='10';if(/MINUTE|MI$/i.test(id))v='00';e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));}});})()"
+        },
+        {
+          "action": "click",
+          "selector": "#save"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 5000
+        },
+        {
+          "action": "expectDialog",
+          "text": "업무요청이 완료되었습니다"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "closePopup"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "switchUser",
+          "user": "{{id_crt869}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VRE0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E 협조"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_REQ_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_REQ_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} E2E 협조"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E 협조"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "click",
+          "selector": "#recvBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 5000
+        },
+        {
+          "action": "expectDialog",
+          "text": "업무요청 접수가 완료되었습니다"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VRE0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E 협조"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_REQ_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_REQ_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} E2E 협조"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E 협조"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"E2E 협조 결과(자동)\";const e=document.querySelector(\"#DS_ACT_CONT\");if(!e)throw new Error('입력칸 없음: '+\"#DS_ACT_CONT\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#completeBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 5000
+        },
+        {
+          "action": "screenshot",
+          "name": "협조완료"
+        }
+      ]
+    },
+    {
+      "name": "S6 [처리담당자→VOC마스터] 기한변경 요청·승인",
+      "_comment": "0001-09 S9 의 2차(반송용) 요청이 대기로 남아 있으면 그 건이 먼저 잡힌다 → 0001-09 S9 를 수동 반송하거나 0004-01 을 다른 날 실행",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_proc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0005.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "click",
+          "selector": "#procDateChangeBtn",
+          "popup": true
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2000
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"E2E 기한변경(자동)\";const e=document.querySelector(\"#DS_APPL_CONT\");if(!e)throw new Error('입력칸 없음: '+\"#DS_APPL_CONT\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{new_plan}}"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DT_VOC_ACT_PLAN\");if(!e)throw new Error('입력칸 없음: '+\"#DT_VOC_ACT_PLAN\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#dateChanBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 5000
+        },
+        {
+          "action": "expectDialog",
+          "text": "처리기한 변경요청이 완료되었습니다"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "closePopup"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "switchUser",
+          "user": "{{id_master}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VRE0011.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();[\"#START_DT\", \"#END_DT\"].forEach(s=>{const e=document.querySelector(s);if(e){e.readOnly=false;e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));}});})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=[...document.querySelectorAll('#list tr.jqgrow')].find(r=>!/승인|반려|반송|완료/.test(r.innerText));if(!r)throw new Error('처리 대기 중인 신청 행 없음');(r.querySelectorAll('td')[1]||r).click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"E2E 승인\";const e=document.querySelector(\"#DS_ACT_CONT\");if(!e)throw new Error('입력칸 없음: '+\"#DS_ACT_CONT\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#confirmBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 5000
+        },
+        {
+          "action": "expectDialog",
+          "text": "기한변경 요청이 완료되었습니다"
+        },
+        {
+          "action": "screenshot",
+          "name": "기한변경승인"
+        }
+      ]
+    },
+    {
+      "name": "S7 [처리담당자] 처리완료(PE)",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_proc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0005.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const d=new Date();const p=n=>String(n).padStart(2,'0');const ymd=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());const set=(s,v)=>{const e=document.querySelector(s);if(!e)return;e.readOnly=false;e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));};const pickv=(s,v)=>{const e=document.querySelector(s);if(!e)return;const o=[...e.options].find(x=>x.value===v);if(!o)throw new Error(s+' 에 코드 '+v+' 없음');e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));};set(\"#PROC_END_YMD\",ymd);pickv('#PROC_CD_TIME',p(d.getHours()));pickv('#PROC_CD_MINUTE','00');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const m=\"SIT 자동 테스트\";const vis=e=>!!(e.offsetWidth||e.offsetHeight);const ymd=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();document.querySelectorAll('[metaessential=\"1\"]').forEach(e=>{if(!vis(e)||e.readOnly||e.disabled)return;const id=e.id||'';if(e.tagName==='SELECT'){if(!e.value){const o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(o){e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));}}}else if(e.type==='radio'){const g=document.querySelectorAll('input[type=radio][name=\"'+e.name+'\"]');if(![...g].some(x=>x.checked))g[0].click();}else if(e.type==='checkbox'){}else if(e.tagName==='TEXTAREA'){if(!e.value.trim()){e.value=m;e.dispatchEvent(new Event('change',{bubbles:true}));}}else if(e.tagName==='INPUT'&&!e.value.trim()){let v=m;if(/YMD|DT_|DATE/i.test(id))v=ymd;if(/TIME|HH/i.test(id))v='10';if(/MINUTE|MI$/i.test(id))v='00';e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));}});})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#CD_VOC_CAUSE_1\");if(!e)throw new Error('콤보 없음: '+\"#CD_VOC_CAUSE_1\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#CD_VOC_CAUSE_1\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#CD_VOC_CAUSE_2\");if(!e)throw new Error('콤보 없음: '+\"#CD_VOC_CAUSE_2\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#CD_VOC_CAUSE_2\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#CD_VOC_CAUSE_3\");if(!e)throw new Error('콤보 없음: '+\"#CD_VOC_CAUSE_3\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#CD_VOC_CAUSE_3\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#CD_SBSTN\");if(!e)throw new Error('콤보 없음: '+\"#CD_SBSTN\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#CD_SBSTN\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#FG_PROC_NONE\");if(!e)throw new Error('체크박스 없음: '+\"#FG_PROC_NONE\");if(!e.checked)e.click();})()"
+        },
+        {
+          "action": "wait",
+          "ms": 600
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"SIT 자동 테스트 - 통보없음\";const e=document.querySelector(\"#DS_PROC_NONE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_PROC_NONE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"E2E 처리내용(자동)\";const e=document.querySelector(\"#PROC_DS_CONT\");if(!e)throw new Error('입력칸 없음: '+\"#PROC_DS_CONT\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const m=\"SIT 자동 테스트\";const vis=e=>!!(e.offsetWidth||e.offsetHeight);const ymd=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();document.querySelectorAll('[metaessential=\"1\"]').forEach(e=>{if(!vis(e)||e.readOnly||e.disabled)return;const id=e.id||'';if(e.tagName==='SELECT'){if(!e.value){const o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(o){e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));}}}else if(e.type==='radio'){const g=document.querySelectorAll('input[type=radio][name=\"'+e.name+'\"]');if(![...g].some(x=>x.checked))g[0].click();}else if(e.type==='checkbox'){}else if(e.tagName==='TEXTAREA'){if(!e.value.trim()){e.value=m;e.dispatchEvent(new Event('change',{bubbles:true}));}}else if(e.tagName==='INPUT'&&!e.value.trim()){let v=m;if(/YMD|DT_|DATE/i.test(id))v=ymd;if(/TIME|HH/i.test(id))v='10';if(/MINUTE|MI$/i.test(id))v='00';e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));}});})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelector('#FG_PROC_NONE');if(!n||!n.checked)throw new Error('고객회신 통보없음 미체크 — 고객 통보 위험');})()"
+        },
+        {
+          "action": "click",
+          "selector": "#procEndBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 6000
+        },
+        {
+          "action": "expectDialog",
+          "text": "진행하시겠습니까"
+        },
+        {
+          "action": "screenshot",
+          "name": "처리완료"
+        }
+      ]
+    },
+    {
+      "name": "S8 [DCC] 확인(PC)",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_dcc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0005.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "click",
+          "selector": "#procCheckBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 6000
+        },
+        {
+          "action": "expectDialog",
+          "text": "확인 되었습니다"
+        },
+        {
+          "action": "screenshot",
+          "name": "확인"
+        }
+      ]
+    },
+    {
+      "name": "S9 [VOC마스터] 종결(CE)",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_master}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0019.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=document.querySelector('.ub-layout.search-advanced');if(l&&l.classList.contains('close')){const b=l.querySelector('span.btn a')||l.querySelector('span.btn');if(b)b.click();}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const d=new Date();const p=n=>String(n).padStart(2,'0');const ymd=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());const set=(s,v)=>{const e=document.querySelector(s);if(!e)return;e.readOnly=false;e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));};const pickv=(s,v)=>{const e=document.querySelector(s);if(!e)return;const o=[...e.options].find(x=>x.value===v);if(!o)throw new Error(s+' 에 코드 '+v+' 없음');e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));};set(\"#END_YMD\",ymd);pickv('#END_CD_TIME',p(d.getHours()));pickv('#END_CD_MINUTE','00');})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.querySelector(\"#CD_DONE\");if(!e)throw new Error('콤보 없음: '+\"#CD_DONE\");const p=\"\";let o=null;if(p)o=[...e.options].find(x=>x.value===p||x.text.includes(p));if(!o)o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(!o)throw new Error('선택할 옵션 없음: '+\"#CD_DONE\"+' ['+[...e.options].map(x=>x.value+':'+x.text).join(',')+']');e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"E2E 종결(자동)\";const e=document.querySelector(\"#END_CONT\");if(!e)throw new Error('입력칸 없음: '+\"#END_CONT\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const m=\"SIT 자동 테스트\";const vis=e=>!!(e.offsetWidth||e.offsetHeight);const ymd=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();document.querySelectorAll('[metaessential=\"1\"]').forEach(e=>{if(!vis(e)||e.readOnly||e.disabled)return;const id=e.id||'';if(e.tagName==='SELECT'){if(!e.value){const o=[...e.options].find(x=>x.value!==''&&!/선택|전체/.test(x.text));if(o){e.value=o.value;e.dispatchEvent(new Event('change',{bubbles:true}));}}}else if(e.type==='radio'){const g=document.querySelectorAll('input[type=radio][name=\"'+e.name+'\"]');if(![...g].some(x=>x.checked))g[0].click();}else if(e.type==='checkbox'){}else if(e.tagName==='TEXTAREA'){if(!e.value.trim()){e.value=m;e.dispatchEvent(new Event('change',{bubbles:true}));}}else if(e.tagName==='INPUT'&&!e.value.trim()){let v=m;if(/YMD|DT_|DATE/i.test(id))v=ymd;if(/TIME|HH/i.test(id))v='10';if(/MINUTE|MI$/i.test(id))v='00';e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));}});})()"
+        },
+        {
+          "action": "click",
+          "selector": "#completeBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 6000
+        },
+        {
+          "action": "expectDialog",
+          "text": "종결이 완료되었습니다"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const bad=[\"#completeBtn\"].filter(s=>{const e=document.querySelector(s);return e&&!!(e.offsetWidth||e.offsetHeight)});if(bad.length)throw new Error('보이면 안 되는 버튼이 보임: '+bad.join(', '));})()"
+        },
+        {
+          "action": "screenshot",
+          "name": "종결"
+        }
+      ]
+    },
+    {
+      "name": "S10 [처리담당자→VOC마스터] 수정권한 요청·승인·저장",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_proc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0022.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=document.querySelector('.ub-layout.search-advanced');if(l&&l.classList.contains('close')){const b=l.querySelector('span.btn a')||l.querySelector('span.btn');if(b)b.click();}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "click",
+          "selector": "#AppupdateBtn",
+          "popup": true
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2000
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"E2E 수정권한(자동)\";const e=document.querySelector(\"#DS_MODIFY_CONT\");if(!e)throw new Error('입력칸 없음: '+\"#DS_MODIFY_CONT\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#AppUpdateBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 5000
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "closePopup"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "switchUser",
+          "user": "{{id_master}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VRE0014.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();[\"#START_DT\", \"#END_DT\"].forEach(s=>{const e=document.querySelector(s);if(e){e.readOnly=false;e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));}});})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=[...document.querySelectorAll('#list tr.jqgrow')].find(r=>!/승인|반려|반송|완료/.test(r.innerText));if(!r)throw new Error('처리 대기 중인 신청 행 없음');(r.querySelectorAll('td')[1]||r).click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "click",
+          "selector": "#confirmBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 5000
+        },
+        {
+          "action": "expectDialog",
+          "text": "수정권한요청 승인이 완료되었습니다"
+        },
+        {
+          "action": "switchUser",
+          "user": "{{id_proc}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC0022.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=document.querySelector('.ub-layout.search-advanced');if(l&&l.classList.contains('close')){const b=l.querySelector('span.btn a')||l.querySelector('span.btn');if(b)b.click();}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const e=document.querySelector(\"#DS_TITLE\");if(!e)throw new Error('입력칸 없음: '+\"#DS_TITLE\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectText",
+          "text": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{let b=document.querySelector('#__wwt_var');if(!b){b=document.createElement('input');b.id='__wwt_var';b.style.cssText='position:fixed;left:0;top:0;width:160px;height:22px;z-index:2147483647;opacity:1';document.body.appendChild(b);}b.value='';})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#__wwt_var",
+          "value": "{{mark}} E2E"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=(()=>{const b=document.querySelector('#__wwt_var');const v=b?b.value:'';if(b)b.remove();return v;})();const r=[...document.querySelectorAll(\"#list tr.jqgrow\")].find(r=>r.innerText.includes(t));if(!r)throw new Error('목록에 행 없음: '+t);const td=[...r.querySelectorAll('td')].find(x=>x.innerText.includes(t))||r.querySelectorAll('td')[1];td.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=\"E2E 종결 후 수정(자동)\";const e=document.querySelector(\"#PROC_DS_CONT\");if(!e)throw new Error('입력칸 없음: '+\"#PROC_DS_CONT\");e.readOnly=false;e.disabled=false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        {
+          "action": "click",
+          "selector": "#saveBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 5000
+        },
+        {
+          "action": "expectDialog",
+          "text": "수정이 완료되었습니다"
+        },
+        {
+          "action": "screenshot",
+          "name": "수정저장"
+        }
+      ]
+    },
+    {
+      "name": "S11 로그 관리 3종 조회(관리자)",
+      "_comment": "관리자 비밀번호가 SIT 계정과 다르면 이 흐름만 실패 → 해당 흐름 switchUser 에 password 항목(관리자 전용 자리표시자)을 추가",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_admin}}"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "goto",
+          "url": "/screen/SYS0157.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "screenshot",
+          "name": "접속로그"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/SYS0158.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "screenshot",
+          "name": "사용로그"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/SYS0165.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "screenshot",
+          "name": "권한변경로그"
+        }
+      ]
+    }
+  ]
+}

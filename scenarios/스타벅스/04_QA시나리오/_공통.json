@@ -1,0 +1,124 @@
+{
+  "name": "스타벅스 QA 시나리오 공통 (상속 전용)",
+  "_comment": "QA팀 시나리오 문서(내부 260916/시나리오.md, VC_TC_001~1986)를 자동화한 04_QA시나리오 폴더의 공통 설정. 각 파일은 extends 로 이 파일을 상속하고 menus/crud 만 정의한다. 앞에 _ 가 붙어 목록·일괄 실행에서 제외됨.",
+  "_comment_env": "접속 URL·브라우저·stub 은 프로젝트 설정(scenarios/스타벅스/_project.json)이 우선. 계정은 test01(시스템관리자 100) — QA 문서가 관리자 화면 기준이라 전 메뉴 접근 가능한 계정으로 고정.",
+  "timeout": 15000,
+  "expectTimeout": 10000,
+  "stepDelay": 300,
+  "evidence": {
+    "screenshotAll": true
+  },
+  "ignore": {
+    "console": [
+      "Content Security Policy",
+      "Failed to load resource: the server responded with a status of 404",
+      "jQuery Migrate"
+    ],
+    "resources": [
+      "cdnjs\\.cloudflare\\.com",
+      "/page/",
+      "/uxl/",
+      "/page/images/",
+      "/logout\\.ub",
+      "/login\\.ub"
+    ],
+    "dialogs": [
+      "승인되지 않은 도메인"
+    ]
+  },
+  "_comment_forbidden": "실데이터를 바꾸는 버튼은 기본 차단. 등록·수정·삭제 흐름은 _보류_CRUD/ 폴더에 allowForbidden 을 명시해 두었고, 사용자 확인 후에만 실행한다.",
+  "forbidden": [
+    "삭제",
+    "영구삭제",
+    "발송",
+    "강제실행",
+    "상신",
+    "승인",
+    "반려",
+    "마감",
+    "선정승인",
+    "기안",
+    "저장",
+    "Save",
+    "Delete",
+    "일괄",
+    "접수확인",
+    "처리완료",
+    "확인불가",
+    "로그인갱신",
+    "업로드",
+    "복구",
+    "^\\s*등록\\s*$",
+    "^\\s*수정\\s*$"
+  ],
+  "_comment_forbidden2": "등록/수정 은 정확히 그 글자만(anchored) — '신규등록'(등록 화면으로 이동, 데이터 변경 없음) 은 눌러도 되기 때문. forbidden 은 대소문자 무시 부분일치 정규식이다.",
+  "errorPatterns": [
+    "시스템 오류",
+    "HTTP Status 5\\d\\d",
+    "Exception report",
+    "권한이 없는",
+    "접근권한이 없"
+  ],
+  "_comment_inputs": "조회 화면 기간 조건 공통값(있는 필드만 채움). 형식 yyyy-MM-dd. 통계(ANA0021) 31일 제한·고객메모(VOC1501) 3개월 제한에 맞춰 약 1개월.",
+  "inputs": {
+    "common": {
+      "DT_START": "2026-08-01",
+      "DT_END": "2026-08-29",
+      "DT_START_REQ": "2026-08-01",
+      "DT_END_REQ": "2026-08-29",
+      "DT_VOC_REG_START": "2026-08-01",
+      "DT_VOC_REG_END": "2026-08-29"
+    },
+    "search": "#searchBtn a, #searchBtn, #search a, #btnSearch a, #Search a, #SEARCH a",
+    "labels": {
+      "DT_START": "시작일",
+      "DT_END": "종료일",
+      "DT_START_REQ": "요청시작일",
+      "DT_END_REQ": "요청종료일",
+      "DT_VOC_REG_START": "등록시작일",
+      "DT_VOC_REG_END": "등록종료일"
+    }
+  },
+  "_comment_vars": "등록 테스트 데이터 접두어. 실행마다 {{now}} 가 붙어 중복을 피하고 나중에 찾아 지우기 쉽다.",
+  "vars": {
+    "qaPrefix": "TEST_QA",
+    "dtFrom": "2026-08-01",
+    "dtTo": "2026-08-29"
+  },
+  "_comment_login": "BCO0001.jsp: #userid/#userpw, 로그인 버튼 <div id=login>. 비번은 클라이언트 SHA256 이라 평문 입력. loginSuccess.jsp 컨텍스트 누락 버그로 포털(POR0001)로 직접 이동. userField 는 switchUser 용.",
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "userField": "#userid",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "test01"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001"
+    }
+  }
+}

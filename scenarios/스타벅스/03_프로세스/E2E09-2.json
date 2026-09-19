@@ -1,0 +1,158 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E09-2 [250] VOC 메일관리 신규→저장→수정/삭제",
+  "_comment": "E2E-09 3~4단계. TEST_E2E09 행 생성 후 화면에서 삭제(실발송 없음)",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R250"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "SYS0313 CRUD",
+      "allowForbidden": [
+        "저장",
+        "삭제"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/SYS0313.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "수신자"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"btnReset\", \"btnUpdate\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==true});if(bad.length)throw new Error('버튼 노출 불일치(기대 표시): '+bad.join(','));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#btnReset a')||document.getElementById('btnReset');if(!b)throw new Error('btnReset 없음');b.click();})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"btnSave\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==true});if(bad.length)throw new Error('버튼 노출 불일치(기대 표시): '+bad.join(','));})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#TOEMAIL",
+          "value": "TEST_E2E09@test.local"
+        },
+        {
+          "action": "fill",
+          "selector": "#WORD",
+          "value": "TEST_E2E09"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#btnSave a')||document.getElementById('btnSave');if(!b)throw new Error('btnSave 없음');b.click();})()"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectText",
+          "text": "수신자"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "expectText",
+          "text": "TEST_E2E09"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const tr=[...document.querySelectorAll('table.ui-jqgrid-btable tr.jqgrow')].find(r=>r.textContent.includes('TEST_E2E09'));if(!tr)throw new Error('행 없음');tr.querySelector('td').click();})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"btnUpdate\", \"btnDelete\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==true});if(bad.length)throw new Error('버튼 노출 불일치(기대 표시): '+bad.join(','));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#btnDelete a')||document.getElementById('btnDelete');if(!b)throw new Error('btnDelete 없음');b.click();})()"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectText",
+          "text": "수신자"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "expectNotText",
+          "text": "TEST_E2E09"
+        },
+        {
+          "action": "screenshot",
+          "name": "메일관리"
+        }
+      ]
+    }
+  ]
+}

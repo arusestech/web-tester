@@ -1,0 +1,109 @@
+{
+  "extends": "../_공통.json",
+  "name": "QA 로그인·홈 대시보드",
+  "_comment_source": "QA 시나리오.md VC_TC_001~017. 로그인 화면 = BCO0001.jsp(app/standard/bco), 대시보드 = POR1001.jsp(app/standard/por, 포털 POR0001 의 첫 탭 iframe). 대시보드는 직접 URL 진입.",
+  "_comment_login_tc": "VC_TC_003/004 오류 메시지는 uxl.error → 레이어(showDebug) 라 expectText 로 본다. 계정 잠금(패스워드 실패 허용횟수) 위험 때문에 존재하지 않는 아이디로 검사하고, 비밀번호 오입력(TC_004)은 수동. TC_006 세션 만료 대기는 수동.",
+  "menus": [
+    {
+      "name": "VC_TC_007 홈 대시보드 화면 구성(KPI·유형별·Vital Few·전광판·채널별·월별)",
+      "url": "/screen/POR1001.ub",
+      "expect": [
+        "#RESPONSE_RATE",
+        "#CNT_SPEED",
+        "#CNT_ANS_LIMIT",
+        "#CNT_MM_VITAL_TOT",
+        "#OUT_AGENCY_REC_MM_CNT",
+        "#callDashBoardLink",
+        "#CNT_DD_DEMAND_TOT",
+        "#CNT_DD_CALL",
+        "#dailyVocRegChart",
+        "#btnMonth",
+        "#btnYear"
+      ],
+      "actions": [
+        {
+          "name": "VC_TC_012 Call 전광판 Go → U Connect 새 창",
+          "click": "#callDashBoardLink",
+          "popup": true,
+          "expectUrl": "uconnect",
+          "_note": "외부 사이트(https://uc.uconnect.co.kr/admin/). 사내망에서 외부 접속이 막혀 있으면 새 창은 열리되 내용은 에러일 수 있음 — URL 만 판정"
+        },
+        {
+          "name": "VC_TC_016 월별 접수현황 월단위 탭 → 꺾은선 그래프 + 채널별 현황표",
+          "click": "#btnYear",
+          "expect": [
+            "#tabs-2",
+            "#monthlyVocRegChart",
+            "#callTr",
+            "#appwebTr",
+            "#chatTr"
+          ],
+          "back": "none"
+        }
+      ]
+    }
+  ],
+  "crud": [
+    {
+      "name": "VC_TC_008~011,013 KPI·유형별·Vital Few·채널별 수치 표시",
+      "_note": "'실제 데이터 표시' 는 값이 숫자 형태로 렌더됐는지까지만 자동 판정(0 도 통과). 실제 집계와 맞는지는 캡처로 사람이 대조 → 부분",
+      "steps": [
+        { "action": "goto", "url": "/screen/POR1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=['RESPONSE_RATE','CALLTIME_AVG_M','CALLTIME_AVG_S','CNT_SPEED','CNT_ACCURACY','CNT_KIND','CNT_ANS_LIMIT','CNT_MM_VITAL_TOT','OUT_AGENCY_REC_MM_CNT','CNT_DD_DEMAND_TOT','CNT_MM_DEMAND_TOT','CNT_DD_INQUIRY','RATE_DD_INQUIRY','CNT_MM_INQUIRY','CNT_DD_COMPLAINT','CNT_MM_COMPLAINT','CNT_DD_PRAISE','CNT_MM_PRAISE','CNT_DD_SUGGEST','CNT_MM_SUGGEST','CNT_DD_CALL','RATE_DD_CALL','CNT_MM_CALL','CNT_DD_MOBILE_WEB','CNT_MM_MOBILE_WEB','CNT_DD_CHAT','CNT_MM_CHAT'];const bad=ids.filter(id=>{const e=document.getElementById(id);return !e||!/[0-9]/.test(e.textContent)});if(bad.length)throw new Error('수치 미표시: '+bad.join(','));})()"
+        },
+        { "action": "screenshot", "name": "대시보드-수치" }
+      ]
+    },
+    {
+      "name": "VC_TC_014 월별 접수현황 일단위 막대 그래프 렌더",
+      "_note": "차트 라이브러리가 svg/canvas 를 그렸는지만 판정. 막대 마우스오버 툴팁(TC_015), 월단위 꺾은선 툴팁(TC_017)은 수동",
+      "steps": [
+        { "action": "goto", "url": "/screen/POR1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const c=document.getElementById('dailyVocRegChart');if(!c)throw new Error('#dailyVocRegChart 없음');const g=c.querySelector('svg, canvas, .highcharts-container, div[_echarts_instance_]');if(!g)throw new Error('일단위 그래프가 그려지지 않음(svg/canvas 없음)');})()"
+        },
+        { "action": "click", "selector": "#btnYear" },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const c=document.getElementById('monthlyVocRegChart');if(!c||c.offsetParent===null)throw new Error('월단위 차트 영역이 보이지 않음');const g=c.querySelector('svg, canvas, .highcharts-container, div[_echarts_instance_]');if(!g)throw new Error('월단위 그래프가 그려지지 않음');const rows=['callTr','appwebTr','chatTr'].filter(id=>{const e=document.getElementById(id);return !e||e.offsetParent===null});if(rows.length)throw new Error('채널별 현황표 행 미표시: '+rows.join(','));})()"
+        },
+        { "action": "screenshot", "name": "대시보드-월단위" }
+      ]
+    },
+    {
+      "name": "VC_TC_001~003,005 로그인 화면 플레이스홀더·아이디저장·오류메시지·정상 로그인",
+      "_note": "순서: 로그인 화면 진입 → placeholder/체크박스 확인 → 없는 아이디로 Login → 오류 레이어 문구 → test01 재로그인(switchUser) 으로 세션 복구. 아이디저장 Default 체크는 쿠키(loginId) 가 있을 때만 체크되는 구현(BCO0001.jsp:142~146) 이라 첫 진입엔 미체크가 정상일 수 있음 → 경고성 판정(throw 대신 상태만 기록)",
+      "steps": [
+        { "action": "goto", "url": "/screen/BCO0001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#userid" },
+        {
+          "action": "eval",
+          "script": "(()=>{const a=document.getElementById('userid'),b=document.getElementById('userpw');if(!a||!b)throw new Error('아이디/비밀번호 입력창 없음');if(a.placeholder!=='아이디')throw new Error('아이디 placeholder 불일치: '+a.placeholder);if(b.placeholder!=='비밀번호')throw new Error('비밀번호 placeholder 불일치: '+b.placeholder);})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const c=document.getElementById('login-idSave');if(!c)throw new Error('아이디저장 체크박스 없음');const lb=document.querySelector('label[for=login-idSave]');if(!lb||!lb.textContent.includes('아이디저장'))throw new Error('아이디저장 라벨 없음');document.title='idSave='+c.checked;})()"
+        },
+        { "action": "screenshot", "name": "로그인화면" },
+        { "action": "fill", "selector": "#userid", "value": "TEST_QA_NOUSER" },
+        { "action": "fill", "selector": "#userpw", "value": "x" },
+        { "action": "click", "selector": "#login" },
+        { "action": "wait", "ms": 2000 },
+        { "action": "expectText", "text": "사용자 정보가 일치하지 않습니다" },
+        { "action": "screenshot", "name": "로그인오류" },
+        { "action": "switchUser", "user": "test01", "url": "/screen/POR0001.ub" },
+        { "action": "expectUrl", "contains": "POR0001" },
+        { "action": "expectVisible", "selector": "#tabs" }
+      ]
+    }
+  ]
+}

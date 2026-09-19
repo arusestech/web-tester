@@ -1,0 +1,92 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E10-1 [100] 칭찬파트너 조회·엑셀",
+  "_comment": "E2E-10 1단계. FNCVOC0044(100), FNCVOC0057(100/110)",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "test01"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "VOC1019",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1019.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"exportExcel\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==true});if(bad.length)throw new Error('버튼 노출 불일치(기대 표시): '+bad.join(','));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(async()=>{const r=await fetch(uxl.getFunctionUrl('VOC1019','INQUIRY'),{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest'},body:\"\"});const t=await r.text();const st=(t.match(/\"resultStatus\":\"(\\w+)\"/)||[])[1]||'';const denied=t.includes('권한이 없습니다');if(st!=='Success')throw new Error('VOC1019 INQUIRY 기대 Success, 실제 '+st+(denied?'(권한없음)':''));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(async()=>{const r=await fetch(uxl.getFunctionUrl('VOC1019','EXPORT'),{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest'},body:\"\"});const t=await r.text();const st=(t.match(/\"resultStatus\":\"(\\w+)\"/)||[])[1]||'';const denied=t.includes('권한이 없습니다');if(st!=='Success')throw new Error('VOC1019 EXPORT 기대 Success, 실제 '+st+(denied?'(권한없음)':''));})()"
+        }
+      ]
+    }
+  ]
+}

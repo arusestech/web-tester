@@ -1,0 +1,330 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E01-1 [240 Call접수자] VOC 등록",
+  "_comment": "E2E-01 1단계. 240 이 VOC 등록 → 접수 → 업무요청(수신자 TEST_R250). 정리는 E2E01-4.",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat(SMTP 목업 localhost:1025 적용 war). 8888 = IntelliJ Tomcat(메일 host 내부망 IP → 발송 실패). CrossEditor 라이선스는 도메인 기준이라 포트 무관",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 가 컨텍스트 없는 /screen/POR0001.ub 로 보내는 알려진 현상(세션은 정상)",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R240"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "VOC0001 등록 → VOC1001 확인",
+      "allowForbidden": [
+        "등록",
+        "저장"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "click",
+          "selector": "#FG_CSTMR"
+        },
+        {
+          "action": "wait",
+          "ms": 800
+        },
+        {
+          "action": "fill",
+          "selector": "#DS_CSTMR_CTTPC",
+          "value": "01000000000"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_CAUSE_1');if(!s)throw new Error('CD_VOC_CAUSE_1 없음');for(let i=0;i<s.options.length;i++){if(s.options[i].value){s.selectedIndex=i;s.dispatchEvent(new Event('change',{bubbles:true}));return;}}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_CAUSE_2');if(!s)throw new Error('CD_VOC_CAUSE_2 없음');for(let i=0;i<s.options.length;i++){if(s.options[i].value){s.selectedIndex=i;s.dispatchEvent(new Event('change',{bubbles:true}));return;}}})()"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_CAUSE_3');if(!s)throw new Error('CD_VOC_CAUSE_3 없음');for(let i=0;i<s.options.length;i++){if(s.options[i].value){s.selectedIndex=i;s.dispatchEvent(new Event('change',{bubbles:true}));return;}}})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#DS_VOC_TITLE",
+          "value": "TEST_E2E01"
+        },
+        {
+          "action": "fill",
+          "selector": "#DS_VOC_CN",
+          "value": "TEST_E2E01 고객 문의 내용(자동)"
+        },
+        {
+          "action": "note",
+          "_note": "DS_ANSWER_CN 은 초기 숨김(채널별) → 입력 생략. 필수 라디오: CD_VOC_CHANNEL(C=Call), CD_VOC_CENTER(01), TP_VOC_DEMAND(01) — 8/25 라이브 검증"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{for(const [n,v] of [['CD_VOC_CHANNEL','C'],['CD_VOC_CENTER','01'],['TP_VOC_DEMAND','01']]){const r=document.querySelector('input[name='+n+'][value=\"'+v+'\"]');if(!r)throw new Error(n+' 라디오 없음');r.click();}})()"
+        },
+        {
+          "action": "screenshot",
+          "name": "입력"
+        },
+        {
+          "action": "eval",
+          "script": "document.querySelector('#btnRegister a').click()"
+        },
+        {
+          "action": "expectDialog",
+          "text": "등록"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "screenshot",
+          "name": "등록결과"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/VOC1001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn a, #searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectText",
+          "text": "TEST_E2E01"
+        },
+        {
+          "action": "screenshot",
+          "name": "목록확인"
+        }
+      ]
+    },
+    {
+      "name": "VOC1002 접수(W0→P0) + 업무요청(→ TEST_R250)",
+      "allowForbidden": [
+        "접수",
+        "저장",
+        "추가",
+        "등록",
+        "Save"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "click",
+          "selector": "#searchBtn a, #searchBtn"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const td=[...document.querySelectorAll('table.ui-jqgrid-btable td')].find(t=>t.textContent.includes('TEST_E2E01'));if(!td)throw new Error('행 없음: TEST_E2E01');td.dispatchEvent(new MouseEvent('dblclick',{bubbles:true}));})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2500
+        },
+        {
+          "action": "expectUrl",
+          "contains": "VOC1002"
+        },
+        {
+          "action": "screenshot",
+          "name": "상세"
+        },
+        {
+          "action": "note",
+          "_verified": "8/25 라이브 검증: Call 채널 등록 시 상태가 바로 P0(접수자=등록자) → [접수] 불필요. 접수자 본인에게 btnSave/btnReq/btnAddReq 노출(수정모드). 공유 없음(FG_SHARE_NONE) 체크 + 요청 제목/내용 필수"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.getElementById('FG_SHARE_NONE');if(e&&!e.checked)e.click();})()"
+        },
+        {
+          "action": "fill",
+          "selector": "#DS_JOB_REQUEST_TITLE",
+          "value": "TEST_E2E01 업무요청"
+        },
+        {
+          "action": "fill",
+          "selector": "#DS_JOB_REQUEST_CN",
+          "value": "TEST_E2E01 업무요청 내용(자동) → 고객서비스팀"
+        },
+        {
+          "action": "click",
+          "selector": "#btnAddReq a",
+          "popup": true
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "screenshot",
+          "name": "VRE1000팝업"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#btnAddEmp"
+        },
+        {
+          "action": "note",
+          "_note": "VRE1000 안에서 POP0016(직원 멀티선택) 을 window.open 으로 열어 TEST_고객서비스팀 검색·선택·확정 (eval Promise). 처리자는 INCUMBENT_CD=0(재직) 이어야 검색됨"
+        },
+        {
+          "action": "eval",
+          "script": "new Promise((res,rej)=>{document.getElementById('btnAddEmp').click();let n=0;const t=setInterval(()=>{n++;try{const w=window.open('','MultiUserPopup');const d=w&&w.document;if(d&&d.getElementById('NM_USER')&&d.readyState==='complete'){clearInterval(t);d.getElementById('NM_USER').value='TEST_고객서비스팀';const b=d.getElementById('fnSearch');(b.querySelector('a')||b).click();let m=0;const t2=setInterval(()=>{m++;const tr=d.querySelector('#list tr.jqgrow');if(tr){clearInterval(t2);(tr.querySelector('input[type=checkbox]')||tr.querySelector('td:nth-child(2)')).click();setTimeout(()=>{const c=d.getElementById('conFirm');(c.querySelector('a')||c).click();setTimeout(()=>res('ok'),1200);},800);}else if(m>40){clearInterval(t2);rej(new Error('POP0016 검색결과 없음'));}},500);}}catch(e){} if(n>60){clearInterval(t);rej(new Error('POP0016 로드 실패'));}},500);})"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "expectVisible",
+          "selector": "input[name=NM_REQ_PROCESS_EMP]"
+        },
+        {
+          "action": "screenshot",
+          "name": "처리자지정"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.getElementById('btnSave');if(!b)throw new Error('버튼 없음: btnSave');(b.querySelector('a')||b).click();})()"
+        },
+        {
+          "action": "expectDialog",
+          "text": "등록"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "closePopup"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectText",
+          "text": "TEST_고객서비스팀"
+        },
+        {
+          "action": "screenshot",
+          "name": "업무요청등록"
+        },
+        {
+          "action": "note",
+          "_expected": "processList 에 '배정 TEST_R250' 행, vocHistList 에 '업무요청이 발송되었습니다'. TBS_VOC_REQUEST.CD_REQ_STATUS=R1. 메일은 SMTP 목업(localhost:1025) 로그로 확인"
+        }
+      ]
+    },
+    {
+      "name": "로그아웃",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "click",
+          "selector": ".logout-button a"
+        },
+        {
+          "action": "expectDialog",
+          "text": "로그아웃"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "expectUrl",
+          "contains": "BCO0001"
+        }
+      ]
+    }
+  ]
+}

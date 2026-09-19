@@ -1,0 +1,64 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E08-2 [110] 결재 메뉴 미노출",
+  "_comment": "E2E-08 3단계",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R110"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "메뉴",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const m=[...document.querySelectorAll('#menu a[menuurl]')].map(a=>a.getAttribute('menuurl'));const miss=[].filter(x=>!m.includes(x));const extra=[\"APP0001\", \"APP0005\", \"APP0008\", \"APP0003\"].filter(x=>m.includes(x));if(miss.length||extra.length)throw new Error('메뉴 불일치 누락:'+miss+' 불필요:'+extra);})()"
+        }
+      ]
+    }
+  ]
+}

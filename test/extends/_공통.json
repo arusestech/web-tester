@@ -1,0 +1,22 @@
+{
+  "_comment": "자체검증용 공통 설정 (extends 대상). '_' 로 시작하므로 목록·일괄 실행에서는 제외된다. 실행: npm run mock 후 node cli.js run test/extends --headless",
+  "baseUrl": "http://localhost:3999",
+  "browser": { "channel": "chrome", "headless": true },
+  "evidence": { "screenshotAll": false },
+  "forbidden": ["삭제"],
+  "blocked": ["핵심 요소 없음"],
+  "login": {
+    "url": "/login",
+    "steps": [
+      { "action": "fill", "selector": "input[name=userId]", "value": "tester" },
+      { "action": "fill", "selector": "input[name=password]", "value": "1234" },
+      { "action": "click", "selector": "button[type=submit]" }
+    ],
+    "success": { "urlNotContains": "login" }
+  },
+  "menus": [
+    { "name": "메인", "url": "/main", "expect": ["#content"] },
+    { "name": "사원관리", "url": "/emp", "expect": ["table"] },
+    { "name": "에러메뉴", "url": "/err" }
+  ]
+}

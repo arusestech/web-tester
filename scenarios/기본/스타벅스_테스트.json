@@ -1,0 +1,59 @@
+{
+  "name": "스타벅스 테스트",
+  "baseUrl": "http://dev-ivoc.istarbucks.co.kr:8080/voc",
+  "browser": {
+    "channel": "chrome"
+  },
+  "forbidden": [],
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "test01"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001"
+    }
+  },
+  "menus": [],
+  "crud": [],
+  "timeout": 10000,
+  "stepDelay": 300,
+  "evidence": {
+    "screenshotAll": true
+  },
+  "crawl": {
+    "enabled": false,
+    "startUrl": "/",
+    "selector": "nav a, #sidebar a, .menu a, .gnb a, .lnb a",
+    "exclude": [
+      "logout",
+      "download"
+    ],
+    "maxPages": 100
+  }
+}

@@ -1,0 +1,3739 @@
+{
+  "name": "스타벅스 VOC — 소스스캔 초안",
+  "_생성정보": "run.bat scan-source <스타벅스 VOC 소스 루트> (2026-08-31). 화면 정의 XML(src.resource/…/screen/*.xml) 526개 + 컨트롤러에서 뽑음. 근거·제외 사유는 reports/_소스분석/스타벅스_VOC_소스스캔_초안-20260831-1206/source-scan.html",
+  "_comment_env": "접속 URL·브라우저는 프로젝트 설정(🔧 _project.json = http://dev-ivoc.istarbucks.co.kr:8888)에서 상속한다. 여기에 baseUrl 을 다시 넣으면 프로젝트 설정을 바꿔도 안 먹는다",
+  "timeout": 15000,
+  "evidence": {
+    "screenshotAll": true
+  },
+  "_comment_ignore": "01_메뉴회귀 에서 검증된 환경 노이즈 목록을 그대로 가져옴 (CSP·404·CDN 차단 등)",
+  "ignore": {
+    "console": [
+      "Content Security Policy",
+      "Failed to load resource: the server responded with a status of 404",
+      "jQuery Migrate"
+    ],
+    "resources": [
+      "cdnjs\\.cloudflare\\.com",
+      "/page/",
+      "/uxl/",
+      "/page/images/",
+      "/logout\\.ub",
+      "/login\\.ub"
+    ],
+    "dialogs": [
+      "승인되지 않은 도메인"
+    ]
+  },
+  "errorPatterns": [
+    "시스템 오류",
+    "HTTP Status 5\\d\\d",
+    "Exception report",
+    "권한이 없는",
+    "접근권한이 없"
+  ],
+  "_comment_forbidden": "소스 JSP 버튼 텍스트에서 뽑은 위험 단어 + 01_메뉴회귀 의 검증된 목록을 합침 (조회 전용이므로 저장·등록까지 막는다)",
+  "forbidden": [
+    "삭제",
+    "영구삭제",
+    "발송",
+    "강제실행",
+    "상신",
+    "승인",
+    "반려",
+    "마감",
+    "선정승인",
+    "저장",
+    "Save",
+    "Delete",
+    "등록",
+    "수정",
+    "Remove",
+    "Submit",
+    "실행",
+    "회수",
+    "업로드",
+    "확정",
+    "일괄",
+    "Upload",
+    "초기화",
+    "결제",
+    "이관",
+    "Send",
+    "전송",
+    "제거"
+  ],
+  "_comment_login": "소스 BCO0001.jsp 에서 뽑은 셀렉터(#userid/#userpw/#login) — 01_메뉴회귀 와 동일. 로그인 후 포털(POR0001) 이동까지 확인한다. 비밀번호는 실행할 때 입력",
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "test01"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001"
+    }
+  },
+  "_comment_inputs": "01_메뉴회귀 에서 가져옴. 날짜는 실행 시점에 맞게 고칠 것 (기간 제한이 있는 화면이 있다)",
+  "inputs": {
+    "common": {
+      "DT_START": "2026-08-01",
+      "DT_END": "2026-08-29",
+      "DT_START_REQ": "2026-08-01",
+      "DT_END_REQ": "2026-08-29",
+      "DT_VOC_REG_START": "2026-08-01",
+      "DT_VOC_REG_END": "2026-08-29"
+    },
+    "search": "#searchBtn a, #searchBtn",
+    "labels": {
+      "DT_START": "시작일",
+      "DT_END": "종료일"
+    }
+  },
+  "_comment_menus": "소스 스캔 초안 333개 — 화면 정의 XML 의 screenName 을 그대로 이름으로 썼다. _이미있음 이 붙은 60개는 01_메뉴회귀 에 이미 있는 화면(중복 실행하지 말 것). 나머지는 아직 한 번도 안 돌려 본 화면이라 실패가 많이 나올 수 있다 — 모듈(화면ID 앞 3글자)별로 나눠서 조금씩 확인하는 것을 권한다",
+  "_comment_expect": "expect 는 화면 JSP(WebContent/WEB-INF/jsp/app/standard/<모듈>/<화면ID>.jsp)에서 뽑은 후보다 — 잠정값이므로 첫 실행 보고서의 \"핵심 요소 없음\" 을 보고 확정할 것. 비어 있는 화면은 JSP 에 마크업이 없고 메타 페이지(DB)가 그리는 화면이다",
+  "_comment_detail": "상세 진입(detail)은 넣지 않았다 — 행 클릭이 상태를 바꾸는 화면이 있기 때문. 각 메뉴의 _상세후보(ondblClickRow 로 찾은 것)를 확인한 뒤 detail 로 옮긴다",
+  "_comment_버튼": "각 메뉴의 _버튼 은 그 화면 JSP 에 있는 버튼 목록이다(마크업 버튼 + 스크립트에서 id 로만 다루는 버튼). ⚠ 는 forbidden 에 걸려 실행 중 차단되는 것",
+  "_comment_actions": "actions 는 **눌러서 동작까지 검사**하는 버튼이다 — 조회·검색처럼 데이터를 바꾸지 않는 것만 넣었다(139개 화면). 누르면 JS 에러·서버 5xx·에러 알림·무반응(죽은 버튼)을 잡는다. 등록·저장·삭제·발송은 일부러 뺐다 — 그건 ⏺ 녹화로 crud 에 만든다",
+  "_제외_팝업": [
+    "개선과제 배정이력 팝업 (ISS1001)",
+    "개선과제 선정 - 종결요청 반려 팝업 (조회만) (ISS0215)",
+    "개선과제 선정승인 - 승인의견 팝업 (조회만) (ISS0213)",
+    "개선과제 의견요청 - 의견 팝업 (ISS0511)",
+    "개선과제 종결요청 이력 팝업 (ISS1002)",
+    "개선과제관리 처리 - 불채택 팝업 (ISS0212)",
+    "개선과제관리 처리 - 채택 팝업 (ISS0211)",
+    "개선과제요청 팝업 (POP0101)",
+    "개선과제활동 - 반려 팝업 (조회만) (ISS0311)",
+    "개선과제활동 - 접수 팝업 (ISS0313)",
+    "개선과제활동 - 활동 등록 팝업 (ISS0312)",
+    "개인정보 상세 조회 팝업 (POP1007)",
+    "게시판 선택 팝업 (UBS0009)",
+    "게시판관리 / 게시판 복제 팝업 (SYS0302)",
+    "게시판관리 / 게시판 복제 팝업 (2) (UBS0002)",
+    "결재선 선택 팝업 (APP0010)",
+    "고객 목록 검색 (POP0012)",
+    "고객 목록 검색(연락처) (POP0013)",
+    "공지사항 팝업 목록 (POP1008)",
+    "공지사항 팝업 상세 (POP1009)",
+    "관련VOC 검색 팝업 (ISS0111)",
+    "다국어 리소스 데이터 등록 팝업 (APM0040)",
+    "다국어 리소스 데이터 상세 팝업 (APM0041)",
+    "답변수정 팝업 (VOC0026)",
+    "도로명주소 검색 (POP0004)",
+    "매장 목록 검색 (POP1001)",
+    "문자발송 팝업 (조회만) (POP0007)",
+    "반기별 목표 등록 팝업 (VOC1205)",
+    "반기별 목표 상세 팝업 (VOC1206)",
+    "배정 VOC 접수자 변경 팝업 (VOC1028)",
+    "배정자 예외추가 팝업 (VOC1023)",
+    "부서 검색 목록 (POP0002)",
+    "부서 검색 목록 (2) (POP0017)",
+    "상담이력 레이어팝업 (VOC1039)",
+    "상용구 목록 검색 (POP0005)",
+    "상용구관리 상세 팝업 (POP0015)",
+    "상품 목록 검색 (POP1002)",
+    "스토어 케어 처리 처리완료(팝업) (STC2001)",
+    "시스템관리 / 서비스 상세 (팝업) (SYS0105)",
+    "시스템관리 / 서비스 코드 등록(팝업) (SYS0118)",
+    "시스템관리 / 서비스 코드 수정(팝업) (SYS0119)",
+    "시스템관리 / 서비스관리 목록 (팝업) (SYS0127)",
+    "시스템관리 / 템플릿 조회 팝업 (SYS0146)",
+    "시스템관리 / 프로그램 권한 관리 / Screen 조회 팝업 (SYS0051)",
+    "시스템관리 / 프로그램 권한 관리 / Screen 조회 팝업 (XML용) (APM0067)",
+    "시스템관리 / 프로그램 권한 관리 / Screen 조회 팝업 (XML용) (2) (SYS0053)",
+    "시스템관리 / 프로그램 권한 관리 / Screen 조회 팝업 (XML용) (다국어용) (APM0051)",
+    "시스템관리 / 화면관리 / 메타연동 (팝업) (SYS0160)",
+    "시스템관리 / 화면관리 목록 (팝업) (SYS0128)",
+    "시스템관리 / 화면관리 상세(팝업) (SYS0161)",
+    "시스템관리 / Function 등록(팝업) (SYS0110)",
+    "시스템관리 / Function 목록 (팝업) (SYS0103)",
+    "시스템관리 / Function 상세 (팝업) (SYS0120)",
+    "시스템관리 / Function Alias 등록(팝업) (SYS0116)",
+    "시스템관리 / Function Alias 상세(팝업) (SYS0117)",
+    "안내팝업 관리 등록 (VOC1208)",
+    "안내팝업 관리 목록 (VOC1207)",
+    "안내팝업 관리 상세 (VOC1209)",
+    "업무요청 사유 등록 팝업 (VRE1007)",
+    "업무요청 처리자변경 팝업 (VRE1100)",
+    "외부관련자 검색 (POP1005)",
+    "외부자 엑셀업로드 팝업 (POP1006)",
+    "이벤트 목록 검색 (POP1004)",
+    "자주하는 질문 선택 팝업 (INF0205)",
+    "접수자 변경 팝업 (VOC1010)",
+    "지식관리 상세 팝업 (POP1012)",
+    "직원 목록 화면 (POP0001)",
+    "직원 목록 화면(멀티선택) (POP0011)",
+    "직원 목록 화면(멀티선택) (2) (POP0016)",
+    "프로모션 목록 검색 (POP1003)",
+    "협조요청 등록 팝업 (VRE1000)",
+    "APMD / 서비스 상세 (팝업) (APM0006)",
+    "APMD / 서비스 코드 등록(팝업) (APM0019)",
+    "APMD / 서비스 코드 수정(팝업) (APM0020)",
+    "APMD / 서비스관리 등록 (팝업) (APM0036)",
+    "APMD / 서비스관리 목록 (팝업) (APM0022)",
+    "APMD / 화면관리 / 메타연동 (팝업) (APM0030)",
+    "APMD / 화면관리 목록 (팝업) (APM0023)",
+    "APMD / 화면관리 상세(팝업) (APM0031)",
+    "APMD / Function 등록(팝업) (APM0011)",
+    "APMD / Function 목록 (팝업) (APM0004)",
+    "APMD / Function 상세 (팝업) (APM0021)",
+    "APMD / Function Alias 등록(팝업) (APM0017)",
+    "APMD / Function Alias 상세(팝업) (APM0018)",
+    "my VOC 상세 팝업 (POP1011)",
+    "SMS 이력 연락처 상세 조회 팝업 (POP1013)",
+    "Store Care FAQ 선택 팝업 (INF0305)",
+    "STORECARE FAQ 베스트 등록 팝업 (INF0307)",
+    "Team VOC 상세 팝업 (POP1010)",
+    "UB-Board 게시물 조회로그 조회 팝업 (UBD0001)",
+    "VOC 삭제 팝업 (조회만) (VOC1012)",
+    "VOC 순차배정 예외관리 팝업 상세 (VOC1033)",
+    "VOC ep POPUP (POP2000)",
+    "VOC배분 추가등록 팝업 (VOC1032)",
+    "VOC업무문의(매장) 등록 팝업 (POP0008)",
+    "VOC업무문의(매장) 상세 팝업 (POP0009)",
+    "WEB VOC FAQ 베스트 등록 팝업 (INF0306)"
+  ],
+  "_제외_예제화면": [
+    "개선과제 현황 (2) (EXP1122)",
+    "고객별 스토어케어 현황 (2) (EXP1126)",
+    "공지사항 등록 (EXP8003)",
+    "공지사항 목록 (EXP8001)",
+    "공지사항 상세 (EXP8002)",
+    "기본 피벗 그리드 목록 (EXP8005)",
+    "매장별 스토어케어 현황 (2) (EXP1125)",
+    "매장별 통합 통계 (EXP1127)",
+    "메인-박스형테스트 (POR0004)",
+    "목록 예제화면 (EXP9998)",
+    "목록 테스트 화면 (EXP9010)",
+    "문항별 스토어케어 현황 (2) (EXP1124)",
+    "불만 VOC (Six sigma) (2) (EXP1123)",
+    "상세형 예제 (EXP9999)",
+    "서브그리드 테스트 (EXP9994)",
+    "예제 멀티콤보 목록화면&#xd; (EXP9000)",
+    "예제목록화면 (EXP0200)",
+    "이벤트별 통계 (2) (EXP1118)",
+    "접힘펼침 테스트 (EXP9997)",
+    "제이쿼리 탭 &amp;gt; 일반 탭 (EXP5006)",
+    "제품/상품별 통계 (2) (EXP1116)",
+    "좌측메뉴예제 (EXP9996)",
+    "테이블 테스트 화면 (EXP9009)",
+    "프로모션별 통계 (2) (EXP1117)",
+    "화면 resize 테스트 (EXP9995)",
+    "DIV TAB - 예제 등록 화면 (EXP5001)",
+    "DIV TAB - 예제 목록 화면 (페이징) (EXP5003)",
+    "DIV TAB - 예제 목록 화면 2 (페이징) (EXP5004)",
+    "DIV TAB - 예제 상세 화면 (EXP5002)",
+    "DIV TAB - 예제 상세 화면 (2) (EXP5005)",
+    "DIV TAB 예제 메인페이지 (EXP5000)",
+    "FooterSum Grid Test (EXP8009)",
+    "Frozen 피벗 그리드 (EXP8007)",
+    "Hierarchy 피벗 그리드 (EXP8006)",
+    "Multiple 피벗 그리드 (EXP8004)",
+    "NONOVOC 예제 (EXP9993)",
+    "Total 피벗 그리드 (EXP8008)",
+    "Vital Fwe 통계 (EXP1115)",
+    "VOC 매장별 통계 (2) (EXP1114)",
+    "VOC 분류별 통계 (2) (EXP1112)",
+    "VOC 업무 처리 통계 (2) (EXP1020)",
+    "VOC 업무 처리부서 통계 (2) (EXP1121)",
+    "VOC 연간 통계 (3) (EXP1111)",
+    "VOC 연간 통계 (4) (EXP1120)",
+    "VOC 채널별 통계 (2) (EXP1113)",
+    "Web VOC 처리현황 (2) (EXP1119)"
+  ],
+  "_제외_모바일": [
+    "고객의소리 등록(내용입력) (MOB0024)",
+    "고객의소리 등록(등록완료) (MOB0025)",
+    "고객의소리 등록(유형선택) (MOB0023)",
+    "고객의소리 등록(정보이용동의) (MOB0022)",
+    "고객의소리 안내 (MOB0021)",
+    "고객의소리 FAQ (MOB0040)",
+    "고객의소리 FAQ (2) (MOB0042)",
+    "고객의소리 FAQ(헤더X) (MOB0041)",
+    "고객의소리 Intro (MOB0020)",
+    "스토어케어 가까운 매장 목록 조회 (MOB0005)",
+    "스토어케어 등록(등록완료) (MOB0004)",
+    "스토어케어 등록(부가정보) (MOB0003)",
+    "스토어케어 등록(요청내용) (MOB0002)",
+    "스토어케어 안내 (MOB0001)",
+    "EP 공개 VOC (2) (MOB0400)",
+    "EP 스토어케어 목록 (MOB2001)",
+    "EP Store VOC Note (2) (MOB1001)",
+    "My고객의소리 목록 (MOB0030)",
+    "My고객의소리 상세 (MOB0031)",
+    "My스토어케어 목록 (MOB0010)",
+    "My스토어케어 상세 (MOB0011)"
+  ],
+  "_제외_로그인계정": [
+    "로그인 (BCO0001)",
+    "미접속 60일 경과 대상 SMS인증(잠금 해제) (BCO0003)",
+    "비밀번호 변경 (BCO0002)"
+  ],
+  "_제외_화면조각": [
+    "개선과제 - 과제내용 영역 (ISS0901)",
+    "개선과제 - 과제내용 영역 (조회) (ISS0902)",
+    "개선과제 성과내용 영역 (ISS0801)",
+    "게시판관리 / 게시판상세 관리자설정 (TabContent) (SYS0307)",
+    "게시판관리 / 게시판상세 관리자설정 (TabContent) (2) (UBS0006)",
+    "게시판관리 / 게시판상세 권한정보 (TabContent) (UBS0007)",
+    "게시판관리 / 게시판상세 기본정보 (TabContent) (SYS0305)",
+    "게시판관리 / 게시판상세 알림메세지정보 (TabContent) (UBS0008)",
+    "게시판관리 / 게시판상세 유형정보 (TabContent) (SYS0306)",
+    "게시판관리 / 게시판상세 유형정보 (TabContent) (2) (UBS0005)",
+    "고객정보(마스킹용) (VOC0003)",
+    "고객정보(수정용) (VOC0004)",
+    "공개정보 정보(수정용) (VOC0010)",
+    "공개정보 정보(VIEW용) (VOC0009)",
+    "답변내용 정보(수정용) (VOC0008)",
+    "답변내용 정보(VIEW용) (VOC0007)",
+    "업무요청 - 고객정보 (VIEW용) (VRE1001)",
+    "업무요청 - 답변내용 정보(VIEW용) (VRE1002)",
+    "업무요청 - 업무요청 상세 정보(수정용) (VRE1005)",
+    "업무요청 - 업무요청 상세 정보(VIEW용) (VRE1006)",
+    "업무요청 - 업무요청 정보(VIEW용) (VRE1004)",
+    "업무요청 상세 정보(수정용) (VOC0016)",
+    "업무요청 정보(수정용) (VOC0006)",
+    "업무요청 정보(VIEW용) (VOC0005)",
+    "접수정보(수정용) (VOC0012)",
+    "추가정보(수정용) (VOC0014)"
+  ],
+  "_제외_기타": [
+    "콜센터 INBOUND 상담건 VOC이관 처리 (조회만) (/call/vocRegFromCall.ub)",
+    "bds > bds Check Count (/bds/bdsCheckCount.ub)"
+  ],
+  "_comment_제외": "팝업 97 (직접 열면 렌더가 다를 수 있음) / 예제·테스트 46 (uxl 프레임워크 예제) / 모바일 21 (모바일 전용) / 로그인·계정 3 (비밀번호 변경 등 위험) / 화면조각 26 ((VIEW용)·(수정용)·TabContent·…영역 = 다른 화면 안에 들어가는 조각이라 단독으로 열면 깨진다) / 기타 2 (화면이 아닌 처리 URL). 필요하면 여기서 골라 menus 로 옮기면 된다",
+  "menus": [
+    {
+      "name": "알리미 발송 / 화면관리 목록 (조회만)",
+      "url": "/screen/ALM0001.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/alm/ALM0001.xml:1",
+      "_상세후보": "#list tbody tr — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "알리미 발송 등록화면 (조회만)",
+      "url": "/screen/ALM0002.ub",
+      "expect": [
+        "#registForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/alm/ALM0002.xml:1"
+    },
+    {
+      "name": "VOC 연간 통계",
+      "url": "/screen/ANA0011.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0011.xml:1"
+    },
+    {
+      "name": "VOC 분류별 통계",
+      "url": "/screen/ANA0012.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0012.xml:1"
+    },
+    {
+      "name": "VOC 채널별 통계",
+      "url": "/screen/ANA0013.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0013.xml:1"
+    },
+    {
+      "name": "VOC 매장별 통계",
+      "url": "/screen/ANA0014.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0014.xml:1",
+      "_버튼": "searchBtn(#searchBtn) · ⚠excelDownBtn(#excelDownBtn) · CauseAddBtn(#CauseAddBtn) · ⚠CauseDelBtn(#CauseDelBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "Vital Few 통계",
+      "url": "/screen/ANA0015.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0015.xml:1",
+      "_버튼": "search(#btnDeptSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "제품/상품별 통계",
+      "url": "/screen/ANA0016.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0016.xml:1",
+      "_버튼": "searchBtn(#searchBtn) · ⚠excelDownBtn(#excelDownBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "프로모션별 통계",
+      "url": "/screen/ANA0017.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0017.xml:1"
+    },
+    {
+      "name": "이벤트별 통계",
+      "url": "/screen/ANA0018.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0018.xml:1"
+    },
+    {
+      "name": "Web VOC 처리현황",
+      "url": "/screen/ANA0019.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0019.xml:1"
+    },
+    {
+      "name": "VOC 업무 처리 통계",
+      "url": "/screen/ANA0020.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0020.xml:1",
+      "_버튼": "searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "VOC 업무 처리부서 통계",
+      "url": "/screen/ANA0021.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0021.xml:1",
+      "_버튼": "search(#btnDeptSearch) · searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "개선과제 현황",
+      "url": "/screen/ANA0022.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0022.xml:1"
+    },
+    {
+      "name": "불만 VOC (Six sigma)",
+      "url": "/screen/ANA0023.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0023.xml:1"
+    },
+    {
+      "name": "문항별 스토어케어 현황",
+      "url": "/screen/ANA0024.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0024.xml:1",
+      "_버튼": "search(#btnDeptSearch) · searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "매장별 스토어케어 현황",
+      "url": "/screen/ANA0025.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0025.xml:1",
+      "_버튼": "search(#btnDeptSearch) · searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "고객별 스토어케어 현황",
+      "url": "/screen/ANA0026.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0026.xml:1",
+      "_버튼": "search(#btnDeptSearch) · searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "CE 매장별 통합 통계",
+      "url": "/screen/ANA0027.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0027.xml:1"
+    },
+    {
+      "name": "매장별 점수 통계(고객교감/매장운영)",
+      "url": "/screen/ANA0028.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0028.xml:1",
+      "_버튼": "searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "매장별 점수 통계(상세항목별)",
+      "url": "/screen/ANA0029.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0029.xml:1",
+      "_버튼": "searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "연간 CE 통계",
+      "url": "/screen/ANA0030.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0030.xml:1",
+      "_버튼": "searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "월 CE 통계",
+      "url": "/screen/ANA0031.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0031.xml:1",
+      "_버튼": "searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "분류별 코멘트 현황",
+      "url": "/screen/ANA0032.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0032.xml:1",
+      "_버튼": "search(#btnChargeDept) · searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnChargeDept"
+        }
+      ]
+    },
+    {
+      "name": "VOC 연간 통계 (2)",
+      "url": "/screen/ANA0033.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA0033.xml:1"
+    },
+    {
+      "name": "VOC 연간 통계 (컨텐츠)",
+      "url": "/screen/ANA1011.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1011.xml:1"
+    },
+    {
+      "name": "VOC 분류별 통계 (컨텐츠)",
+      "url": "/screen/ANA1012.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1012.xml:1"
+    },
+    {
+      "name": "VOC 채널별 통계 (컨텐츠)",
+      "url": "/screen/ANA1013.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1013.xml:1"
+    },
+    {
+      "name": "VOC 매장별 통계 (컨텐츠)",
+      "url": "/screen/ANA1014.ub",
+      "expect": [
+        "#cntTable"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1014.xml:1"
+    },
+    {
+      "name": "제품/상품별 통계 (컨텐츠)",
+      "url": "/screen/ANA1016.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1016.xml:1"
+    },
+    {
+      "name": "프로모션별 통계 (컨텐츠)",
+      "url": "/screen/ANA1017.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1017.xml:1"
+    },
+    {
+      "name": "이벤트별 통계 (컨텐츠)",
+      "url": "/screen/ANA1018.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1018.xml:1"
+    },
+    {
+      "name": "Web VOC 처리현황 (컨텐츠)",
+      "url": "/screen/ANA1019.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1019.xml:1"
+    },
+    {
+      "name": "VOC 업무 처리 통계 (컨텐츠)",
+      "url": "/screen/ANA1020.ub",
+      "expect": [
+        "#cntTable"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1020.xml:1"
+    },
+    {
+      "name": "VOC 업무 처리부서 통계 (컨텐츠)",
+      "url": "/screen/ANA1021.ub",
+      "expect": [
+        "#cntTable"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1021.xml:1"
+    },
+    {
+      "name": "불만 VOC (Six sigma) (컨텐츠)",
+      "url": "/screen/ANA1023.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1023.xml:1"
+    },
+    {
+      "name": "문항별 스토어케어 현황 (컨텐츠)",
+      "url": "/screen/ANA1024.ub",
+      "expect": [
+        "#cntTable"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1024.xml:1"
+    },
+    {
+      "name": "ANA1025",
+      "url": "/screen/ANA1025.ub",
+      "expect": [
+        "#cntTable"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1025.xml:1"
+    },
+    {
+      "name": "ANA1026",
+      "url": "/screen/ANA1026.ub",
+      "expect": [
+        "#cntTable"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1026.xml:1"
+    },
+    {
+      "name": "매장별 통합 통계(상세항목별)",
+      "url": "/screen/ANA1027.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1027.xml:1"
+    },
+    {
+      "name": "매장별 통계(상세항목별) 컨텐츠",
+      "url": "/screen/ANA1029.ub",
+      "expect": [
+        "#cntTable"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1029.xml:1"
+    },
+    {
+      "name": "연간 CE 통계 (컨텐츠)",
+      "url": "/screen/ANA1030.ub",
+      "expect": [
+        "#cntTable"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1030.xml:1"
+    },
+    {
+      "name": "월별 CE 통계 (컨텐츠)",
+      "url": "/screen/ANA1031.ub",
+      "expect": [
+        "#cntTable"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1031.xml:1"
+    },
+    {
+      "name": "분류별 코멘트 현황 (컨텐츠)",
+      "url": "/screen/ANA1032.ub",
+      "expect": [
+        "#cntTable"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1032.xml:1"
+    },
+    {
+      "name": "VOC 연간 통계 (컨텐츠) (2)",
+      "url": "/screen/ANA1033.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ana/ANA1033.xml:1"
+    },
+    {
+      "name": "APMD / 화면관리 목록",
+      "url": "/screen/APM0001.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0001.xml:1",
+      "_상세후보": "#list tbody tr — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnMeta(#btnMeta) · btnScreenCache(#btnScreenCache) · btnBuildMeta(#btnBuildMeta) · ⚠btnRemoveMeta(#btnRemoveMeta) · btnBuildXml(#btnBuildXml) · ⚠btnRemoveXml(#btnRemoveXml)"
+    },
+    {
+      "name": "APMD / 화면관리 상세",
+      "url": "/screen/APM0002.ub",
+      "expect": [
+        "#funcList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0002.xml:1",
+      "_버튼": "⚠btnUpdate(#btnUpdate) · ⚠btnDelete(#btnDelete) · btnMap(#btnMap) · btnSearch(#btnSearch) · btnAddFunction(#btnAddFunction) · btnAddParameter(#btnAddParameter) · ⚠btnUpdateParameter(#btnUpdateParameter)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "APMD / 화면관리 등록",
+      "url": "/screen/APM0003.ub",
+      "expect": [
+        "#tblScrInfo"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0003.xml:1",
+      "_버튼": "목록(#btnList) · ⚠저장(#btnInsert)",
+      "actions": [
+        {
+          "name": "목록",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "APMD / 서비스관리 목록",
+      "url": "/screen/APM0005.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0005.xml:1",
+      "_상세후보": "#list tbody tr — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "검색(#btnSearch) · ⚠btnRegister(#btnRegister) · btnServiceCache(#btnServiceCache)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "APMD / 서비스관리 등록",
+      "url": "/screen/APM0007.ub",
+      "expect": [
+        "#tblSvcInfo"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0007.xml:1",
+      "_버튼": "목록(#btnList) · ⚠저장(#btnInsert)",
+      "actions": [
+        {
+          "name": "목록",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "APMD / 서비스 상세",
+      "url": "/screen/APM0008.ub",
+      "expect": [
+        "#tblSvcInfo"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0008.xml:1",
+      "_버튼": "⚠수정(#updateBtn) · ⚠삭제(#deleteBtn)"
+    },
+    {
+      "name": "APMD / 서비스 코드목록",
+      "url": "/screen/APM0009.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0009.xml:1",
+      "_상세후보": "#list tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "추가(#btnAdd)"
+    },
+    {
+      "name": "APMD / 서비스 실행에러로그 목록",
+      "url": "/screen/APM0010.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0010.xml:1"
+    },
+    {
+      "name": "APMD / Function 목록",
+      "url": "/screen/APM0012.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0012.xml:1",
+      "_상세후보": "#list tbody tr — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnSearch(#btnSearch) · ⚠btnRegister(#btnRegister)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "APMD / Function 등록",
+      "url": "/screen/APM0013.ub",
+      "expect": [
+        "#tblFunc"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0013.xml:1",
+      "_버튼": "목록(#btnList) · ⚠저장(#btnInsert) · btnSearchService(#btnSearchService) · btnSearchScreen(#btnSearchScreen)",
+      "actions": [
+        {
+          "name": "목록",
+          "click": "#btnList"
+        },
+        {
+          "name": "Search Service",
+          "click": "#btnSearchService"
+        },
+        {
+          "name": "Search Screen",
+          "click": "#btnSearchScreen"
+        }
+      ]
+    },
+    {
+      "name": "APMD / Function 상세",
+      "url": "/screen/APM0014.ub",
+      "expect": [
+        "#tblFunc"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0014.xml:1",
+      "_버튼": "목록(#btnList) · 찾기(#btnSearchService) · 상세(#btnViewService) · ⚠수정(#btnUpdate) · ⚠삭제(#btnDelete) · btnSearchScreen(#btnSearchScreen) · btnViewScreen(#btnViewScreen)",
+      "actions": [
+        {
+          "name": "목록",
+          "click": "#btnList"
+        },
+        {
+          "name": "찾기",
+          "click": "#btnSearchService"
+        },
+        {
+          "name": "Search Screen",
+          "click": "#btnSearchScreen"
+        }
+      ]
+    },
+    {
+      "name": "APMD / 서비스 상세 Main Tab",
+      "url": "/screen/APM0015.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0015.xml:1",
+      "_버튼": "btnList(#btnList)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "APMD / Function Alias 목록",
+      "url": "/screen/APM0016.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0016.xml:1",
+      "_상세후보": "#list tbody tr — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "검색(#btnSearch) · ⚠btnRegister(#btnRegister)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "APMD / 서비스 마스킹 목록",
+      "url": "/screen/APM0024.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0024.xml:1",
+      "_상세후보": "#list tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnAdd(#btnAdd) · ⚠btnDelete(#btnDelete)"
+    },
+    {
+      "name": "APMD / 서비스 마스킹 추가",
+      "url": "/screen/APM0026.ub",
+      "expect": [
+        "#tblMask"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0026.xml:1",
+      "_버튼": "⚠저장(#btnAdd)"
+    },
+    {
+      "name": "APMD / 마스크 관리 / 마스크 목록",
+      "url": "/screen/APM0027.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0027.xml:1",
+      "_상세후보": "#list tbody tr — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnSearch(#btnSearch) · ⚠btnRegister(#btnRegister)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "APMD / 마스크 관리 / 마스크 상세",
+      "url": "/screen/APM0028.ub",
+      "expect": [
+        "#authList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0028.xml:1",
+      "_상세후보": "#authList tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠btnUpdate(#btnUpdate) · ⚠btnDelete(#btnDelete) · btnList(#btnList)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "APMD / 마스크 관리 / 마스크 등록",
+      "url": "/screen/APM0029.ub",
+      "expect": [
+        "#registForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0029.xml:1",
+      "_버튼": "⚠btnRegist(#btnRegist) · btnCancle(#btnCancle)"
+    },
+    {
+      "name": "APMD / SQLMAP 목록",
+      "url": "/screen/APM0032.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0032.xml:1",
+      "_상세후보": "#list tbody tr — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "추가(#btnAdd)"
+    },
+    {
+      "name": "APMD / 서비스쿼리 상세",
+      "url": "/screen/APM0033.ub",
+      "expect": [
+        "#detailForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0033.xml:1",
+      "_버튼": "⚠저장(#btnUpdate)"
+    },
+    {
+      "name": "APMD / 서비스쿼리 등록",
+      "url": "/screen/APM0034.ub",
+      "expect": [
+        "#detailForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0034.xml:1",
+      "_버튼": "⚠저장(#btnInsert)"
+    },
+    {
+      "name": "APMD / 서비스관리 상세코드보기",
+      "url": "/screen/APM0035.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0035.xml:1",
+      "_버튼": "닫기(#btnClose)",
+      "actions": [
+        {
+          "name": "닫기",
+          "click": "#btnClose"
+        }
+      ]
+    },
+    {
+      "name": "다국어 리소스 관리",
+      "url": "/screen/APM0042.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0042.xml:1",
+      "_상세후보": "#list tbody tr — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnSearch(#btnSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 메뉴 관리 (다국어용)",
+      "url": "/screen/APM0050.ub",
+      "expect": [
+        "#screenList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0050.xml:1",
+      "_상세후보": "#screenList tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠updateBtn(#updateBtn) · ⚠deleteBtn(#deleteBtn) · BTN_SCREEN_ADD(#BTN_SCREEN_ADD)"
+    },
+    {
+      "name": "시스템관리 / 코드 유형 목록(다국어용)",
+      "url": "/screen/APM0060.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0060.xml:1",
+      "_상세후보": "#list tbody tr — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠insertBtn(#insertBtn)"
+    },
+    {
+      "name": "시스템관리 / 코드 유형 등록(다국어용)",
+      "url": "/screen/APM0061.ub",
+      "expect": [
+        "#insertForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0061.xml:1",
+      "_버튼": "listBtn(#listBtn) · ⚠insertBtn(#insertBtn) · viewCodeBtn(#viewCodeBtn)",
+      "actions": [
+        {
+          "name": "list",
+          "click": "#listBtn"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 코드 유형 상세(다국어용)",
+      "url": "/screen/APM0062.ub",
+      "expect": [
+        "#list2"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0062.xml:1",
+      "_상세후보": "#list2 tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "listBtn(#listBtn) · ⚠insertBtn(#insertBtn) · ⚠updateBtn(#updateBtn) · ⚠deleteBtn(#deleteBtn) · viewCodeBtn(#viewCodeBtn) · ⚠insertGroupBtn(#insertGroupBtn) · ⚠deleteGroupBtn(#deleteGroupBtn)",
+      "actions": [
+        {
+          "name": "list",
+          "click": "#listBtn"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 코드 등록(다국어용)",
+      "url": "/screen/APM0063.ub",
+      "expect": [
+        "#list2"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0063.xml:1",
+      "_버튼": "⚠insertBtn(#insertBtn)"
+    },
+    {
+      "name": "시스템관리 / 코드 상세(다국어용)",
+      "url": "/screen/APM0064.ub",
+      "expect": [
+        "#insertForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0064.xml:1",
+      "_버튼": "⚠updateBtn(#updateBtn)"
+    },
+    {
+      "name": "시스템관리 / Dynamic 코드 조회(다국어용)",
+      "url": "/screen/APM0065.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0065.xml:1",
+      "_버튼": "닫기(#btnClose)",
+      "actions": [
+        {
+          "name": "닫기",
+          "click": "#btnClose"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 프로그램 권한 관리 (XML용)",
+      "url": "/screen/APM0066.ub",
+      "expect": [
+        "#functionList"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/apm/APM0066.xml:1",
+      "_상세후보": "#functionList tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "BTN_SCREEN_ADD(#BTN_SCREEN_ADD)"
+    },
+    {
+      "name": "나의상신목록 (조회만)",
+      "url": "/screen/APP0001.ub",
+      "expect": [
+        "#LIST"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/app/APP0001.xml:1",
+      "_상세후보": "#LIST tbody tr — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요"
+    },
+    {
+      "name": "나의상신상세 (조회만)",
+      "url": "/screen/APP0002.ub",
+      "expect": [
+        "#LIST"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/app/APP0002.xml:1"
+    },
+    {
+      "name": "결재상신등록 (조회만)",
+      "url": "/screen/APP0003.ub",
+      "expect": [
+        "#APPROVAL_FORM"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/app/APP0003.xml:1",
+      "_버튼": "search(#SEARCH_LINE) · ⚠삭제(#DELETE_LINE) · 위(#UP_LINE) · 아래(#DOWN_LINE) · BTN_APPR_LINE(#BTN_APPR_LINE)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#SEARCH_LINE"
+        }
+      ]
+    },
+    {
+      "name": "결재자 지정",
+      "url": "/screen/APP0004.ub",
+      "expect": [
+        "#list2"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/app/APP0004.xml:1",
+      "_상세후보": "#list2 tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "search(#fnSearch_dept) · search(#fnSearch) · 위(#UP_LINE) · 아래(#DOWN_LINE) · ⚠삭제(#DELETE_LINE)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#fnSearch_dept"
+        }
+      ]
+    },
+    {
+      "name": "나의결재목록",
+      "url": "/screen/APP0005.ub",
+      "expect": [
+        "#LIST"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/app/APP0005.xml:1",
+      "_상세후보": "#LIST tbody tr — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요"
+    },
+    {
+      "name": "나의결재상세",
+      "url": "/screen/APP0006.ub",
+      "expect": [
+        "#APP_ROOT"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/app/APP0006.xml:1"
+    },
+    {
+      "name": "결재반려 (조회만)",
+      "url": "/screen/APP0007.ub",
+      "expect": [
+        "#BANRAE_REASON_FORM"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/app/APP0007.xml:1"
+    },
+    {
+      "name": "결재선관리",
+      "url": "/screen/APP0008.ub",
+      "expect": [
+        "#list2"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/app/APP0008.xml:1",
+      "_상세후보": "#list2 tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "위(#UP_LINE) · 아래(#DOWN_LINE) · ⚠삭제(#DELETE_LINE)"
+    },
+    {
+      "name": "결재선 등록",
+      "url": "/screen/APP0009.ub",
+      "expect": [
+        "#list2"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/app/APP0009.xml:1",
+      "_상세후보": "#list2 tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "search(#fnSearch_dept) · search(#fnSearch) · 위(#UP_LINE) · 아래(#DOWN_LINE) · ⚠삭제(#DELETE_LINE)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#fnSearch_dept"
+        }
+      ]
+    },
+    {
+      "name": "결재승인 (조회만)",
+      "url": "/screen/APP0011.ub",
+      "expect": [
+        "#apprForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/app/APP0011.xml:1",
+      "_버튼": "btnAppr(#btnAppr) · btnCancel(#btnCancel)",
+      "actions": [
+        {
+          "name": "Cancel",
+          "click": "#btnCancel"
+        }
+      ]
+    },
+    {
+      "name": "나의상신목록 - 모바일 (조회만)",
+      "url": "/screen/APP5001.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/app/APP5001.xml:1"
+    },
+    {
+      "name": "나의결재목록 - 모바일",
+      "url": "/screen/APP5005.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/app/APP5005.xml:1"
+    },
+    {
+      "name": "기본리스트",
+      "url": "/screen/BRD0001.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/brd/BRD0001.xml:1"
+    },
+    {
+      "name": "등록화면",
+      "url": "/screen/BRD0002.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/brd/BRD0002.xml:1"
+    },
+    {
+      "name": "상세화면",
+      "url": "/screen/BRD0003.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/brd/BRD0003.xml:1"
+    },
+    {
+      "name": "수정화면",
+      "url": "/screen/BRD0004.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/brd/BRD0004.xml:1"
+    },
+    {
+      "name": "답글등록화면",
+      "url": "/screen/BRD0005.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/brd/BRD0005.xml:1"
+    },
+    {
+      "name": "공지사항 목록 (2)",
+      "url": "/screen/INF0001.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0001.xml:1",
+      "_버튼": "btnNew(#btnNew) · btnNoticeTree(#btnNoticeTree)"
+    },
+    {
+      "name": "공지사항 상세 (2)",
+      "url": "/screen/INF0002.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0002.xml:1",
+      "_버튼": "btnSelectClass(#btnSelectClass)"
+    },
+    {
+      "name": "공지사항 등록 (2)",
+      "url": "/screen/INF0003.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0003.xml:1",
+      "_버튼": "btnSelectClass(#btnSelectClass) · btnList(#btnList) · ⚠btnSave(#btnSave)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "공지사항 분류 선택",
+      "url": "/screen/INF0004.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0004.xml:1"
+    },
+    {
+      "name": "공지사항 분류관리",
+      "url": "/screen/INF0005.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0005.xml:1",
+      "_버튼": "btnAddCl(#btnAddCl) · ⚠btnUpdateCl(#btnUpdateCl) · ⚠btnDelCl(#btnDelCl)"
+    },
+    {
+      "name": "자료실 목록",
+      "url": "/screen/INF0007.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0007.xml:1"
+    },
+    {
+      "name": "자료실 상세",
+      "url": "/screen/INF0008.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0008.xml:1"
+    },
+    {
+      "name": "자료실 등록",
+      "url": "/screen/INF0009.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0009.xml:1"
+    },
+    {
+      "name": "지식관리 목록",
+      "url": "/screen/INF0011.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0011.xml:1",
+      "_상세후보": "#list tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnSearch(#btnSearch) · btnReg(#btnReg) · btnTrash(#btnTrash) · btnTmp(#btnTmp) · btnKnwldgTree(#btnKnwldgTree)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "지식관리 분류관리",
+      "url": "/screen/INF0012.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0012.xml:1",
+      "_버튼": "btnAddCl(#btnAddCl) · ⚠btnUpdateCl(#btnUpdateCl) · ⚠btnDelCl(#btnDelCl)"
+    },
+    {
+      "name": "지식관리 분류 선택",
+      "url": "/screen/INF0013.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0013.xml:1"
+    },
+    {
+      "name": "지식관리 편집",
+      "url": "/screen/INF0102.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0102.xml:1",
+      "_버튼": "⚠btnRemove(#btnRemove) · btnModify(#btnModify) · ⚠btnTmpSave(#btnTmpSave) · btnSelectClass(#btnSelectClass) · btnAddKeyword(#btnAddKeyword) · ⚠btnDelKeyword(#btnDelKeyword)"
+    },
+    {
+      "name": "지식관리 등록",
+      "url": "/screen/INF0103.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0103.xml:1",
+      "_버튼": "btnList(#btnList) · ⚠btnSave(#btnSave) · ⚠btnTmpSave(#btnTmpSave) · btnAddKeyword(#btnAddKeyword) · ⚠btnDelKeyword(#btnDelKeyword) · btnSelectClass(#btnSelectClass)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "지식관리 목록 (2)",
+      "url": "/screen/INF0104.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0104.xml:1",
+      "_상세후보": "#list tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnList(#btnList) · btnSearch(#btnSearch) · btnKnwldgTree(#btnKnwldgTree)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        },
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "지식관리 상세 페이지",
+      "url": "/screen/INF0105.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0105.xml:1",
+      "_버튼": "btnList(#btnList) · btnRestore(#btnRestore) · ⚠btnRemove(#btnRemove)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "지식관리 목록 (3)",
+      "url": "/screen/INF0106.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0106.xml:1",
+      "_상세후보": "#list tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnList(#btnList) · btnSearch(#btnSearch) · btnKnwldgTree(#btnKnwldgTree)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        },
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "지식관리 임시저장 상세 페이지",
+      "url": "/screen/INF0107.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0107.xml:1",
+      "_버튼": "btnModify(#btnModify) · btnList(#btnList) · ⚠btnRemove(#btnRemove)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "지식관리 임시저장 편집 페이지",
+      "url": "/screen/INF0108.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0108.xml:1",
+      "_버튼": "⚠btnRemove(#btnRemove) · ⚠btnTmpSave(#btnTmpSave) · ⚠btnSave(#btnSave) · btnSelectClass(#btnSelectClass)"
+    },
+    {
+      "name": "지식관리 상세 페이지 (2)",
+      "url": "/screen/INF0109.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0109.xml:1",
+      "_버튼": "btnList(#btnList) · btnModify(#btnModify) · ⚠btnRemove(#btnRemove)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "Web VOC FAQ 목록",
+      "url": "/screen/INF0201.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0201.xml:1",
+      "_상세후보": "#list tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnSearch(#btnSearch) · ⚠btnSave(#btnSave) · btnNew(#btnNew)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "Web VOC FAQ 상세",
+      "url": "/screen/INF0202.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0202.xml:1"
+    },
+    {
+      "name": "Web VOC FAQ 등록",
+      "url": "/screen/INF0203.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0203.xml:1",
+      "_버튼": "btnList(#btnList) · ⚠btnSave(#btnSave)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "자주하는 질문 베스트 5",
+      "url": "/screen/INF0204.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0204.xml:1",
+      "_버튼": "btnUp1(#btnUp1) · btnDown10(#btnDown10) · ⚠btnSave(#btnSave) · btnSelect1(#btnSelect1) · btnSelect2(#btnSelect2) · btnSelect3(#btnSelect3) · btnSelect4(#btnSelect4) · btnSelect5(#btnSelect5) · btnSelect6(#btnSelect6) · btnSelect7(#btnSelect7) · btnSelect8(#btnSelect8) · btnSelect9(#btnSelect9) · btnSelect10(#btnSelect10) · btnUnselect1(#btnUnselect1) · btnUnselect2(#btnUnselect2) · btnUnselect3(#btnUnselect3) · btnUnselect4(#btnUnselect4) · btnUnselect5(#btnUnselect5) · btnUnselect6(#btnUnselect6) · btnUnselect7(#btnUnselect7)"
+    },
+    {
+      "name": "Store Care FAQ 목록",
+      "url": "/screen/INF0301.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0301.xml:1",
+      "_상세후보": "#list tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnSearch(#btnSearch) · ⚠btnSave(#btnSave)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "Store Care FAQ 상세",
+      "url": "/screen/INF0302.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0302.xml:1"
+    },
+    {
+      "name": "Store Care FAQ 등록",
+      "url": "/screen/INF0303.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0303.xml:1",
+      "_버튼": "⚠btnSave(#btnSave)"
+    },
+    {
+      "name": "Store Care FAQ 베스트 5",
+      "url": "/screen/INF0304.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF0304.xml:1",
+      "_버튼": "⚠btnSave(#btnSave) · btnSelect1(#btnSelect1) · btnSelect2(#btnSelect2) · btnSelect3(#btnSelect3) · btnSelect4(#btnSelect4) · btnSelect5(#btnSelect5) · btnSelect6(#btnSelect6) · btnSelect7(#btnSelect7) · btnSelect8(#btnSelect8) · btnSelect9(#btnSelect9) · btnSelect10(#btnSelect10) · btnUnselect1(#btnUnselect1) · btnUnselect2(#btnUnselect2) · btnUnselect3(#btnUnselect3) · btnUnselect4(#btnUnselect4) · btnUnselect5(#btnUnselect5) · btnUnselect6(#btnUnselect6) · btnUnselect7(#btnUnselect7) · btnUnselect8(#btnUnselect8) · btnUnselect9(#btnUnselect9)"
+    },
+    {
+      "name": "공지사항 목록(NEW)",
+      "url": "/screen/INF4001.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF4001.xml:1",
+      "_상세후보": "#list tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnSearch(#btnSearch) · btnReg(#btnReg) · btnTrash(#btnTrash) · btnTmp(#btnTmp) · btnKnwldgTree(#btnKnwldgTree)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "공지사항 분류관리(NEW)",
+      "url": "/screen/INF4002.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF4002.xml:1",
+      "_버튼": "btnAddCl(#btnAddCl) · ⚠btnUpdateCl(#btnUpdateCl) · ⚠btnDelCl(#btnDelCl)"
+    },
+    {
+      "name": "공지사항 분류 선택(NEW)",
+      "url": "/screen/INF4003.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF4003.xml:1"
+    },
+    {
+      "name": "공지사항 편집(NEW)",
+      "url": "/screen/INF4004.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF4004.xml:1",
+      "_버튼": "⚠btnRemove(#btnRemove) · btnModify(#btnModify) · ⚠btnTmpSave(#btnTmpSave) · btnSelectClass(#btnSelectClass) · btnAddKeyword(#btnAddKeyword) · ⚠btnDelKeyword(#btnDelKeyword)"
+    },
+    {
+      "name": "공지사항 등록(NEW)",
+      "url": "/screen/INF4005.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF4005.xml:1",
+      "_버튼": "btnList(#btnList) · ⚠btnSave(#btnSave) · ⚠btnTmpSave(#btnTmpSave) · btnAddKeyword(#btnAddKeyword) · ⚠btnDelKeyword(#btnDelKeyword) · btnSelectClass(#btnSelectClass)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "공지사항 상세 페이지",
+      "url": "/screen/INF4006.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF4006.xml:1",
+      "_버튼": "btnList(#btnList) · btnModify(#btnModify) · ⚠btnRemove(#btnRemove)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "공지사항 목록(NEW) (2)",
+      "url": "/screen/INF4007.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF4007.xml:1",
+      "_상세후보": "#list tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnList(#btnList) · btnSearch(#btnSearch) · btnKnwldgTree(#btnKnwldgTree)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        },
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "공지사항 상세 페이지 (2)",
+      "url": "/screen/INF4008.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF4008.xml:1",
+      "_버튼": "btnList(#btnList) · btnRestore(#btnRestore) · ⚠btnRemove(#btnRemove)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "공지사항 임시저장 목록(NEW)",
+      "url": "/screen/INF4009.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF4009.xml:1",
+      "_상세후보": "#list tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnSearch(#btnSearch) · btnList(#btnList) · btnKnwldgTree(#btnKnwldgTree)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        },
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "지식관리 상세 페이지 (3)",
+      "url": "/screen/INF4010.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF4010.xml:1",
+      "_버튼": "btnModify(#btnModify) · btnList(#btnList) · ⚠btnRemove(#btnRemove)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "공지사항 임시저장 편집(NEW)",
+      "url": "/screen/INF4011.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/inf/INF4011.xml:1",
+      "_버튼": "⚠btnRemove(#btnRemove) · ⚠btnTmpSave(#btnTmpSave) · ⚠btnSave(#btnSave) · btnSelectClass(#btnSelectClass)"
+    },
+    {
+      "name": "개선과제선정 목록",
+      "url": "/screen/ISS0101.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS0101.xml:1",
+      "_버튼": "btnReg(#btnReg) · btnSearch(#btnSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "개선과제선정 상세",
+      "url": "/screen/ISS0102.ub",
+      "expect": [
+        "#vocList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS0102.xml:1",
+      "_상세후보": "#vocList tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnList(#btnList) · btnAddVoc(#btnAddVoc) · ⚠btnRemoveVoc(#btnRemoveVoc) · ⚠btnSave(#btnSave) · btnReq(#btnReq) · btnAssignHistory(#btnAssignHistory) · btnReqCloseHistory(#btnReqCloseHistory)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        },
+        {
+          "name": "Req Close History",
+          "click": "#btnReqCloseHistory"
+        }
+      ]
+    },
+    {
+      "name": "개선과제선정 등록",
+      "url": "/screen/ISS0103.ub",
+      "expect": [
+        "#vocList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS0103.xml:1",
+      "_상세후보": "#vocList tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnList(#btnList) · ⚠btnSave(#btnSave) · btnReq(#btnReq) · btnAddVoc(#btnAddVoc) · ⚠btnRemoveVoc(#btnRemoveVoc)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "개선과제관리 목록",
+      "url": "/screen/ISS0201.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS0201.xml:1",
+      "_버튼": "btnSearch(#btnSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "개선과제관리 상세",
+      "url": "/screen/ISS0202.ub",
+      "expect": [
+        "#opinionList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS0202.xml:1",
+      "_상세후보": "#opinionList tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnList(#btnList) · ⚠btnRemoveVoc(#btnRemoveVoc) · ⚠btnSave(#btnSave) · btnChoose(#btnChoose) · btnReturn(#btnReturn) · btnReqReg(#btnReqReg) · ⚠btnReqDel(#btnReqDel) · btnReqAppr(#btnReqAppr) · btnAddVoc(#btnAddVoc) · ⚠btnSubmit(#btnSubmit) · btnAssign(#btnAssign) · btnRetClose(#btnRetClose) · btnClose(#btnClose) · btnAssignHistory(#btnAssignHistory) · btnReqCloseHistory(#btnReqCloseHistory)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        },
+        {
+          "name": "Ret Close",
+          "click": "#btnRetClose"
+        },
+        {
+          "name": "Close",
+          "click": "#btnClose"
+        },
+        {
+          "name": "Req Close History",
+          "click": "#btnReqCloseHistory"
+        }
+      ]
+    },
+    {
+      "name": "개선과제 관리 결재상신등록 (조회만)",
+      "url": "/screen/ISS0203.ub",
+      "expect": [
+        "#APPROVAL_FORM"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS0203.xml:1",
+      "_버튼": "search(#SEARCH_LINE) · ⚠삭제(#DELETE_LINE) · 위(#UP_LINE) · 아래(#DOWN_LINE) · BTN_APPR_LINE(#BTN_APPR_LINE)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#SEARCH_LINE"
+        }
+      ]
+    },
+    {
+      "name": "개선과제관리 - 의견요청 담당자 선택",
+      "url": "/screen/ISS0214.ub",
+      "expect": [
+        "#inList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS0214.xml:1"
+    },
+    {
+      "name": "나의상신목록 (조회만) (2)",
+      "url": "/screen/ISS0221.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS0221.xml:1"
+    },
+    {
+      "name": "개선과제활동 목록",
+      "url": "/screen/ISS0301.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS0301.xml:1",
+      "_버튼": "btnSearch(#btnSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "개선과제활동 상세",
+      "url": "/screen/ISS0302.ub",
+      "expect": [
+        "#vocList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS0302.xml:1",
+      "_상세후보": "#vocList tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnList(#btnList) · btnExecutAccept(#btnExecutAccept) · btnExecutReturn(#btnExecutReturn) · ⚠btnSubmit(#btnSubmit) · btnAddTaskAct(#btnAddTaskAct) · btnEditTaskAct(#btnEditTaskAct) · ⚠btnDelTaskAct(#btnDelTaskAct) · btnReqClose(#btnReqClose) · btnAssignHistory(#btnAssignHistory) · btnReqCloseHistory(#btnReqCloseHistory)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        },
+        {
+          "name": "Req Close",
+          "click": "#btnReqClose"
+        },
+        {
+          "name": "Req Close History",
+          "click": "#btnReqCloseHistory"
+        }
+      ]
+    },
+    {
+      "name": "개선과제현황",
+      "url": "/screen/ISS0401.ub",
+      "expect": [
+        "#searchForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS0401.xml:1",
+      "_버튼": "검색(#btnSearch)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "개선과제 의견요청 목록",
+      "url": "/screen/ISS0501.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS0501.xml:1",
+      "_버튼": "btnSearch(#btnSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "개선과제 의견요청 상세",
+      "url": "/screen/ISS0502.ub",
+      "expect": [
+        "#vocList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS0502.xml:1",
+      "_상세후보": "#vocList tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnList(#btnList) · ⚠btnSaveOpinion(#btnSaveOpinion) · btnRegOpinion(#btnRegOpinion) · btnAssignHistory(#btnAssignHistory) · btnReqCloseHistory(#btnReqCloseHistory)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        },
+        {
+          "name": "Req Close History",
+          "click": "#btnReqCloseHistory"
+        }
+      ]
+    },
+    {
+      "name": "개선과제 선정승인 목록 (조회만)",
+      "url": "/screen/ISS0601.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS0601.xml:1",
+      "_버튼": "btnSearch(#btnSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "개선과제 선정승인 상세 (조회만)",
+      "url": "/screen/ISS0602.ub",
+      "expect": [
+        "#vocList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS0602.xml:1",
+      "_상세후보": "#vocList tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnList(#btnList) · btnAccept(#btnAccept) · btnReturn(#btnReturn) · ⚠btnSubmit(#btnSubmit) · btnAssignHistory(#btnAssignHistory) · btnReqCloseHistory(#btnReqCloseHistory)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        },
+        {
+          "name": "Req Close History",
+          "click": "#btnReqCloseHistory"
+        }
+      ]
+    },
+    {
+      "name": "개선과제 의견상세",
+      "url": "/screen/ISS1003.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS1003.xml:1"
+    },
+    {
+      "name": "개선과제 도출 목표 입력화면(월별)",
+      "url": "/screen/ISS1101.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/iss/ISS1101.xml:1",
+      "_버튼": "⚠btnSave(#btnSave)"
+    },
+    {
+      "name": "[EP] 공통모듈",
+      "url": "/screen/MEP0000.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/mep/MEP0000.xml:1"
+    },
+    {
+      "name": "My VOC 목록",
+      "url": "/screen/MEP0100.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/mep/MEP0100.xml:1"
+    },
+    {
+      "name": "My VOC 상세",
+      "url": "/screen/MEP0101.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/mep/MEP0101.xml:1"
+    },
+    {
+      "name": "EP Team VOC",
+      "url": "/screen/MEP0200.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/mep/MEP0200.xml:1"
+    },
+    {
+      "name": "TeamVOC 상세",
+      "url": "/screen/MEP0201.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/mep/MEP0201.xml:1"
+    },
+    {
+      "name": "[EP]My 스토어케어",
+      "url": "/screen/MEP0300.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/mep/MEP0300.xml:1"
+    },
+    {
+      "name": "EP 공개 VOC",
+      "url": "/screen/MEP0400.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/mep/MEP0400.xml:1"
+    },
+    {
+      "name": "공개 VOC 상세",
+      "url": "/screen/MEP0401.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/mep/MEP0401.xml:1"
+    },
+    {
+      "name": "EP Store VOC Note",
+      "url": "/screen/MEP0500.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/mep/MEP0500.xml:1"
+    },
+    {
+      "name": "[EP]Store VOC NOTE 등록",
+      "url": "/screen/MEP0501.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/mep/MEP0501.xml:1"
+    },
+    {
+      "name": "[EP]Store VOC NOTE 상세",
+      "url": "/screen/MEP0502.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/mep/MEP0502.xml:1"
+    },
+    {
+      "name": "EP 불만예외신청 목록",
+      "url": "/screen/MEP0600.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/mep/MEP0600.xml:1"
+    },
+    {
+      "name": "[EP]불만예외 신청 등록",
+      "url": "/screen/MEP0601.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/mep/MEP0601.xml:1"
+    },
+    {
+      "name": "[EP]불만예외신청 상세",
+      "url": "/screen/MEP0602.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/mep/MEP0602.xml:1"
+    },
+    {
+      "name": "Wide Menu 포털",
+      "url": "/screen/POR0001.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/por/POR0001.xml:1"
+    },
+    {
+      "name": "Simple Menu 포털",
+      "url": "/screen/POR0002.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/por/POR0002.xml:1"
+    },
+    {
+      "name": "index",
+      "url": "/screen/POR0003.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/por/POR0003.xml:1"
+    },
+    {
+      "name": "메인-카운터형",
+      "url": "/screen/POR0005.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/por/POR0005.xml:1"
+    },
+    {
+      "name": "VOC 사별 메인포탈 (하단 탭 삭제) (조회만)",
+      "url": "/screen/POR0007.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/por/POR0007.xml:1"
+    },
+    {
+      "name": "좌측메뉴(하단탭O)",
+      "url": "/screen/POR0011.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/por/POR0011.xml:1"
+    },
+    {
+      "name": "좌측메뉴(하단탭X)",
+      "url": "/screen/POR0017.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/por/POR0017.xml:1"
+    },
+    {
+      "name": "메인1",
+      "url": "/screen/POR1001.ub",
+      "expect": [
+        "#detailForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/por/POR1001.xml:1"
+    },
+    {
+      "name": "메인2",
+      "url": "/screen/POR1002.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/por/POR1002.xml:1"
+    },
+    {
+      "name": "VOC처리자 권한 메인화면",
+      "url": "/screen/POR1003.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/por/POR1003.xml:1"
+    },
+    {
+      "name": "My StoreCare",
+      "url": "/screen/STC0101.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/stc/STC0101.xml:1",
+      "_상세후보": "#list tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnCstmrIdDetail(#btnCstmrIdDetail) · btnAcceptAll(#btnAcceptAll) · btnProcAll(#btnProcAll) · btnNoCfmAll(#btnNoCfmAll) · ⚠btnExcel(#btnExcel) · btnDeptSearch(#btnDeptSearch)",
+      "actions": [
+        {
+          "name": "Dept Search",
+          "click": "#btnDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "Store Care 분류관리",
+      "url": "/screen/STC0102.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/stc/STC0102.xml:1",
+      "_버튼": "btnSearchStore(#btnSearchStore) · ⚠updateBtn(#updateBtn) · ⚠deleteBtn(#deleteBtn)",
+      "actions": [
+        {
+          "name": "Search Store",
+          "click": "#btnSearchStore"
+        }
+      ]
+    },
+    {
+      "name": "Store Care 현황",
+      "url": "/screen/STC0103.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/stc/STC0103.xml:1",
+      "_버튼": "⚠btnExcel(#btnExcel) · btnDeptSearch(#btnDeptSearch)",
+      "actions": [
+        {
+          "name": "Dept Search",
+          "click": "#btnDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "BDS 스토어케어 처리대기 목록",
+      "url": "/screen/STC1001.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/stc/STC1001.xml:1",
+      "_버튼": "미접수(#btnSelAccept) · 처리중(#btnSelProcessing) · 처리완료(#btnSelComplete) · 확인불가(#btnSelUnknown) · 처리지연(#btnSelNoComplete) · 확인불가([name=btnProcUnknown]) · 처리([name=btnProc]) · btnReqTest(#btnReqTest) · btnHome(#btnHome) · procCfmBtn(#procCfmBtn) · prcoCalBtn(#prcoCalBtn) · ⚠btnConfirm(#btnConfirm) · btnOk(#btnOk)"
+    },
+    {
+      "name": "시스템관리 / 코드 유형 목록",
+      "url": "/screen/SYS0002.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0002.xml:1",
+      "_상세후보": "#list tbody tr — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠insertBtn(#insertBtn)"
+    },
+    {
+      "name": "시스템관리 / 코드 유형 등록",
+      "url": "/screen/SYS0003.ub",
+      "expect": [
+        "#insertForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0003.xml:1",
+      "_버튼": "listBtn(#listBtn) · ⚠insertBtn(#insertBtn) · viewCodeBtn(#viewCodeBtn)",
+      "actions": [
+        {
+          "name": "list",
+          "click": "#listBtn"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 코드 유형 상세",
+      "url": "/screen/SYS0004.ub",
+      "expect": [
+        "#list2"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0004.xml:1",
+      "_상세후보": "#list2 tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "listBtn(#listBtn) · ⚠insertBtn(#insertBtn) · ⚠updateBtn(#updateBtn) · ⚠deleteBtn(#deleteBtn) · viewCodeBtn(#viewCodeBtn) · ⚠insertGroupBtn(#insertGroupBtn) · ⚠deleteGroupBtn(#deleteGroupBtn)",
+      "actions": [
+        {
+          "name": "list",
+          "click": "#listBtn"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 코드 등록",
+      "url": "/screen/SYS0005.ub",
+      "expect": [
+        "#list2"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0005.xml:1",
+      "_버튼": "⚠insertBtn(#insertBtn)"
+    },
+    {
+      "name": "시스템관리 / 코드 상세",
+      "url": "/screen/SYS0006.ub",
+      "expect": [
+        "#insertForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0006.xml:1",
+      "_버튼": "⚠updateBtn(#updateBtn)"
+    },
+    {
+      "name": "시스템관리 / Dynamic 코드 조회",
+      "url": "/screen/SYS0007.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0007.xml:1",
+      "_버튼": "닫기(#btnClose)",
+      "actions": [
+        {
+          "name": "닫기",
+          "click": "#btnClose"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 메뉴 관리",
+      "url": "/screen/SYS0011.ub",
+      "expect": [
+        "#screenList"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0011.xml:1",
+      "_상세후보": "#screenList tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠updateBtn(#updateBtn) · ⚠deleteBtn(#deleteBtn) · BTN_SCREEN_ADD(#BTN_SCREEN_ADD)"
+    },
+    {
+      "name": "시스템관리 / 사용자관리 목록",
+      "url": "/screen/SYS0021.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0021.xml:1",
+      "_상세후보": "#list tbody tr (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "newBtn(#newBtn)"
+    },
+    {
+      "name": "담당업무 목록",
+      "url": "/screen/SYS0022.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0022.xml:1",
+      "_상세후보": "#list tbody tr — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요"
+    },
+    {
+      "name": "시스템관리 / 담당업무 상세",
+      "url": "/screen/SYS0023.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0023.xml:1",
+      "_상세후보": "#list tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnSearch(#btnSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 담당업무 등록",
+      "url": "/screen/SYS0024.ub",
+      "expect": [
+        "#detailForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0024.xml:1",
+      "_버튼": "checkRoleIdBtn(#checkRoleIdBtn)"
+    },
+    {
+      "name": "시스템관리 / 사용자 관리 상세목록",
+      "url": "/screen/SYS0026.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0026.xml:1",
+      "_버튼": "⚠saveBtn(#saveBtn)"
+    },
+    {
+      "name": "시스템관리 / 로그인 관리 목록",
+      "url": "/screen/SYS0027.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0027.xml:1"
+    },
+    {
+      "name": "시스템관리 / 배치 목록",
+      "url": "/screen/SYS0040.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0040.xml:1",
+      "_상세후보": "#list tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "searchBtn(#searchBtn) · ⚠insertBatchBtn(#insertBatchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 배치 등록",
+      "url": "/screen/SYS0041.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0041.xml:1",
+      "_버튼": "listBtn(#listBtn) · ⚠insertBtn(#insertBtn)",
+      "actions": [
+        {
+          "name": "list",
+          "click": "#listBtn"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 배치 상세",
+      "url": "/screen/SYS0042.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0042.xml:1",
+      "_버튼": "listBtn(#listBtn) · ⚠insertBatchBtn(#insertBatchBtn) · readyBtn(#readyBtn) · forceBtn(#forceBtn) · ⚠updateBtn(#updateBtn) · ⚠deleteBtn(#deleteBtn)",
+      "actions": [
+        {
+          "name": "list",
+          "click": "#listBtn"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 프로그램 권한 관리",
+      "url": "/screen/SYS0050.ub",
+      "expect": [
+        "#functionList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0050.xml:1",
+      "_상세후보": "#functionList tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "BTN_SCREEN_ADD(#BTN_SCREEN_ADD)"
+    },
+    {
+      "name": "시스템관리 / 프로그램 권한 관리 (XML용) (2)",
+      "url": "/screen/SYS0052.ub",
+      "expect": [
+        "#functionList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0052.xml:1",
+      "_상세후보": "#functionList tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "BTN_SCREEN_ADD(#BTN_SCREEN_ADD)"
+    },
+    {
+      "name": "시스템관리 / 메세지 룰 관리",
+      "url": "/screen/SYS0059.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0059.xml:1",
+      "_버튼": "searchBtn(#searchBtn) · ⚠registBtn(#registBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 비밀번호 변경",
+      "url": "/screen/SYS0060.ub",
+      "expect": [
+        "#detailForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0060.xml:1"
+    },
+    {
+      "name": "시스템관리 / 메세지 룰 관리 등록",
+      "url": "/screen/SYS0071.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0071.xml:1",
+      "_버튼": "listBtn(#listBtn) · tempBtn(#tempBtn) · ⚠saveBtn(#saveBtn)",
+      "actions": [
+        {
+          "name": "list",
+          "click": "#listBtn"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 메세지 룰 관리 상세",
+      "url": "/screen/SYS0073.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0073.xml:1",
+      "_버튼": "listBtn(#listBtn) · tempBtn(#tempBtn) · ⚠saveBtn(#saveBtn) · ⚠delBtn(#delBtn)",
+      "actions": [
+        {
+          "name": "list",
+          "click": "#listBtn"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 화면관리 목록",
+      "url": "/screen/SYS0100.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0100.xml:1"
+    },
+    {
+      "name": "시스템관리 / 화면관리 상세",
+      "url": "/screen/SYS0101.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0101.xml:1"
+    },
+    {
+      "name": "시스템관리 / 화면관리 등록",
+      "url": "/screen/SYS0102.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0102.xml:1"
+    },
+    {
+      "name": "시스템관리 / 서비스관리 목록",
+      "url": "/screen/SYS0104.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0104.xml:1"
+    },
+    {
+      "name": "시스템관리 / 서비스관리 등록",
+      "url": "/screen/SYS0106.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0106.xml:1"
+    },
+    {
+      "name": "시스템관리 / 서비스 상세",
+      "url": "/screen/SYS0107.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0107.xml:1"
+    },
+    {
+      "name": "시스템관리 / 서비스 코드목록",
+      "url": "/screen/SYS0108.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0108.xml:1"
+    },
+    {
+      "name": "시스템관리 / 서비스 실행에러로그 목록",
+      "url": "/screen/SYS0109.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0109.xml:1"
+    },
+    {
+      "name": "시스템관리 / Function 목록",
+      "url": "/screen/SYS0111.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0111.xml:1"
+    },
+    {
+      "name": "시스템관리 / Function 등록",
+      "url": "/screen/SYS0112.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0112.xml:1"
+    },
+    {
+      "name": "시스템관리 / Function 상세",
+      "url": "/screen/SYS0113.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0113.xml:1"
+    },
+    {
+      "name": "시스템관리 / 서비스 상세 Main Tab",
+      "url": "/screen/SYS0114.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0114.xml:1"
+    },
+    {
+      "name": "시스템관리 / Function Alias 목록",
+      "url": "/screen/SYS0115.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0115.xml:1"
+    },
+    {
+      "name": "시스템관리 / 휴무일관리 / 휴무일관리 목록",
+      "url": "/screen/SYS0140.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0140.xml:1",
+      "_버튼": "⚠btnRegister(#btnRegister) · btnSearch(#btnSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 휴무일관리 / 휴무일관리 상세",
+      "url": "/screen/SYS0141.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0141.xml:1",
+      "_버튼": "btnList(#btnList) · ⚠btnUpdate(#btnUpdate) · ⚠btnDelete(#btnDelete)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 휴무일관리 / 휴무일관리 등록",
+      "url": "/screen/SYS0142.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0142.xml:1",
+      "_버튼": "⚠btnRegist(#btnRegist) · btnList(#btnList)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 템플릿 / 메일템플릿 목록",
+      "url": "/screen/SYS0143.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0143.xml:1",
+      "_버튼": "⚠registBtn(#registBtn) · searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 템플릿 / 메일템플릿 상세",
+      "url": "/screen/SYS0144.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0144.xml:1",
+      "_버튼": "btnList(#btnList) · ⚠btnUpdate(#btnUpdate) · ⚠btnDelete(#btnDelete)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 템플릿 / 메일템플릿 등록",
+      "url": "/screen/SYS0145.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0145.xml:1",
+      "_버튼": "⚠btnRegist(#btnRegist) · btnList(#btnList)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 사용자관리 등록",
+      "url": "/screen/SYS0148.ub",
+      "expect": [
+        "#detailForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0148.xml:1",
+      "_버튼": "search(#searchDept) · ⚠btnRegist(#btnRegist) · btnList(#btnList) · checkBtn(#checkBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchDept"
+        },
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 서비스 마스킹 목록",
+      "url": "/screen/SYS0150.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0150.xml:1"
+    },
+    {
+      "name": "서비스관리 데이터변환 목록화면 (신규)",
+      "url": "/screen/SYS0151.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0151.xml:1"
+    },
+    {
+      "name": "시스템관리 / 서비스 마스킹 추가",
+      "url": "/screen/SYS0152.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0152.xml:1"
+    },
+    {
+      "name": "시스템관리 / 마스크 관리 / 마스크 목록",
+      "url": "/screen/SYS0154.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0154.xml:1",
+      "_상세후보": "#list tbody tr — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "btnSearch(#btnSearch) · ⚠btnRegister(#btnRegister)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 마스크 관리 / 마스크 상세",
+      "url": "/screen/SYS0155.ub",
+      "expect": [
+        "#authList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0155.xml:1",
+      "_상세후보": "#authList tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠btnUpdate(#btnUpdate) · ⚠btnDelete(#btnDelete) · btnList(#btnList)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 마스크 관리 / 마스크 등록",
+      "url": "/screen/SYS0156.ub",
+      "expect": [
+        "#registForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0156.xml:1",
+      "_버튼": "⚠btnRegist(#btnRegist) · btnCancle(#btnCancle)"
+    },
+    {
+      "name": "시스템관리 / 로그관리 / 사용자접속로그 목록",
+      "url": "/screen/SYS0157.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0157.xml:1",
+      "_버튼": "btnSearch(#btnSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 로그관리 / 프로그램사용로그 목록",
+      "url": "/screen/SYS0158.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0158.xml:1",
+      "_버튼": "btnSearch(#btnSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 부서관리",
+      "url": "/screen/SYS0159.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0159.xml:1",
+      "_버튼": "⚠updateBtn(#updateBtn) · ⚠deleteBtn(#deleteBtn)"
+    },
+    {
+      "name": "시스템관리 / SQLMAP 목록",
+      "url": "/screen/SYS0162.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0162.xml:1"
+    },
+    {
+      "name": "시스템관리 / 서비스쿼리 상세",
+      "url": "/screen/SYS0163.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0163.xml:1"
+    },
+    {
+      "name": "시스템관리 / 서비스쿼리 등록",
+      "url": "/screen/SYS0164.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0164.xml:1"
+    },
+    {
+      "name": "시스템관리 / 로그관리 / 권한변경로그 목록",
+      "url": "/screen/SYS0165.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0165.xml:1",
+      "_버튼": "btnSearch(#btnSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "서비스관리 상세코드보기",
+      "url": "/screen/SYS0166.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0166.xml:1"
+    },
+    {
+      "name": "시스템관리 / 로그관리 / 배치실행로그 목록",
+      "url": "/screen/SYS0167.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0167.xml:1",
+      "_버튼": "btnSearch(#btnSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnSearch"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 매장 관리 목록",
+      "url": "/screen/SYS0168.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0168.xml:1",
+      "_버튼": "searchBtn(#searchBtn) · btnDeptSearch(#btnDeptSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        },
+        {
+          "name": "Dept Search",
+          "click": "#btnDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 매장 관리 상세",
+      "url": "/screen/SYS0169.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0169.xml:1",
+      "_버튼": "listBtn(#listBtn)",
+      "actions": [
+        {
+          "name": "list",
+          "click": "#listBtn"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 통보이력",
+      "url": "/screen/SYS0170.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0170.xml:1",
+      "_버튼": "searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 개인정보 조회 이력",
+      "url": "/screen/SYS0171.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0171.xml:1",
+      "_버튼": "searchEmpBtn(#searchEmpBtn) · searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "search Emp",
+          "click": "#searchEmpBtn"
+        },
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 / 사용자 관리 상세목록(신규)",
+      "url": "/screen/SYS0211.ub",
+      "expect": [
+        "#detailForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0211.xml:1",
+      "_버튼": "btnList(#btnList)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "부서관리(사용자등록)",
+      "url": "/screen/SYS0213.ub",
+      "expect": [
+        "#detailForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0213.xml:1",
+      "_버튼": "search(#searchDept) · Y(#btnfgrecv) · ⚠btnRegist(#btnRegist) · btnList(#btnList) · checkBtn(#checkBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchDept"
+        },
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "게시판관리 목록",
+      "url": "/screen/SYS0301.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0301.xml:1",
+      "_상세후보": "#list tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠registBtn(#registBtn) · searchBtn(#searchBtn) · boardCloneBtn(#boardCloneBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "게시판관리 / 게시판 신규 등록",
+      "url": "/screen/SYS0303.ub",
+      "expect": [
+        "#registForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0303.xml:1",
+      "_버튼": "목록(#listBtn) · ⚠등록(#registBtn)",
+      "actions": [
+        {
+          "name": "목록",
+          "click": "#listBtn"
+        }
+      ]
+    },
+    {
+      "name": "게시판관리 / 게시판상세 Main Tab Control",
+      "url": "/screen/SYS0304.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0304.xml:1",
+      "_버튼": "listBtn(#listBtn)",
+      "actions": [
+        {
+          "name": "list",
+          "click": "#listBtn"
+        }
+      ]
+    },
+    {
+      "name": "칭찬 Advantage 관리 목록",
+      "url": "/screen/SYS0312.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0312.xml:1",
+      "_버튼": "resetBtn(#resetBtn)",
+      "actions": [
+        {
+          "name": "reset",
+          "click": "#resetBtn"
+        }
+      ]
+    },
+    {
+      "name": "VOC메일 관리",
+      "url": "/screen/SYS0313.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS0313.xml:1",
+      "_버튼": "⚠btnSave(#btnSave) · ⚠btnDelete(#btnDelete) · ⚠btnUpdate(#btnUpdate) · btnReset(#btnReset)",
+      "actions": [
+        {
+          "name": "Reset",
+          "click": "#btnReset"
+        }
+      ]
+    },
+    {
+      "name": "화면 및 IP 관리",
+      "url": "/screen/SYS9999.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/sys/SYS9999.xml:1",
+      "_상세후보": "#list tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요"
+    },
+    {
+      "name": "Tools / SQL관리",
+      "url": "/screen/TSQ0001.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/tsq/TSQ0001.xml:1, src.tools.sql/resource/repository/screen/tsq/TSQ0001.xml:1"
+    },
+    {
+      "name": "UB-Board 공통",
+      "url": "/screen/UBD0000.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubd/UBD0000.xml:1"
+    },
+    {
+      "name": "UB-Board Default 리스트 화면",
+      "url": "/screen/UBD1001.ub",
+      "expect": [
+        "#defaultForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubd/UBD1001.xml:1"
+    },
+    {
+      "name": "UB-Board Default 게시물 등록 화면",
+      "url": "/screen/UBD1002.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubd/UBD1002.xml:1"
+    },
+    {
+      "name": "UB-Board Default 게시물 상세 화면",
+      "url": "/screen/UBD1003.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubd/UBD1003.xml:1"
+    },
+    {
+      "name": "UB-Board Default 게시물 수정 화면",
+      "url": "/screen/UBD1004.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubd/UBD1004.xml:1"
+    },
+    {
+      "name": "UB-Board Default 답변 등록 화면",
+      "url": "/screen/UBD1005.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubd/UBD1005.xml:1"
+    },
+    {
+      "name": "UB-Board Default 답변 수정 화면",
+      "url": "/screen/UBD1006.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubd/UBD1006.xml:1"
+    },
+    {
+      "name": "UB-Board Notice 리스트 화면",
+      "url": "/screen/UBD2001.ub",
+      "expect": [
+        "#defaultForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubd/UBD2001.xml:1"
+    },
+    {
+      "name": "UB-Board Notice 게시물 등록 화면",
+      "url": "/screen/UBD2002.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubd/UBD2002.xml:1"
+    },
+    {
+      "name": "UB-Board Notice 게시물 상세 화면",
+      "url": "/screen/UBD2003.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubd/UBD2003.xml:1"
+    },
+    {
+      "name": "UB-Board Notice 게시물 수정 화면",
+      "url": "/screen/UBD2004.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubd/UBD2004.xml:1"
+    },
+    {
+      "name": "UB-Board Notice 답변 등록 화면",
+      "url": "/screen/UBD2005.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubd/UBD2005.xml:1"
+    },
+    {
+      "name": "UB-Board Notice 답변 수정 화면",
+      "url": "/screen/UBD2006.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubd/UBD2006.xml:1"
+    },
+    {
+      "name": "게시판관리 목록 (2)",
+      "url": "/screen/UBS0001.ub",
+      "expect": [
+        "#list"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubs/UBS0001.xml:1",
+      "_상세후보": "#list tr.jqgrow — onSelectRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠registBtn(#registBtn) · searchBtn(#searchBtn) · boardCloneBtn(#boardCloneBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "게시판관리 / 게시판 신규 등록 (2)",
+      "url": "/screen/UBS0003.ub",
+      "expect": [
+        "#registForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubs/UBS0003.xml:1",
+      "_버튼": "목록(#listBtn) · ⚠등록(#registBtn)",
+      "actions": [
+        {
+          "name": "목록",
+          "click": "#listBtn"
+        }
+      ]
+    },
+    {
+      "name": "게시판관리 / 게시판상세 Main Tab Control (2)",
+      "url": "/screen/UBS0004.ub",
+      "expect": [
+        "#detailForm"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/ubs/UBS0004.xml:1",
+      "_버튼": "⚠저장(#basicUpdateBtn) · ⚠삭제(#deleteBoardBtn) · listBtn(#listBtn)",
+      "actions": [
+        {
+          "name": "list",
+          "click": "#listBtn"
+        }
+      ]
+    },
+    {
+      "name": "VOC 등록",
+      "url": "/screen/VOC0001.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC0001.xml:1",
+      "_버튼": "btnCustSerachPhone(#btnCustSerachPhone) · btnCusInfo(#btnCusInfo) · btnSpAdminInfo(#btnSpAdminInfo) · btnCusCardInfo(#btnCusCardInfo) · btnCusCardBillInfo(#btnCusCardBillInfo) · btnClearCust(#btnClearCust) · ⚠btnRegister(#btnRegister) · btnCustSerachCust(#btnCustSerachCust) · btnVocHist(#btnVocHist) · btnSirenHist(#btnSirenHist) · btnVisitStrSerach(#btnVisitStrSerach) · btnGoodsSearch(#btnGoodsSearch) · ⚠btnRemoveGoods(#btnRemoveGoods) · btnPromotionSerach(#btnPromotionSerach) · btnEventSearch(#btnEventSearch) · btnChargeDeptSearch(#btnChargeDeptSearch)",
+      "actions": [
+        {
+          "name": "Clear Cust",
+          "click": "#btnClearCust"
+        },
+        {
+          "name": "Goods Search",
+          "click": "#btnGoodsSearch"
+        },
+        {
+          "name": "Event Search",
+          "click": "#btnEventSearch"
+        },
+        {
+          "name": "Charge Dept Search",
+          "click": "#btnChargeDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "VOC 등록(Call Center용)",
+      "url": "/screen/VOC0002.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC0002.xml:1",
+      "_버튼": "btnCustSerach(#btnCustSerach) · btnVocHist(#btnVocHist) · btnList(#btnList) · ⚠btnRegister(#btnRegister) · btnVisitStrSerach(#btnVisitStrSerach) · btnGoodsSearch(#btnGoodsSearch) · ⚠btnRemoveGoods(#btnRemoveGoods) · btnPromotionSerach(#btnPromotionSerach) · btnEventSearch(#btnEventSearch) · btnChargeDeptSearch(#btnChargeDeptSearch) · btnSearchKindEmp(#btnSearchKindEmp) · ⚠btnRemoveKindEmp(#btnRemoveKindEmp)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        },
+        {
+          "name": "Goods Search",
+          "click": "#btnGoodsSearch"
+        },
+        {
+          "name": "Event Search",
+          "click": "#btnEventSearch"
+        },
+        {
+          "name": "Charge Dept Search",
+          "click": "#btnChargeDeptSearch"
+        },
+        {
+          "name": "Search Kind Emp",
+          "click": "#btnSearchKindEmp"
+        }
+      ]
+    },
+    {
+      "name": "접수정보(VIEW)",
+      "url": "/screen/VOC0011.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC0011.xml:1"
+    },
+    {
+      "name": "추가정보(VIEW)",
+      "url": "/screen/VOC0013.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC0013.xml:1"
+    },
+    {
+      "name": "업무요청 상세 정보(VIEW)",
+      "url": "/screen/VOC0015.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC0015.xml:1"
+    },
+    {
+      "name": "상용구관리 목록",
+      "url": "/screen/VOC0023.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC0023.xml:1"
+    },
+    {
+      "name": "상용구관리 상세",
+      "url": "/screen/VOC0024.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC0024.xml:1",
+      "_버튼": "⚠btnUpdate(#btnUpdate) · ⚠btnDelete(#btnDelete)"
+    },
+    {
+      "name": "상용구관리 등록",
+      "url": "/screen/VOC0025.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC0025.xml:1"
+    },
+    {
+      "name": "부가항목 관리 목록",
+      "url": "/screen/VOC0027.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC0027.xml:1"
+    },
+    {
+      "name": "통보이력 목록",
+      "url": "/screen/VOC0028.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC0028.xml:1"
+    },
+    {
+      "name": "상담사 관리 목록",
+      "url": "/screen/VOC0029.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC0029.xml:1",
+      "_버튼": "⚠btnSave(#btnSave)"
+    },
+    {
+      "name": "콜센터(KPI) 입력화면",
+      "url": "/screen/VOC0030.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC0030.xml:1",
+      "_버튼": "⚠btnSave(#btnSave)"
+    },
+    {
+      "name": "VOC 목록",
+      "url": "/screen/VOC1001.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1001.xml:1",
+      "_상세후보": "#list tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "엑셀다운로드(text=엑셀다운로드) · ⚠btnExcel(#btnExcel) · btnVisitStrSerach(#btnVisitStrSerach) · searchBtn(#searchBtn) · btnEmpSearch(#btnEmpSearch) · btnPromotionSerach(#btnPromotionSerach) · btnEventSearch(#btnEventSearch) · btnGoodsSearch(#btnGoodsSearch) · CauseAddBtn(#CauseAddBtn) · ⚠CauseDelBtn(#CauseDelBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        },
+        {
+          "name": "Emp Search",
+          "click": "#btnEmpSearch"
+        },
+        {
+          "name": "Event Search",
+          "click": "#btnEventSearch"
+        },
+        {
+          "name": "Goods Search",
+          "click": "#btnGoodsSearch"
+        }
+      ]
+    },
+    {
+      "name": "VOC 상세",
+      "url": "/screen/VOC1002.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1002.xml:1",
+      "_버튼": "btnList(#btnList) · btnReceiv(#btnReceiv) · btnAnsCmpl(#btnAnsCmpl) · ⚠btnSave(#btnSave) · btnReq(#btnReq) · btnModify(#btnModify) · btnCusInfo(#btnCusInfo) · btnSpAdminInfo(#btnSpAdminInfo) · btnCusCardInfo(#btnCusCardInfo) · btnCusCardBillInfo(#btnCusCardBillInfo) · btnModifyCancel(#btnModifyCancel) · ⚠btnIssueRegist(#btnIssueRegist) · btnChgEmp(#btnChgEmp) · ⚠btnDel(#btnDel) · btnAnsModify(#btnAnsModify) · ⚠btnNoteSave(#btnNoteSave)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        },
+        {
+          "name": "Modify Cancel",
+          "click": "#btnModifyCancel"
+        }
+      ]
+    },
+    {
+      "name": "Vital few VOC 상세",
+      "url": "/screen/VOC1003.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1003.xml:1",
+      "_버튼": "btnList(#btnList) · btnCusInfo(#btnCusInfo) · btnCusCardInfo(#btnCusCardInfo) · btnCusCardBillInfo(#btnCusCardBillInfo)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "VOC 처리이력 탭",
+      "url": "/screen/VOC1004.ub",
+      "expect": [
+        "#vocHistList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1004.xml:1"
+    },
+    {
+      "name": "매장별 칭찬 VOC 상세",
+      "url": "/screen/VOC1005.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1005.xml:1",
+      "_버튼": "btnList(#btnList)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "VOC 콜센터 상담이력 탭",
+      "url": "/screen/VOC1006.ub",
+      "expect": [
+        "#contentDetailTable"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1006.xml:1"
+    },
+    {
+      "name": "고객별 VOC이력 목록",
+      "url": "/screen/VOC1007.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1007.xml:1",
+      "_버튼": "searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "매장별 칭찬 VOC 목록",
+      "url": "/screen/VOC1008.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1008.xml:1",
+      "_버튼": "btnSearchEmp(#btnSearchEmp) · searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "Search Emp",
+          "click": "#btnSearchEmp"
+        },
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "VOC 통보이력 목록 조회",
+      "url": "/screen/VOC1009.ub",
+      "expect": [
+        "#dispatchList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1009.xml:1"
+    },
+    {
+      "name": "VOC 처리이력 탭 (2)",
+      "url": "/screen/VOC1011.ub",
+      "expect": [
+        "#vocHistList"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1011.xml:1"
+    },
+    {
+      "name": "공개 VOC 목록",
+      "url": "/screen/VOC1015.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1015.xml:1",
+      "_버튼": "searchBtn(#searchBtn) · VocEpPopupBtn(#VocEpPopupBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "공개 VOC 상세 (2)",
+      "url": "/screen/VOC1016.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1016.xml:1",
+      "_버튼": "btnList(#btnList)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "삭제 VOC 목록 (조회만)",
+      "url": "/screen/VOC1017.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1017.xml:1",
+      "_버튼": "btnVisitStrSerach(#btnVisitStrSerach) · searchBtn(#searchBtn) · btnEmpSearch(#btnEmpSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        },
+        {
+          "name": "Emp Search",
+          "click": "#btnEmpSearch"
+        }
+      ]
+    },
+    {
+      "name": "삭제 VOC 상세 (조회만)",
+      "url": "/screen/VOC1018.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1018.xml:1",
+      "_버튼": "btnList(#btnList) · btnCusInfo(#btnCusInfo) · btnCusCardInfo(#btnCusCardInfo) · btnCusCardBillInfo(#btnCusCardBillInfo)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "칭찬 파트너 목록",
+      "url": "/screen/VOC1019.ub",
+      "expect": [
+        "#exportListViewer"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1019.xml:1",
+      "_버튼": "btnPrevew(#btnPrevew) · btn1qu(#btn1qu) · btn2qu(#btn2qu) · btn3qu(#btn3qu) · btn4qu(#btn4qu) · btnRecvEmp(#btnRecvEmp) · btnDeptSearch(#btnDeptSearch)",
+      "actions": [
+        {
+          "name": "Dept Search",
+          "click": "#btnDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "Nono VOC 목록",
+      "url": "/screen/VOC1020.ub",
+      "expect": [
+        "#exportListViewer"
+      ],
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1020.xml:1",
+      "_버튼": "btnRecvEmp(#btnRecvEmp)"
+    },
+    {
+      "name": "CE 고객의견 관리",
+      "url": "/screen/VOC1021.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1021.xml:1",
+      "_상세후보": "#list tr.jqgrow (더블클릭) — on('dblclick'). 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "searchBtn(#searchBtn) · ⚠saveBtn(#saveBtn) · ⚠excelBtn(#excelBtn) · btnChargeDept(#btnChargeDept) · btnDeptSearch(#btnDeptSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        },
+        {
+          "name": "Dept Search",
+          "click": "#btnDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "순차배정 예외관리",
+      "url": "/screen/VOC1022.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1022.xml:1",
+      "_상세후보": "#list tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠btnOpenRegist(#btnOpenRegist) · ⚠btnDelete(#btnDelete)"
+    },
+    {
+      "name": "배정 VOC",
+      "url": "/screen/VOC1024.ub",
+      "expect": [
+        "#list_normal"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1024.xml:1",
+      "_버튼": "btnAddNormal(#btnAddNormal) · ⚠btnSaveNormal(#btnSaveNormal) · btnAddVital(#btnAddVital) · ⚠btnSaveVital(#btnSaveVital)"
+    },
+    {
+      "name": "Vital few VOC 목록",
+      "url": "/screen/VOC1025.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1025.xml:1",
+      "_버튼": "btnVisitStrSerach(#btnVisitStrSerach) · searchBtn(#searchBtn) · btnEmpSearch(#btnEmpSearch)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        },
+        {
+          "name": "Emp Search",
+          "click": "#btnEmpSearch"
+        }
+      ]
+    },
+    {
+      "name": "VOC 분류관리",
+      "url": "/screen/VOC1026.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1026.xml:1",
+      "_버튼": "⚠updateBtn(#updateBtn) · ⚠deleteBtn(#deleteBtn)"
+    },
+    {
+      "name": "외부관련자 목록",
+      "url": "/screen/VOC1029.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1029.xml:1",
+      "_버튼": "addBtn(#addBtn) · ⚠btnExcel(#btnExcel)"
+    },
+    {
+      "name": "외부관련자 상세",
+      "url": "/screen/VOC1030.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1030.xml:1",
+      "_버튼": "btnLay(#btnLay) · ⚠btnUpdate(#btnUpdate) · ⚠btnDelete(#btnDelete)"
+    },
+    {
+      "name": "외부관련자 등록",
+      "url": "/screen/VOC1031.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1031.xml:1"
+    },
+    {
+      "name": "CE 고객의견 조회",
+      "url": "/screen/VOC1034.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1034.xml:1",
+      "_상세후보": "#list tbody tr (더블클릭) — on('dblclick'). 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "search(#btnDeptSearch) · search(#btnChargeDept) · searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#btnDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "CE 마감 목록 검색 (조회만)",
+      "url": "/screen/VOC1035.ub",
+      "expect": [
+        "#list"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1035.xml:1",
+      "_상세후보": "#list tr.jqgrow (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "searchBtn(#searchBtn) · ⚠registBtn(#registBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "CE 마감 기준 등록 (조회만)",
+      "url": "/screen/VOC1036.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1036.xml:1",
+      "_버튼": "⚠saveBtn(#saveBtn)"
+    },
+    {
+      "name": "CE 마감 기준 상세 (조회만)",
+      "url": "/screen/VOC1037.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1037.xml:1",
+      "_버튼": "⚠saveBtn(#saveBtn)"
+    },
+    {
+      "name": "VOC SMS이력 목록 조회",
+      "url": "/screen/VOC1038.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1038.xml:1"
+    },
+    {
+      "name": "매장 VOC NOTE 목록",
+      "url": "/screen/VOC1101.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1101.xml:1",
+      "_버튼": "btnDeptSearch(#btnDeptSearch) · ⚠btnExcel(#btnExcel)",
+      "actions": [
+        {
+          "name": "Dept Search",
+          "click": "#btnDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "매장 VOC NOTE 등록",
+      "url": "/screen/VOC1102.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1102.xml:1",
+      "_버튼": "btnDeptSearch(#btnDeptSearch)",
+      "actions": [
+        {
+          "name": "Dept Search",
+          "click": "#btnDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "매장 VOC NOTE 상세",
+      "url": "/screen/VOC1103.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1103.xml:1",
+      "_버튼": "⚠btnUpdate(#btnUpdate) · ⚠btnDelete(#btnDelete) · btnCancel(#btnCancel) · btnSvae(#btnSvae)",
+      "actions": [
+        {
+          "name": "Cancel",
+          "click": "#btnCancel"
+        }
+      ]
+    },
+    {
+      "name": "업무요청/공유 양식 등록",
+      "url": "/screen/VOC1104.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1104.xml:1"
+    },
+    {
+      "name": "매장 VOC NOTE 상세(view)",
+      "url": "/screen/VOC1105.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1105.xml:1",
+      "_버튼": "⚠btnUpdate(#btnUpdate) · ⚠btnDelete(#btnDelete)"
+    },
+    {
+      "name": "업무요청/공유 양식 등록 (2)",
+      "url": "/screen/VOC1114.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1114.xml:1"
+    },
+    {
+      "name": "외부 VOC NOTE 목록",
+      "url": "/screen/VOC1201.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1201.xml:1",
+      "_버튼": "searchBtn(#searchBtn) · btnVisitStrSerach(#btnVisitStrSerach)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "외부 VOC NOTE 등록",
+      "url": "/screen/VOC1202.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1202.xml:1",
+      "_버튼": "btnVisitStrSerach(#btnVisitStrSerach)"
+    },
+    {
+      "name": "외부 VOC NOTE 상세",
+      "url": "/screen/VOC1203.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1203.xml:1",
+      "_버튼": "⚠btnUpdate(#btnUpdate) · ⚠btnDelete(#btnDelete) · btnVisitStrSerach(#btnVisitStrSerach)"
+    },
+    {
+      "name": "반기별 목표",
+      "url": "/screen/VOC1204.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1204.xml:1",
+      "_버튼": "⚠btnOpenRegist(#btnOpenRegist) · ⚠btnDelete(#btnDelete)"
+    },
+    {
+      "name": "사이렌 VOC이력 목록",
+      "url": "/screen/VOC1210.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1210.xml:1",
+      "_버튼": "searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "Nono VOC 임시",
+      "url": "/screen/VOC1212.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1212.xml:1",
+      "_버튼": "btnRecvEmp(#btnRecvEmp)"
+    },
+    {
+      "name": "VOC업무문의(매장) 목록",
+      "url": "/screen/VOC1301.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1301.xml:1",
+      "_버튼": "btnDeptSearch(#btnDeptSearch) · ⚠btnExcel(#btnExcel)",
+      "actions": [
+        {
+          "name": "Dept Search",
+          "click": "#btnDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "VOC업무문의(매장) 상세(view)",
+      "url": "/screen/VOC1302.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1302.xml:1",
+      "_버튼": "⚠btnConfirm(#btnConfirm) · btnCompanion(#btnCompanion) · btnProcessing(#btnProcessing) · ⚠btnUpdate(#btnUpdate) · ⚠btnDelete(#btnDelete)"
+    },
+    {
+      "name": "VOC업무문의(매장) 상세(수정)",
+      "url": "/screen/VOC1303.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1303.xml:1",
+      "_버튼": "⚠btnSave(#btnSave) · btnCancel(#btnCancel) · ⚠btnDelete(#btnDelete)",
+      "actions": [
+        {
+          "name": "Cancel",
+          "click": "#btnCancel"
+        }
+      ]
+    },
+    {
+      "name": "업무요청 VOC",
+      "url": "/screen/VOC1401.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1401.xml:1",
+      "_버튼": "⚠btnExcel(#btnExcel) · searchBtn(#searchBtn) · btnProcessEmpSearch(#btnProcessEmpSearch) · btnRecvEmpSearch(#btnRecvEmpSearch) · CauseAddBtn(#CauseAddBtn) · ⚠CauseDelBtn(#CauseDelBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        },
+        {
+          "name": "Process Emp Search",
+          "click": "#btnProcessEmpSearch"
+        },
+        {
+          "name": "Recv Emp Search",
+          "click": "#btnRecvEmpSearch"
+        }
+      ]
+    },
+    {
+      "name": "업무요청 VOC 상세",
+      "url": "/screen/VOC1402.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1402.xml:1",
+      "_버튼": "btnList(#btnList) · btnReceiv(#btnReceiv) · btnAnsCmpl(#btnAnsCmpl) · ⚠btnSave(#btnSave) · btnReq(#btnReq) · btnModify(#btnModify) · btnCusInfo(#btnCusInfo) · btnSpAdminInfo(#btnSpAdminInfo) · btnCusCardInfo(#btnCusCardInfo) · btnCusCardBillInfo(#btnCusCardBillInfo) · btnModifyCancel(#btnModifyCancel) · ⚠btnIssueRegist(#btnIssueRegist) · btnChgEmp(#btnChgEmp) · ⚠btnDel(#btnDel) · btnAnsModify(#btnAnsModify) · ⚠btnNoteSave(#btnNoteSave)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        },
+        {
+          "name": "Modify Cancel",
+          "click": "#btnModifyCancel"
+        }
+      ]
+    },
+    {
+      "name": "고객메모 목록",
+      "url": "/screen/VOC1501.ub",
+      "expect": [
+        "#exportListViewer"
+      ],
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1501.xml:1",
+      "_상세후보": "#exportListViewer tbody tr (더블클릭) — ondblClickRow. 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "엑셀다운로드(text=엑셀다운로드) · ⚠registBtn(#registBtn) · ⚠btnExcel(#btnExcel) · searchBtn(#searchBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "고객메모 등록",
+      "url": "/screen/VOC1502.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1502.xml:1",
+      "_버튼": "btnClearCust(#btnClearCust) · btnCustSerachCust(#btnCustSerachCust) · btnCustSerachPhone(#btnCustSerachPhone)",
+      "actions": [
+        {
+          "name": "Clear Cust",
+          "click": "#btnClearCust"
+        }
+      ]
+    },
+    {
+      "name": "고객메모 상세 화면",
+      "url": "/screen/VOC1503.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/voc/VOC1503.xml:1",
+      "_버튼": "⚠btnUpdate(#btnUpdate) · ⚠btnDelete(#btnDelete) · btnCopyId(#btnCopyId) · btnCstmrIdDetail(#btnCstmrIdDetail) · btnCopyName(#btnCopyName) · btnCstmrNMDetail(#btnCstmrNMDetail) · btnCopyInitPhone(#btnCopyInitPhone) · btnSbscrbSttpcDetail(#btnSbscrbSttpcDetail)"
+    },
+    {
+      "name": "업무요청 - 접수정보(VIEW)",
+      "url": "/screen/VRE1003.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/vre/VRE1003.xml:1"
+    },
+    {
+      "name": "업무요청 - 업무요청 정보(My/Team VOC VIEW용)",
+      "url": "/screen/VRE1008.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/vre/VRE1008.xml:1"
+    },
+    {
+      "name": "업무요청 - 업무요청 상세 정보(My/Team Voc 수정용)",
+      "url": "/screen/VRE1009.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/vre/VRE1009.xml:1",
+      "_버튼": "btnAnswer(#btnAnswer) · ⚠btnUpdateAnswerSubmit(#btnUpdateAnswerSubmit) · btnHelp(#btnHelp) · ⚠btnTmpSave(#btnTmpSave) · btnChangeProcessEmp(#btnChangeProcessEmp)"
+    },
+    {
+      "name": "업무요청 - 업무요청 상세 정보(My/Team Voc VIEW용)",
+      "url": "/screen/VRE1010.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/vre/VRE1010.xml:1",
+      "_버튼": "⚠btnUpdateAnswer(#btnUpdateAnswer) · btnHelp(#btnHelp) · btnAccept(#btnAccept) · btnReturn(#btnReturn) · btnChangeProcessEmp(#btnChangeProcessEmp)"
+    },
+    {
+      "name": "업무요청 목록(My VOC)",
+      "url": "/screen/VRE1101.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/vre/VRE1101.xml:1",
+      "_버튼": "btnRecvEmpSearch(#btnRecvEmpSearch) · btnGoodsSearch(#btnGoodsSearch) · btnVisitStrSerach(#btnVisitStrSerach) · searchBtn(#searchBtn) · ⚠btnExcel(#btnExcel)",
+      "actions": [
+        {
+          "name": "Recv Emp Search",
+          "click": "#btnRecvEmpSearch"
+        },
+        {
+          "name": "Goods Search",
+          "click": "#btnGoodsSearch"
+        },
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        }
+      ]
+    },
+    {
+      "name": "업무요청 상세(My VOC - 업무요청)",
+      "url": "/screen/VRE1102.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/vre/VRE1102.xml:1",
+      "_버튼": "btnList(#btnList) · ⚠btnSave(#btnSave) · btnComplainEx(#btnComplainEx) · btnComplainExSearch(#btnComplainExSearch) · btnComplimentSearch(#btnComplimentSearch) · ⚠btnRemoveCompliments(#btnRemoveCompliments)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        },
+        {
+          "name": "Complain Ex Search",
+          "click": "#btnComplainExSearch"
+        },
+        {
+          "name": "Compliment Search",
+          "click": "#btnComplimentSearch"
+        }
+      ]
+    },
+    {
+      "name": "업무요청 상세(My VOC - 공유)",
+      "url": "/screen/VRE1103.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/vre/VRE1103.xml:1",
+      "_버튼": "btnList(#btnList) · ⚠btnSave(#btnSave) · btnComplainEx(#btnComplainEx) · btnComplainExSearch(#btnComplainExSearch) · btnComplimentSearch(#btnComplimentSearch) · ⚠btnRemoveCompliments(#btnRemoveCompliments)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        },
+        {
+          "name": "Complain Ex Search",
+          "click": "#btnComplainExSearch"
+        },
+        {
+          "name": "Compliment Search",
+          "click": "#btnComplimentSearch"
+        }
+      ]
+    },
+    {
+      "name": "업무요청 목록 (Team VOC)",
+      "url": "/screen/VRE1111.ub",
+      "_이미있음": "01_메뉴회귀",
+      "_출처": "screen-def — src.resource/resource/repository/screen/vre/VRE1111.xml:1",
+      "_버튼": "btnRecvEmpSearch(#btnRecvEmpSearch) · btnGoodsSearch(#btnGoodsSearch) · btnVisitStrSerach(#btnVisitStrSerach) · btnReqvEmpSearch(#btnReqvEmpSearch) · searchBtn(#searchBtn) · btnDeptSearch(#btnDeptSearch) · ⚠btnExcel(#btnExcel)",
+      "actions": [
+        {
+          "name": "Recv Emp Search",
+          "click": "#btnRecvEmpSearch"
+        },
+        {
+          "name": "Goods Search",
+          "click": "#btnGoodsSearch"
+        },
+        {
+          "name": "Reqv Emp Search",
+          "click": "#btnReqvEmpSearch"
+        },
+        {
+          "name": "조회",
+          "click": "#searchBtn"
+        },
+        {
+          "name": "Dept Search",
+          "click": "#btnDeptSearch"
+        }
+      ]
+    },
+    {
+      "name": "업무요청 상세(Team VOC - 업무요청)",
+      "url": "/screen/VRE1112.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/vre/VRE1112.xml:1",
+      "_버튼": "btnList(#btnList)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    },
+    {
+      "name": "업무요청 상세(Team VOC - 공유)",
+      "url": "/screen/VRE1113.ub",
+      "_출처": "screen-def — src.resource/resource/repository/screen/vre/VRE1113.xml:1",
+      "_버튼": "btnList(#btnList)",
+      "actions": [
+        {
+          "name": "List",
+          "click": "#btnList"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "_comment": "SCBK VOC 로컬 개발 PC 확인용(IntelliJ Tomcat 11, 9090). 흐름은 SCBK(폐쇄망용)와 동일, 환경값만 로컬·목업",
+  "baseUrl": "http://localhost:9090",
+  "browser": {
+    "headless": false,
+    "viewport": {
+      "width": 1600,
+      "height": 1000
+    }
+  },
+  "reuseSession": false,
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "userField": "#userid",
+    "logoutUrl": "/logout.ub",
+    "retries": 1,
+    "_comment_retries": "비밀번호 연속 실패 시 계정 잠금(maxFailPassword) → 재시도 1회",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "{{id_admin}}"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001",
+      "selector": "#menu"
+    }
+  }
+}

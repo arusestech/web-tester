@@ -1,0 +1,156 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E04-1 [220 VOC관리자] CE 관리 조회·저장·마감 노출",
+  "_comment": "E2E-04 1단계. 사전 _mock/e2e04_ce_insert.sql. 엑셀은 로컬 upload.path 불일치(ExcelExporterBase.writeToFile) 로 NPE → 실행하지 않음",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R220"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "VOC1021 조회·저장",
+      "allowForbidden": [
+        "저장"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1021.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{if($('#YMD_STND_START').length){$('#YMD_STND_START').val('2026-08-01');$('#YMD_STND_END').val('2026-08-31');}if($('#YY_STD').length){$('#YY_STD').val('2026');$('#MM_STD').val('08');}})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "expectText",
+          "text": "TEST_E2E04"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"saveBtn\", \"excelBtn\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==true});if(bad.length)throw new Error('버튼 노출 불일치(기대 표시): '+bad.join(','));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#saveBtn a')||document.getElementById('saveBtn');if(!b)throw new Error('saveBtn 없음');b.click();})()"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "note",
+          "_note": "변경 없이 저장 → MODIFY Success 만 확인"
+        },
+        {
+          "action": "screenshot",
+          "name": "CE관리"
+        }
+      ]
+    },
+    {
+      "name": "VOC1035 마감 목록(노출만)",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/VOC1035.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "expectText",
+          "text": "202608"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const a=[...document.querySelectorAll('table.ui-jqgrid-btable a')].map(a=>a.textContent.trim());if(!a.includes('마감')||!a.includes('업로드'))throw new Error('마감/업로드 행 버튼 없음: '+a);})()"
+        },
+        {
+          "action": "note",
+          "_note": "[마감]/[업로드] 클릭 금지"
+        },
+        {
+          "action": "screenshot",
+          "name": "CE마감"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E07-2 [110 부관리자] 메뉴 경계",
+  "_comment": "E2E-07 2단계. 메뉴관리·배치·템플릿·메세지룰·IP·권한변경로그·프로그램사용로그·로그인관리 미노출",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R110"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "메뉴",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const m=[...document.querySelectorAll('#menu a[menuurl]')].map(a=>a.getAttribute('menuurl'));const miss=[\"SYS0159\", \"SYS0168\", \"SYS0021\", \"SYS0002\", \"SYS0313\", \"SYS0140\", \"SYS0157\", \"SYS0167\", \"SYS0170\", \"SYS0171\"].filter(x=>!m.includes(x));const extra=[\"SYS0011\", \"SYS0040\", \"SYS0143\", \"SYS0059\", \"SYS9999\", \"SYS0165\", \"SYS0158\", \"SYS0027\", \"APP0001\"].filter(x=>m.includes(x));if(miss.length||extra.length)throw new Error('메뉴 불일치 누락:'+miss+' 불필요:'+extra);})()"
+        },
+        {
+          "action": "screenshot",
+          "name": "110메뉴"
+        }
+      ]
+    },
+    {
+      "name": "SYS0159 조회전용",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/SYS0159.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectNotText",
+          "text": "Exception report"
+        },
+        {
+          "action": "expectNotText",
+          "text": "권한이 없습니다"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=[...document.querySelectorAll('span.ub-control.button')].filter(e=>e.offsetParent!==null);if(b.length)throw new Error('버튼 존재: '+b.map(e=>e.id));})()"
+        }
+      ]
+    }
+  ]
+}

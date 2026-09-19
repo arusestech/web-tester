@@ -1,0 +1,222 @@
+{
+  "extends": "_공통.json",
+  "name": "개선7-02 항목별 조회",
+
+  "_comment": "추가한 14종을 하나씩만 조건으로 걸고 조회해서 SQL 이 깨지지 않는지 본다. vocListCond 에 넣은 CONNECT BY 계층조회·TVE/TVED/TVD 별칭·센터보상 상관 서브쿼리가 실제로 파싱·실행되는지 확인하는 것이 목적이라 데이터 0건이어도 유효하다. 오류는 응답 488/487/486 또는 본문 ORA-xxxxx 로 잡힌다(_공통.json errorStatus/errorPatterns)",
+  "_comment_scope": "여기서 확인되는 것 = SQL 실행 무오류. 확인되지 않는 것 = 필터링 정확성(어떤 건이 걸러지는가) → 04 파일(데이터 있는 환경)에서 확인",
+  "_comment_mapper": "근거: VocPrc_SqlMapper.xml vocListCond — 516(complaintTpCd) 569(tipOffYn 개선) 583~633(TVED 8종) 646(finesPrePerceptYn) 653(finesExpectYn) 851(cpesCenterYn)",
+
+  "menus": [
+    {
+      "name": "02-00 조건 없이 조회 (기준선)",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+
+    {
+      "name": "02-01 VOC 처리결과 (관리코드 048/I)",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#vocTaskRsltCdWrapper select" },
+        { "action": "select", "selector": "#vocTaskRsltCdWrapper select", "value": { "index": 1 } },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "02-02 검사이첩여부 (008)",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#prosecutorTransferYnWrapper select" },
+        { "action": "select", "selector": "#prosecutorTransferYnWrapper select", "value": { "index": 1 } },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "02-03 공시대상여부 (013)",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#publicAnnounceYnWrapper select" },
+        { "action": "select", "selector": "#publicAnnounceYnWrapper select", "value": { "index": 1 } },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "02-04 불만발생접점 (026)",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#complaintOccrPointCdWrapper select" },
+        { "action": "select", "selector": "#complaintOccrPointCdWrapper select", "value": { "index": 1 } },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "02-05 불합리한 차별행위 (029, 레거시 Y/N 호환)",
+      "url": "/vocIntegrationList",
+      "_note": "결함9 환원 이전 저장분('Y'/'N')까지 잡도록 관리코드 계층 IN 또는 MGMT_CD_NM 일치로 비교한다(VocPrc_SqlMapper.xml:611~619). 스칼라 서브쿼리가 2건 이상을 반환하면 ORA-01427 로 실패하므로 여기서 드러난다",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#irrationalDiscrimCdWrapper select" },
+        { "action": "select", "selector": "#irrationalDiscrimCdWrapper select", "value": { "index": 1 } },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "02-06 불만유형 사전신고 (027)",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#complaintTpCdWrapper select" },
+        { "action": "select", "selector": "#complaintTpCdWrapper select", "value": { "index": 1 } },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "02-07 사전인지여부 (062)",
+      "url": "/vocIntegrationList",
+      "timeout": 8000,
+      "_note": "CCCOWN 은 VOC010-062 관리코드가 0건이라 선택지가 없어 이 항목만 실패한다(2026-08-29 실측, 기지). 코드가 등록된 내부 DB 에서 재확인할 것 — 실패 메시지가 '관리코드 0건' 이면 코드 미등록, ORA/488 이면 소스 결함. Playwright 타임아웃으로 40초를 버리지 않도록 선택을 eval 로 한다",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#finesPrePerceptYnWrapper select" },
+        { "action": "eval", "script": "(() => { const s = document.querySelector('#finesPrePerceptYnWrapper select'); if (!s) throw new Error('사전인지여부 select 미생성'); if (s.options.length < 2) throw new Error('관리코드 0건(VOC010-062 미등록) — 검색 조건을 걸 수 없다'); s.selectedIndex = 1; s.dispatchEvent(new Event('change', { bubbles: true })); })()" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "02-08 상품(서비스)가입경로 (007)",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#merchandiseJoinPathWrapper select" },
+        { "action": "select", "selector": "#merchandiseJoinPathWrapper select", "value": { "index": 1 } },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "02-09 제보성여부 (055, 레거시 Y/N 호환)",
+      "url": "/vocIntegrationList",
+      "_note": "조건은 원래 있었지만 검색폼에 필드가 없어 못 쓰던 항목. 저장값은 CODE0080000038(예)/CODE0080000039(아니오)이고 04-23~ 저장분에 'Y'/'N' 이 섞여 있어 관리코드 계층 OR 코드명 일치로 비교한다",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#tipOffYnWrapper select" },
+        { "action": "select", "selector": "#tipOffYnWrapper select", "value": { "index": 1 } },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+
+    {
+      "name": "02-10 센터보상여부 Y (CPES_REQ_DP=002)",
+      "url": "/vocIntegrationList",
+      "_note": "기존 고객보상(cpesYn)은 지점보상 001, 이번에 추가한 센터보상은 002. 상관 서브쿼리가 TVD.VOC_DTL_ID 를 참조하므로 별칭이 살아 있는지 여기서 확인된다",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "select[name=cpesCenterYn]" },
+        { "action": "select", "selector": "select[name=cpesCenterYn]", "value": "Y" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "02-11 금감원 민원예상 Y",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "select[name=finesExpectYn]" },
+        { "action": "select", "selector": "select[name=finesExpectYn]", "value": "Y" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "02-12 문제행동소비자 Y",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "select[name=problemBehaviorConsumerCd]" },
+        { "action": "select", "selector": "select[name=problemBehaviorConsumerCd]", "value": "Y" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "02-13 법률질의여부 Y",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "select[name=lawInquiryYn]" },
+        { "action": "select", "selector": "select[name=lawInquiryYn]", "value": "Y" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+    {
+      "name": "02-14 이슈민원 Y",
+      "url": "/vocIntegrationList",
+      "_note": "조건은 원래 있었으나 검색폼에 필드가 없어 못 쓰던 항목(TB_VOC_INSPECTION_DTL INSPECTION_COMN_CD=001 + ISSUE_KEYWORD 존재)",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "select[name=issueVocYn]" },
+        { "action": "select", "selector": "select[name=issueVocYn]", "value": "Y" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    },
+
+    {
+      "name": "02-15 14종 동시 조건 조회",
+      "url": "/vocIntegrationList",
+      "_note": "모든 조건이 한 SQL 에 동시에 들어갔을 때 파싱·실행되는지. 결과는 0건이 정상",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#tipOffYnWrapper select" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "eval", "script": "(() => { const ids = ['vocTaskRsltCdWrapper','prosecutorTransferYnWrapper','publicAnnounceYnWrapper','complaintOccrPointCdWrapper','irrationalDiscrimCdWrapper','complaintTpCdWrapper','finesPrePerceptYnWrapper','merchandiseJoinPathWrapper','tipOffYnWrapper']; const skipped = []; ids.forEach(id => { const s = document.querySelector('#' + id + ' select'); if (!s || s.options.length < 2) { skipped.push(id); return; } s.selectedIndex = 1; s.dispatchEvent(new Event('change', { bubbles: true })); }); ['cpesCenterYn','finesExpectYn','problemBehaviorConsumerCd','lawInquiryYn','issueVocYn'].forEach(n => { const s = document.querySelector('select[name=' + n + ']'); if (s) s.value = 'Y'; }); if (skipped.length) console.warn('선택지 없어 건너뜀: ' + skipped.join(', ')); })()" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "click", "selector": "a.btn-search" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": ["#divGrid1 .tui-grid-container"]
+    }
+  ],
+  "crud": []
+}

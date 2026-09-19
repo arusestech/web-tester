@@ -1,0 +1,24 @@
+{
+  "name": "wigo-web-tester",
+  "version": "1.0.0",
+  "description": "Java/JSP 웹 프로젝트 메뉴 조회 + CRUD 자동 테스트 (Playwright 내장)",
+  "type": "module",
+  "bin": { "wigo-web-tester": "./cli.js" },
+  "scripts": {
+    "start": "node cli.js",
+    "new": "node cli.js new",
+    "mock": "node test/mock-server.js",
+    "test": "node cli.js run test/mock.json --headless --no-config",
+    "test:batch": "node cli.js run test/extends --headless --no-config",
+    "test:checks": "node cli.js run test/checks.json --headless --no-config",
+    "test:switch": "node cli.js run test/switch.json --headless --no-config",
+    "test:slow": "node cli.js run test/slow.json --headless --no-config",
+    "test:actions": "node cli.js run test/actions.json --headless --no-config",
+    "lint:test": "node cli.js lint test/mock.json",
+    "test:source": "node test/source-scan-check.mjs"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "playwright": "^1.50.0"
+  }
+}

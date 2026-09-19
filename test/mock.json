@@ -1,0 +1,43 @@
+{
+  "name": "mock 자체검증",
+  "baseUrl": "http://localhost:3999",
+  "browser": { "channel": "chrome", "headless": true },
+  "forbidden": ["삭제"],
+  "inputs": { "common": { "dept": "10", "nonexist": "x" }, "search": "#btnSearch" },
+  "login": {
+    "url": "/login",
+    "steps": [
+      { "action": "fill", "selector": "input[name=userId]", "value": "tester" },
+      { "action": "fill", "selector": "input[name=password]", "value": "1234" },
+      { "action": "click", "selector": "button[type=submit]" }
+    ],
+    "success": { "urlNotContains": "login" }
+  },
+  "menus": [
+    { "name": "메인", "url": "/main", "expect": ["#content"] },
+    { "name": "사원관리", "url": "/emp", "expect": ["table"], "inputs": { "q": "홍" }, "detail": { "selector": "table a", "rows": 2, "expect": ["#detail"] } },
+    { "name": "사원관리(조건 없음)", "url": "/emp", "expect": ["table"], "search": false },
+    { "name": "입력필드 누락", "url": "/emp", "inputs": { "noField": "1" } },
+    { "name": "에러메뉴", "url": "/err" },
+    { "name": "JS에러", "url": "/jserr", "screenshot": false },
+    { "name": "요소누락", "url": "/main", "expect": ["table"] },
+    { "name": "상세 없음", "url": "/main", "detail": { "selector": "table a" } }
+  ],
+  "crawl": { "enabled": true, "startUrl": "/main", "selector": "#menu a" },
+  "crud": [
+    { "name": "사원 등록→조회", "steps": [
+      { "action": "goto", "url": "/emp" },
+      { "action": "click", "text": "등록" },
+      { "action": "fill", "selector": "input[name=empName]", "value": "자동테스트" },
+      { "action": "click", "text": "저장" },
+      { "action": "waitForLoad" },
+      { "action": "expectDialog", "text": "저장" },
+      { "action": "expectUrl", "contains": "/emp" },
+      { "action": "expectText", "text": "자동테스트" }
+    ]},
+    { "name": "금지버튼 차단", "steps": [
+      { "action": "goto", "url": "/emp" },
+      { "action": "click", "text": "삭제" }
+    ]}
+  ]
+}

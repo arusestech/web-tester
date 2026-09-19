@@ -1,0 +1,336 @@
+{
+  "extends": "_공통.json",
+  "name": "SIT-VOC-0001-01 로그인_메인포털",
+  "_comment": "SIT v0.6 SIT-VOC-0001-01 — 흐름 이름의 S<n> 이 문서 스텝 번호",
+  "login": {
+    "url": "/screen/BCO0001.ub",
+    "userField": "#userid",
+    "logoutUrl": "/logout.ub",
+    "retries": 1,
+    "_comment_retries": "비밀번호 연속 실패 시 계정 잠금(maxFailPassword) → 재시도 1회",
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "{{id_user}}"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ],
+    "success": {
+      "urlContains": "POR0001",
+      "selector": "#menu"
+    }
+  },
+  "_manual_steps": [
+    "S6 공지 팝업(INF0021): 팝업 공지가 등록된 경우에만 자동 표시 — 수동 확인"
+  ],
+  "menus": [
+    {
+      "name": "포털 메인",
+      "url": "/screen/POR0001.ub",
+      "expect": [
+        "#menu",
+        "#tabs",
+        ".logout-button"
+      ]
+    }
+  ],
+  "crud": [
+    {
+      "name": "S1 로그인 화면 표시",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/logout.ub"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/BCO0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#userid"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#userpw"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#login"
+        },
+        {
+          "action": "screenshot",
+          "name": "로그인화면"
+        },
+        {
+          "action": "switchUser",
+          "user": "{{id_user}}",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        }
+      ]
+    },
+    {
+      "name": "S2 잘못된 비밀번호 로그인 실패",
+      "_comment": "1회만 실패시킨다(계정 잠금 방지). 같은 회차에 재실행을 반복하지 말 것",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/BCO0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "fill",
+          "selector": "#userid",
+          "value": "{{id_user}}"
+        },
+        {
+          "action": "fill",
+          "selector": "#userpw",
+          "value": "wrong-password-sit"
+        },
+        {
+          "action": "click",
+          "selector": "#login"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectDialog",
+          "text": "사용자 정보가 일치하지 않습니다"
+        },
+        {
+          "action": "expectUrl",
+          "contains": "BCO0001"
+        },
+        {
+          "action": "screenshot",
+          "name": "로그인실패"
+        },
+        {
+          "action": "switchUser",
+          "user": "{{id_user}}",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        }
+      ]
+    },
+    {
+      "name": "S3 로그인 후 포털 이동",
+      "steps": [
+        {
+          "action": "switchUser",
+          "user": "{{id_user}}",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        },
+        {
+          "action": "expectUrl",
+          "contains": "POR0001"
+        },
+        {
+          "action": "expectText",
+          "text": "님 환영합니다"
+        },
+        {
+          "action": "expectVisible",
+          "selector": ".gnb-util .login-user em"
+        },
+        {
+          "action": "expectVisible",
+          "selector": ".gnb-util .user-department em"
+        },
+        {
+          "action": "screenshot",
+          "name": "포털"
+        }
+      ]
+    },
+    {
+      "name": "S4 상단 메뉴바",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#menu ul.depth01 > li"
+        },
+        {
+          "action": "expectText",
+          "text": "My job"
+        },
+        {
+          "action": "expectText",
+          "text": "VOC"
+        },
+        {
+          "action": "expectText",
+          "text": "정보마당"
+        },
+        {
+          "action": "screenshot",
+          "name": "메뉴바"
+        }
+      ]
+    },
+    {
+      "name": "S5 포털 Main 탭",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectVisible",
+          "selector": "#tabs"
+        },
+        {
+          "action": "expectVisible",
+          "selector": "iframe[name=\"tabFrame_tab_item_ROOT\"]"
+        },
+        {
+          "action": "frame",
+          "name": "tabFrame_tab_item_ROOT"
+        },
+        {
+          "action": "expectNotText",
+          "text": "시스템 오류"
+        },
+        {
+          "action": "mainFrame"
+        },
+        {
+          "action": "screenshot",
+          "name": "메인탭"
+        }
+      ]
+    },
+    {
+      "name": "S7 로그아웃 후 재진입 차단",
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "click",
+          "selector": ".logout-button a"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "expectDialog",
+          "text": "로그아웃 하겠습니까"
+        },
+        {
+          "action": "expectUrl",
+          "contains": "BCO0001"
+        },
+        {
+          "action": "goto",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "expectUrl",
+          "contains": "BCO0001"
+        },
+        {
+          "action": "screenshot",
+          "name": "로그아웃후재진입"
+        },
+        {
+          "action": "switchUser",
+          "user": "{{id_user}}",
+          "url": "/screen/POR0001.ub"
+        },
+        {
+          "action": "wait",
+          "ms": 1000
+        }
+      ]
+    }
+  ]
+}

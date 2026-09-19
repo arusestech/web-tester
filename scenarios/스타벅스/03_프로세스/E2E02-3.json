@@ -1,0 +1,157 @@
+{
+  "extends": "_공통.json",
+  "name": "E2E02-3 [550 수퍼바이저] 일괄접수·일괄처리",
+  "_comment": "E2E-02 3단계. 9003/9004 일괄접수, 9005 일괄처리",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat. 계정 비번은 --secret password=<비번>",
+  "_comment_ignore": "/login.ub 404 = loginSuccess.jsp 컨텍스트 누락(알려진 현상). 세션은 정상",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R550"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "crud": [
+    {
+      "name": "일괄접수",
+      "allowForbidden": [
+        "일괄",
+        "접수"
+      ],
+      "steps": [
+        {
+          "action": "goto",
+          "url": "/screen/STC0101.ub"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const ids=[\"btnAcceptAll\", \"btnProcAll\", \"btnNoCfmAll\"];const bad=ids.filter(id=>{const b=document.getElementById(id);const v=!!b&&b.offsetParent!==null&&getComputedStyle(b).display!=='none';return v!==true});if(bad.length)throw new Error('버튼 노출 불일치(기대 표시): '+bad.join(','));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{$('#list').jqGrid('resetSelection');let n=0;for(const s of [\"202608279003\", \"202608279004\"]){const tr=[...document.querySelectorAll('table.ui-jqgrid-btable tr.jqgrow')].find(r=>r.textContent.includes(s));if(tr){$('#list').jqGrid('setSelection',tr.id,false);n++;}}if(n!==2)throw new Error('행 선택 실패 '+n);})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#btnAcceptAll a')||document.getElementById('btnAcceptAll');if(!b)throw new Error('btnAcceptAll 없음');b.click();})()"
+        },
+        {
+          "action": "expectDialog",
+          "text": "접수"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=[...document.querySelectorAll('table.ui-jqgrid-btable tr.jqgrow')].find(r=>r.textContent.includes('202608279003'));if(!r)throw new Error('행 없음 202608279003');if(!r.textContent.includes('처리중'))throw new Error('202608279003 상태 불일치: '+r.textContent.replace(/\\s+/g,' ').slice(0,80));})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=[...document.querySelectorAll('table.ui-jqgrid-btable tr.jqgrow')].find(r=>r.textContent.includes('202608279004'));if(!r)throw new Error('행 없음 202608279004');if(!r.textContent.includes('처리중'))throw new Error('202608279004 상태 불일치: '+r.textContent.replace(/\\s+/g,' ').slice(0,80));})()"
+        }
+      ]
+    },
+    {
+      "name": "일괄처리",
+      "allowForbidden": [
+        "일괄",
+        "처리"
+      ],
+      "steps": [
+        {
+          "action": "eval",
+          "script": "(()=>{$('#list').jqGrid('resetSelection');let n=0;for(const s of [\"202608279005\"]){const tr=[...document.querySelectorAll('table.ui-jqgrid-btable tr.jqgrow')].find(r=>r.textContent.includes(s));if(tr){$('#list').jqGrid('setSelection',tr.id,false);n++;}}if(n!==1)throw new Error('행 선택 실패 '+n);})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#btnProcAll a')||document.getElementById('btnProcAll');if(!b)throw new Error('btnProcAll 없음');b.click();})()"
+        },
+        {
+          "action": "expectDialog",
+          "text": "처리"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.querySelector('#search a, #searchBtn a, #btnSearch a, span.button.search a');if(!b)throw new Error('조회 버튼 없음');b.click();})()"
+        },
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 2200
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=[...document.querySelectorAll('table.ui-jqgrid-btable tr.jqgrow')].find(r=>r.textContent.includes('202608279005'));if(!r)throw new Error('행 없음 202608279005');if(!r.textContent.includes('처리완료'))throw new Error('202608279005 상태 불일치: '+r.textContent.replace(/\\s+/g,' ').slice(0,80));})()"
+        },
+        {
+          "action": "screenshot",
+          "name": "일괄처리"
+        }
+      ]
+    }
+  ]
+}

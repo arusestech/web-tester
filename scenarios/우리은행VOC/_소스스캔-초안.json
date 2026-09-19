@@ -1,0 +1,1679 @@
+{
+  "name": "우리은행 VOC — 소스스캔 초안",
+  "_생성정보": "run.bat scan-source <우리은행 VOC 소스 루트> --actions (2026-08-31). 컨트롤러 @GetMapping + 메뉴 JSP 에서 뽑음. 근거·제외 사유는 reports/_소스분석/ 보고서",
+  "_comment_env": "접속 URL·브라우저·로그인은 🔧 프로젝트 설정(_project.json)에서 상속한다. 로그인은 소스 login.jsp 에서 뽑은 셀렉터와 동일한 검증된 설정(#loginId/#loginPwd/[data-click=signIn], 계정 b00756)",
+  "timeout": 15000,
+  "evidence": {
+    "screenshotAll": true
+  },
+  "errorStatus": [
+    486,
+    487,
+    488
+  ],
+  "errorPatterns": [
+    "\"errorCode\"\\s*:\\s*4(6[234]|8[678])",
+    "권한이 없는 메뉴입니다",
+    "메뉴가 존재하지 않습니다"
+  ],
+  "_comment_ignore": "wrb-voc.json 에서 검증된 환경 노이즈 (addMenuLog 488, customConfirm 등)",
+  "ignore": {
+    "console": [
+      "parent\\.customConfirm is not a function",
+      "customConfirm is not a function"
+    ],
+    "resources": [
+      "/addMenuLog/",
+      "favicon"
+    ],
+    "dialogs": []
+  },
+  "_comment_forbidden": "소스 JSP 버튼 텍스트에서 뽑은 위험 단어 + wrb-voc.json 의 검증된 목록 합집합 (조회 전용이라 저장·등록까지 막는다)",
+  "forbidden": [
+    "삭제",
+    "상신",
+    "결재요청",
+    "결재",
+    "승인",
+    "반려",
+    "통보",
+    "발송",
+    "실행",
+    "업로드",
+    "저장",
+    "임시저장",
+    "연장",
+    "등록",
+    "수정",
+    "회수",
+    "초기화",
+    "전결",
+    "일괄",
+    "확정",
+    "Send",
+    "마감",
+    "반영",
+    "Save",
+    "전송",
+    "이관",
+    "Submit"
+  ],
+  "_comment_inputs": "wrb-voc.json 에서 가져옴 (접수일자 시작/종료 + 조회 버튼). 날짜는 실행 시점에 맞게 고칠 것",
+  "inputs": {
+    "common": {
+      "regStrtDt": "20260101",
+      "regEndDt": "20260825"
+    },
+    "labels": {
+      "regStrtDt": "접수일자 시작 (VOC 처리/접수 등)",
+      "regEndDt": "접수일자 종료"
+    },
+    "search": ".btn-search, [data-click=search]"
+  },
+  "_comment_menus": "소스 스캔 초안 201개. _이미있음 이 붙은 92개는 기본/wrb-voc.json(109메뉴)에 이미 있는 화면. 나머지는 아직 안 돌려 본 화면이라 실패가 많을 수 있다 — 이름이 영문(컨트롤러 경로에서 만든 것)인 항목은 실제로 열어 보고 한글 메뉴명으로 다듬는 게 좋다",
+  "_comment_expect": "expect 43개는 화면 JSP 의 그리드·폼 id 에서 뽑은 잠정값 — 첫 실행 보고서의 \"핵심 요소 없음\" 을 보고 확정할 것",
+  "_comment_actions": "actions 는 눌러서 동작까지 검사하는 버튼 (40개 화면) — 조회·검색처럼 데이터를 바꾸지 않는 것만. 등록·저장·삭제·발송은 뺐다(⏺ 녹화로 crud 에 만들 것)",
+  "_comment_detail": "상세 진입(detail)은 넣지 않았다 — 각 메뉴의 _상세후보 를 확인한 뒤 옮긴다. toastUI 그리드는 행 클릭이 상태를 바꾸는 화면이 있다",
+  "_제외_개발용화면": [],
+  "_제외_팝업": [
+    "address > address Pop (/address/addressPop)",
+    "employ > emp Org Pop (/employ/empOrgPop)",
+    "grp Emp Hst > snapshot Pop (/grpEmpHst/snapshotPop)",
+    "util > audio Player (/util/audioPlayer)"
+  ],
+  "_comment_제외": "개발용 화면 0 (/AAA·genGrid·viewTest·top1/2 등 — wrb-voc.json crawl.exclude 와 같은 기준) / 팝업 4 (직접 열면 렌더가 다를 수 있음). 필요하면 골라서 menus 로 옮기면 된다",
+  "menus": [
+    {
+      "name": "메인",
+      "url": "/",
+      "expect": [
+        "#frm"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/MainController.java:40"
+    },
+    {
+      "name": "address",
+      "url": "/address",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/AddressController.java:45"
+    },
+    {
+      "name": "시스템관리 > API실행이력",
+      "url": "/apiHist",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/ApiExecHistController.java:46"
+    },
+    {
+      "name": "시스템관리 > API키발급 (조회만)",
+      "url": "/apikey",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/ApiKeyController.java:48"
+    },
+    {
+      "name": "시스템관리 > API관리 (조회만)",
+      "url": "/apiManage",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/ApiManageController.java:46"
+    },
+    {
+      "name": "결재관리 > 결재 목록 (조회만)",
+      "url": "/aprvBas",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/aprv/controller/AprvBasController.java:67"
+    },
+    {
+      "name": "aprv Dtl",
+      "url": "/aprvDtl",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/aprv/controller/AprvDtlController.java:43"
+    },
+    {
+      "name": "asn Bas",
+      "url": "/asnBas",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/assign/controller/AsnBasController.java:34"
+    },
+    {
+      "name": "asn Col Chnl",
+      "url": "/asnColChnl",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/assign/controller/AsnColChnlController.java:37"
+    },
+    {
+      "name": "asn Map Mgmt",
+      "url": "/asnMapMgmt",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/assign/controller/AsnMapMgmtController.java:37"
+    },
+    {
+      "name": "asn Rule",
+      "url": "/asnRule",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/assign/controller/AsnRuleController.java:23"
+    },
+    {
+      "name": "auth Chg Log",
+      "url": "/authChgLog",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/GrpChgHstController.java:31"
+    },
+    {
+      "name": "시스템관리 > 배치관리 (조회만, 실행 금지)",
+      "url": "/batch",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/BatchInfoBasController.java:51"
+    },
+    {
+      "name": "시스템관리 > 배치실행이력",
+      "url": "/batchHist",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/BatchExecHstController.java:49"
+    },
+    {
+      "name": "biz Req List",
+      "url": "/bizReqList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocBizReqListController.java:39"
+    },
+    {
+      "name": "공지사항 > 게시판 카테고리 관리",
+      "url": "/brdCategory",
+      "expect": [
+        "#grid"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/community/controller/BrdCategoryController.java:53",
+      "_버튼": "추가(text=추가) · ⚠저장(text=저장) · ⚠전체 삭제(text=전체 삭제) · ⚠삭제(text=삭제) · ⚠수정(text=수정)"
+    },
+    {
+      "name": "공지사항 > 게시판 관리",
+      "url": "/brdSetting",
+      "expect": [
+        "#grid"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/community/controller/BrdSettingController.java:69",
+      "_버튼": "⚠수정(text=수정) · 추가(text=추가) · ⚠초기화(text=초기화) · ⚠삭제(text=삭제) · ⚠저장(text=저장) · ⚠전체등록(text=전체등록) · ⚠등록(text=등록)"
+    },
+    {
+      "name": "brd Setting > add Prnt Menu",
+      "url": "/brdSetting/addPrntMenu",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/community/controller/BrdSettingController.java:86"
+    },
+    {
+      "name": "brd Stats",
+      "url": "/brdStats",
+      "expect": [
+        "#grid"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/community/controller/BrdStatsController.java:51"
+    },
+    {
+      "name": "call > compensation",
+      "url": "/call/compensation",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/module/wrb/controller/WrbCallController.java:57"
+    },
+    {
+      "name": "call > cpes Update",
+      "url": "/call/cpesUpdate",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/module/wrb/controller/WrbCallController.java:80"
+    },
+    {
+      "name": "시스템관리 > 정보변경이력",
+      "url": "/chngHst",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/ChngHstController.java:46"
+    },
+    {
+      "name": "cmty Brd",
+      "url": "/cmtyBrd",
+      "expect": [
+        "#grid"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/community/controller/CmtyAbstractController.java:72",
+      "_버튼": "⚠신규등록(#addBrd) · ⚠초기화(text=초기화) · 조회(text=조회) · 오늘(text=오늘) · 1주일(text=1주일) · 1개월(text=1개월) · 3개월(text=3개월) · 6개월(text=6개월) · 전체(text=전체) · ⚠삭제(#delBrd)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 > 공통코드관리 (조회만)",
+      "url": "/code",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/ComnCdBaseController.java:43"
+    },
+    {
+      "name": "cost Info",
+      "url": "/costInfo",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cpabase/controller/CostInfoController.java:43"
+    },
+    {
+      "name": "소비자보호 설정 > 소비자보호 Activity 설정",
+      "url": "/cpaActCdBas",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cpabase/controller/CpaActCdBasController.java:45"
+    },
+    {
+      "name": "cpa Bas Hst",
+      "url": "/cpaBasHst",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cpabase/controller/CpaBasHstController.java:43"
+    },
+    {
+      "name": "소비자보호 설정 > 소비자보호 기본절차 설정",
+      "url": "/cpaBasPrcd",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cpabase/controller/CpaBasPrcdController.java:48"
+    },
+    {
+      "name": "cpa Dtl Hst",
+      "url": "/cpaDtlHst",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cpabase/controller/CpaDtlHstController.java:43"
+    },
+    {
+      "name": "cpa Dtl Rjt Hst",
+      "url": "/cpaDtlRjtHst",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cpabase/controller/CpaDtlRjtHstController.java:43"
+    },
+    {
+      "name": "교육관리 > 교육 과정 소개",
+      "url": "/cpaEdu",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/edu/controller/EduController.java:36"
+    },
+    {
+      "name": "교육관리 > 교육 등록 및 검색",
+      "url": "/cpaEdu/regList",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/edu/controller/EduController.java:52"
+    },
+    {
+      "name": "교육관리 > 교육 보고서",
+      "url": "/cpaEdu/report",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/edu/controller/EduController.java:70"
+    },
+    {
+      "name": "교육관리 > 교육 일정 조회",
+      "url": "/cpaEdu/schedule",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/edu/controller/EduController.java:86"
+    },
+    {
+      "name": "소비자보호 설정 > 소비자보호 상세절차 설정",
+      "url": "/cpaMapp",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cpabase/controller/CpaMappController.java:48"
+    },
+    {
+      "name": "소비자보호 설정 > 소비자보호 분류코드",
+      "url": "/cpaMgmtCdBas",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cpabase/controller/CpaMgmtCdBasController.java:40"
+    },
+    {
+      "name": "소비자보호 설정 > 소비자보호 Task 코드",
+      "url": "/cpaPrcdCdBas",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cpabase/controller/CpaPrcdCdBasController.java:43"
+    },
+    {
+      "name": "cpa Pre Mapp Survey",
+      "url": "/cpaPreMappSurvey",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cpabase/controller/CpaPreMappSurveyController.java:47"
+    },
+    {
+      "name": "cpa Process User",
+      "url": "/cpaProcessUser",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cpabase/controller/CpaProcessUserController.java:43"
+    },
+    {
+      "name": "cpa Ref",
+      "url": "/cpaRef",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cpabase/controller/CpaRefController.java:43"
+    },
+    {
+      "name": "소비자보호 설정 > 통합 대상자 관리",
+      "url": "/cpaTargetBas",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cpabase/controller/CpaTargetBasController.java:51"
+    },
+    {
+      "name": "cpa Target Bas > req Reason",
+      "url": "/cpaTargetBas/reqReason",
+      "expect": [
+        "#reasonFrm"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cpabase/controller/CpaTargetBasController.java:56",
+      "_버튼": "요청(text=요청)"
+    },
+    {
+      "name": "cpa Target Dtl",
+      "url": "/cpaTargetDtl",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cpabase/controller/CpaTargetDtlController.java:43"
+    },
+    {
+      "name": "VOC 관리 > VOC 업무요청 > 업무요청 관리",
+      "url": "/cprtReqUsr",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/cprtReq/controller/VocCprtReqUsrController.java:24"
+    },
+    {
+      "name": "data Req List",
+      "url": "/dataReqList",
+      "expect": [
+        "#divGrid1"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/community/controller/DataReqController.java:59",
+      "_버튼": "신규 요청(text=신규 요청) · ⚠초기화(text=초기화) · 조회(text=조회) · 오늘(text=오늘) · 1주일(text=1주일) · 1개월(text=1개월) · 3개월(text=3개월) · 6개월(text=6개월) · 전체(text=전체)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "data Req List > R",
+      "url": "/dataReqList/R",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/community/controller/DataReqController.java:65"
+    },
+    {
+      "name": "defect",
+      "url": "/defect",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/DefectController.java:26"
+    },
+    {
+      "name": "시스템관리 > 통보내역 (조회만, 발송 금지)",
+      "url": "/dispatch",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/dispatch/controller/DspcBasController.java:60"
+    },
+    {
+      "name": "dispatch > detail",
+      "url": "/dispatch/detail",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/dispatch/controller/DspcBasController.java:66"
+    },
+    {
+      "name": "dspc Dtl",
+      "url": "/dspcDtl",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/dispatch/controller/DspcDtlController.java:49"
+    },
+    {
+      "name": "dspc Registration",
+      "url": "/dspcRegistration",
+      "expect": [
+        "#dspcForm"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/dispatch/controller/DspcRegistrationController.java:28",
+      "_버튼": "⚠임시저장(text=임시저장) · 접수(text=접수) · 전달(text=전달)"
+    },
+    {
+      "name": "시스템관리 > 직원관리 (조회만)",
+      "url": "/employ",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/EmpBaseController.java:25"
+    },
+    {
+      "name": "error > render",
+      "url": "/error/render",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/ErrController.java:89"
+    },
+    {
+      "name": "시스템관리 > 예외발생이력",
+      "url": "/errorHst",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/ErrHstController.java:31"
+    },
+    {
+      "name": "시스템관리 > 엑셀다운로드이력",
+      "url": "/excelLog",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/XlsDnldHstController.java:30"
+    },
+    {
+      "name": "faq",
+      "url": "/faq",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/board/controller/FaqController.java:55"
+    },
+    {
+      "name": "시스템관리 > 첨부파일관리",
+      "url": "/file",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/FileController.java:46"
+    },
+    {
+      "name": "file > add",
+      "url": "/file/add",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/FileController.java:52"
+    },
+    {
+      "name": "VOC 관리 > VOC 민원 > 금감원 목록",
+      "url": "/finesList",
+      "expect": [
+        "#divGrid1"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/fines/controller/FinesController.java:49",
+      "_버튼": "splitTest(text=splitTest) · ⚠초기화(text=초기화) · 검색(text=검색)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        }
+      ]
+    },
+    {
+      "name": "global Notice",
+      "url": "/globalNotice",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/board/controller/NoticeController.java:53"
+    },
+    {
+      "name": "시스템관리 > 그룹관리 (조회만)",
+      "url": "/group",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/GroupController.java:56"
+    },
+    {
+      "name": "group > add",
+      "url": "/group/add",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/GroupController.java:68"
+    },
+    {
+      "name": "group > manually Group List",
+      "url": "/group/manuallyGroupList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/GroupController.java:293"
+    },
+    {
+      "name": "시스템관리 > 사원 변경이력",
+      "url": "/grpEmpHst",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/GrpEmpHstController.java:31"
+    },
+    {
+      "name": "시스템관리 > 그룹메뉴 변경이력",
+      "url": "/grpMenuHst",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/GrpMenuHstController.java:31"
+    },
+    {
+      "name": "시스템관리 > 부서 변경이력",
+      "url": "/grpOrgHst",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/GrpOrgHstController.java:31"
+    },
+    {
+      "name": "idea Suggestion",
+      "url": "/ideaSuggestion",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/ideaSuggestion/controller/IdeaSuggestionController.java:48"
+    },
+    {
+      "name": "제도개선 > 제도개선포켓 검토",
+      "url": "/ideaSuggestion/procList",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/ideaSuggestion/controller/IdeaSuggestionController.java:68"
+    },
+    {
+      "name": "제도개선 > 제도개선포켓 등록",
+      "url": "/ideaSuggestion/regList",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/ideaSuggestion/controller/IdeaSuggestionController.java:62"
+    },
+    {
+      "name": "illegal Contract",
+      "url": "/illegalContract",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/illegalContract/controller/IllegalContractController.java:76"
+    },
+    {
+      "name": "illegal Contract > del List",
+      "url": "/illegalContract/delList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/illegalContract/controller/IllegalContractController.java:158"
+    },
+    {
+      "name": "법령준수 > 위법계약해지 통보 (조회만, 통보 금지)",
+      "url": "/illegalContract/dspcList",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/illegalContract/controller/IllegalContractController.java:150"
+    },
+    {
+      "name": "illegal Contract > mon List",
+      "url": "/illegalContract/monList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/illegalContract/controller/IllegalContractController.java:166"
+    },
+    {
+      "name": "법령준수 > 위법계약해지 처리",
+      "url": "/illegalContract/procList",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/illegalContract/controller/IllegalContractController.java:142"
+    },
+    {
+      "name": "illegal Contract > rec List",
+      "url": "/illegalContract/recList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/illegalContract/controller/IllegalContractController.java:134"
+    },
+    {
+      "name": "법령준수 > 위법계약해지 등록",
+      "url": "/illegalContract/regList",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/illegalContract/controller/IllegalContractController.java:126"
+    },
+    {
+      "name": "improvement",
+      "url": "/improvement",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/improvement/controller/ImprovementController.java:52"
+    },
+    {
+      "name": "improvement > arrive List",
+      "url": "/improvement/arriveList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/improvement/controller/ImprovementController.java:106"
+    },
+    {
+      "name": "improvement > assign List",
+      "url": "/improvement/assignList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/improvement/controller/ImprovementController.java:100"
+    },
+    {
+      "name": "improvement > del List",
+      "url": "/improvement/delList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/improvement/controller/ImprovementController.java:118"
+    },
+    {
+      "name": "improvement > mon List",
+      "url": "/improvement/monList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/improvement/controller/ImprovementController.java:151"
+    },
+    {
+      "name": "제도개선 > 제도개선 처리",
+      "url": "/improvement/processList",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/improvement/controller/ImprovementController.java:112"
+    },
+    {
+      "name": "improvement > rec List",
+      "url": "/improvement/recList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/improvement/controller/ImprovementController.java:94"
+    },
+    {
+      "name": "제도개선 > 제도개선 등록",
+      "url": "/improvement/regList",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/improvement/controller/ImprovementController.java:88"
+    },
+    {
+      "name": "improvement > select Target List",
+      "url": "/improvement/selectTargetList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/improvement/controller/ImprovementController.java:58"
+    },
+    {
+      "name": "시스템관리 > 개인정보조회이력",
+      "url": "/inqryHst",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/SnstvInfoInqryHstController.java:50"
+    },
+    {
+      "name": "ip Rel",
+      "url": "/ipRel",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/IpRelController.java:50"
+    },
+    {
+      "name": "kpi Bas",
+      "url": "/kpiBas",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/kpi/controller/KpiBasController.java:46"
+    },
+    {
+      "name": "VOC 설정 > KPI 목록",
+      "url": "/kpiList",
+      "expect": [
+        "#divGrid1"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/kpi/controller/KpiListController.java:56",
+      "_상세후보": "#divGrid1 tbody tr (더블클릭) — on('dblclick'). 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠신규등록(text=신규등록) · ⚠초기화(text=초기화) · 검색(text=검색) · 오늘(text=오늘) · 1주일(text=1주일) · 1개월(text=1개월) · 3개월(text=3개월) · 6개월(text=6개월) · 전체(text=전체) · 조회(#cpaUtilitiesO1) · 조회(#cpaUtilitiesE1) · 조회(#cpaUtilitiesO2) · 조회(#cpaUtilitiesE2) · 복사(text=복사) · 엑셀 다운로드(#btnExcelStayList) · 엑셀 다운로드(#btnExcelProcessList) · 엑셀 다운로드(#btnExcelCompleteList) · 엑셀 다운로드(#btnExcelCloseList)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        },
+        {
+          "name": "조회",
+          "click": "#cpaUtilitiesO1"
+        }
+      ]
+    },
+    {
+      "name": "VOC 설정 > KPI 유형관리",
+      "url": "/kpiMgmtCd",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/kpi/controller/KpiMgmtCdController.java:44"
+    },
+    {
+      "name": "시스템관리 > 라이브러리관리",
+      "url": "/library",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/LibraryController.java:43"
+    },
+    {
+      "name": "main",
+      "url": "/main",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/MainController.java:73",
+      "_버튼": "연장(text=연장) · 로그아웃(text=로그아웃) · 전체닫기(text=전체닫기) · 닫기(text=닫기) · ⚠삭제(text=삭제) · 확인(#custom-confirm-accept) · 취소(#custom-confirm-reject)",
+      "actions": [
+        {
+          "name": "전체닫기",
+          "click": "text=전체닫기"
+        },
+        {
+          "name": "닫기",
+          "click": "text=닫기"
+        },
+        {
+          "name": "취소",
+          "click": "#custom-confirm-reject"
+        }
+      ]
+    },
+    {
+      "name": "시스템관리 > 메뉴관리 (조회만)",
+      "url": "/menu",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/MenuController.java:38"
+    },
+    {
+      "name": "menu > add",
+      "url": "/menu/add",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/MenuController.java:44"
+    },
+    {
+      "name": "시스템관리 > 메뉴접근이력",
+      "url": "/menuViewHst",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/MenuViewHstController.java:50"
+    },
+    {
+      "name": "VOC 설정 > 분류코드데이터등록 (업로드 금지)",
+      "url": "/mgmtExcelUpload",
+      "expect": [
+        "#excelGridDiv"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/setting/controller/VocMgmtExcelUploadController.java:32",
+      "_버튼": "⚠엑셀등록(text=엑셀등록) · ⚠미사용엑셀등록(text=미사용엑셀등록) · 추가(text=추가)"
+    },
+    {
+      "name": "시스템관리 > 통보 템플릿관리 (조회만)",
+      "url": "/msgTemplate",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/dispatch/controller/DspcTmpltBasController.java:48"
+    },
+    {
+      "name": "결재관리 > 나의 결재 라인 관리",
+      "url": "/myAprvLineBas",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/aprv/controller/MyAprvLineBasController.java:52"
+    },
+    {
+      "name": "my Aprv Line Bas > bas Add",
+      "url": "/myAprvLineBas/basAdd",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/aprv/controller/MyAprvLineBasController.java:58"
+    },
+    {
+      "name": "my Info",
+      "url": "/myInfo",
+      "expect": [
+        "#frmMain"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/MyInfoController.java:44",
+      "_버튼": "비밀번호변경(#changePassword)"
+    },
+    {
+      "name": "실태평가 > 비계량 체크리스트",
+      "url": "/nmeItem",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/nme/controller/NmeItemController.java:37"
+    },
+    {
+      "name": "실태평가 > 비계량 평가",
+      "url": "/nmeList",
+      "expect": [
+        "#divGrid1"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/nme/controller/NmeListController.java:50",
+      "_상세후보": "#divGrid1 tbody tr (더블클릭) — on('dblclick'). 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠신규등록(text=신규등록) · ⚠초기화(text=초기화) · 검색(text=검색) · 오늘(text=오늘) · 1주일(text=1주일) · 1개월(text=1개월) · 3개월(text=3개월) · 6개월(text=6개월) · 전체(text=전체) · 조회(#cpaUtilitiesO1) · 조회(#cpaUtilitiesE1) · 조회(#cpaUtilitiesO2) · 조회(#cpaUtilitiesE2) · 복사(text=복사) · 엑셀 다운로드(#btnExcelInProgressList) · 엑셀 다운로드(#btnExcelUnderEvalutaionList) · 엑셀 다운로드(#btnExcelFinalizingList) · 엑셀 다운로드(#btnExcelCompletedList)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        },
+        {
+          "name": "조회",
+          "click": "#cpaUtilitiesO1"
+        }
+      ]
+    },
+    {
+      "name": "nmt Bas",
+      "url": "/nmtBas",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/nmt/controller/NmtBasController.java:139"
+    },
+    {
+      "name": "nmt Bas > add",
+      "url": "/nmtBas/add",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/nmt/controller/NmtBasController.java:200"
+    },
+    {
+      "name": "nmt Bas > item",
+      "url": "/nmtBas/item",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/nmt/controller/NmtBasController.java:145"
+    },
+    {
+      "name": "nmt Bas > prc List",
+      "url": "/nmtBas/prcList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/nmt/controller/NmtBasController.java:151"
+    },
+    {
+      "name": "noq Bas",
+      "url": "/noqBas",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/noq/controller/NoqBasController.java:48"
+    },
+    {
+      "name": "비계량실태평가 추가 화면",
+      "url": "/noqBas/add",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/noq/controller/NoqBasController.java:100"
+    },
+    {
+      "name": "비계량실태평가 체크리스트 목록 화면",
+      "url": "/noqBas/item",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/noq/controller/NoqBasController.java:182"
+    },
+    {
+      "name": "비계량실태평가 체크리스트 추가 화면",
+      "url": "/noqBas/ItemAdd",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/noq/controller/NoqBasController.java:116"
+    },
+    {
+      "name": "모니터링 화면 연결",
+      "url": "/noqBas/monitor",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/noq/controller/NoqBasController.java:55"
+    },
+    {
+      "name": "noq Bas > open Noq Prc Detail",
+      "url": "/noqBas/openNoqPrcDetail",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/noq/controller/NoqBasController.java:508"
+    },
+    {
+      "name": "noq Bas > prc List",
+      "url": "/noqBas/prcList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/noq/controller/NoqBasController.java:496"
+    },
+    {
+      "name": "시스템관리 > 공지사항",
+      "url": "/notice",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/PostBasController.java:31"
+    },
+    {
+      "name": "notice > add",
+      "url": "/notice/add",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/PostBasController.java:37"
+    },
+    {
+      "name": "notice > mod",
+      "url": "/notice/mod",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/PostBasController.java:51"
+    },
+    {
+      "name": "oq Bas",
+      "url": "/oqBas",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/oq/controller/OqBasController.java:57"
+    },
+    {
+      "name": "oq Bas > add",
+      "url": "/oqBas/add",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/oq/controller/OqBasController.java:63"
+    },
+    {
+      "name": "oq Process",
+      "url": "/oqProcess",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/oq/controller/OqProcessController.java:43"
+    },
+    {
+      "name": "시스템관리 > 부서관리 (조회만)",
+      "url": "/organization",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/OrgBaseController.java:27"
+    },
+    {
+      "name": "organization > bnk",
+      "url": "/organization/bnk",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/OrgBaseController.java:144"
+    },
+    {
+      "name": "VOC 설정 > 답변서식 관리",
+      "url": "/pblTmplt",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/template/controller/PblVocReplyTmpltController.java:43"
+    },
+    {
+      "name": "시스템관리 > 직책권한관리 (조회만)",
+      "url": "/procAuthority",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/ProcAuthorityController.java:35"
+    },
+    {
+      "name": "실태평가 > 계량 평가",
+      "url": "/qmeList",
+      "expect": [
+        "#divGrid1"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/qme/controller/QmeListController.java:44",
+      "_상세후보": "#divGrid1 tbody tr (더블클릭) — on('dblclick'). 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠신규등록(text=신규등록) · ⚠초기화(text=초기화) · 검색(text=검색) · 오늘(text=오늘) · 1주일(text=1주일) · 1개월(text=1개월) · 3개월(text=3개월) · 6개월(text=6개월) · 전체(text=전체) · 조회(#cpaUtilitiesO1) · 조회(#cpaUtilitiesE1) · 조회(#cpaUtilitiesO2) · 조회(#cpaUtilitiesE2) · 복사(text=복사) · 엑셀 다운로드(#btnExcelInProgressList) · 엑셀 다운로드(#btnExcelUnderEvalutaionList) · 엑셀 다운로드(#btnExcelFinalizingList) · 엑셀 다운로드(#btnExcelCompletedList)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        },
+        {
+          "name": "조회",
+          "click": "#cpaUtilitiesO1"
+        }
+      ]
+    },
+    {
+      "name": "red",
+      "url": "/red",
+      "expect": [
+        "#frm"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/MainController.java:54"
+    },
+    {
+      "name": "report > list1",
+      "url": "/report/list1",
+      "expect": [
+        "#searchFrm"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/report/controller/ReportController.java:33",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        }
+      ]
+    },
+    {
+      "name": "report > list2",
+      "url": "/report/list2",
+      "expect": [
+        "#searchFrm"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/report/controller/ReportController.java:39",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        }
+      ]
+    },
+    {
+      "name": "report > list3",
+      "url": "/report/list3",
+      "expect": [
+        "#searchFrm"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/report/controller/ReportController.java:45",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        }
+      ]
+    },
+    {
+      "name": "report > list4",
+      "url": "/report/list4",
+      "expect": [
+        "#searchFrm"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/report/controller/ReportController.java:51",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        }
+      ]
+    },
+    {
+      "name": "report > list5",
+      "url": "/report/list5",
+      "expect": [
+        "#searchFrm"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/report/controller/ReportController.java:57",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        }
+      ]
+    },
+    {
+      "name": "report > list6",
+      "url": "/report/list6",
+      "expect": [
+        "#searchFrm"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/report/controller/ReportController.java:63",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        }
+      ]
+    },
+    {
+      "name": "report > list7",
+      "url": "/report/list7",
+      "expect": [
+        "#searchFrm"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/report/controller/ReportController.java:69",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        }
+      ]
+    },
+    {
+      "name": "report > list8",
+      "url": "/report/list8",
+      "expect": [
+        "#searchFrm"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/report/controller/ReportController.java:75",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        }
+      ]
+    },
+    {
+      "name": "report > list9",
+      "url": "/report/list9",
+      "expect": [
+        "#searchFrm"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/report/controller/ReportController.java:81",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        }
+      ]
+    },
+    {
+      "name": "req Ref Read",
+      "url": "/reqRefRead",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/reqRefRead/controller/ReqRefReadController.java:60"
+    },
+    {
+      "name": "req Ref Read > cplt List",
+      "url": "/reqRefRead/cpltList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/reqRefRead/controller/ReqRefReadController.java:99"
+    },
+    {
+      "name": "req Ref Read > del List",
+      "url": "/reqRefRead/delList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/reqRefRead/controller/ReqRefReadController.java:105"
+    },
+    {
+      "name": "req Ref Read > proc List",
+      "url": "/reqRefRead/procList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/reqRefRead/controller/ReqRefReadController.java:93"
+    },
+    {
+      "name": "법령준수 > 자료열람 요구",
+      "url": "/reqRefRead/regList",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/reqRefRead/controller/ReqRefReadController.java:87"
+    },
+    {
+      "name": "req Ref Read > test Report",
+      "url": "/reqRefRead/testReport",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/reqRefRead/controller/ReqRefReadController.java:113"
+    },
+    {
+      "name": "sort",
+      "url": "/sort",
+      "expect": [
+        "#frmMain"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/MainController.java:79",
+      "_버튼": "⚠저장(#btnSave)"
+    },
+    {
+      "name": "시스템관리 > 체크리스트 관리",
+      "url": "/surveyBas",
+      "expect": [
+        "#surveyBasGrpTree"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/survey/controller/SurveyBasController.java:34",
+      "_버튼": "⚠수정(text=수정) · 추가(text=추가) · ⚠삭제(text=삭제) · slide-button(text=slide-button) · 복제(text=복제) · 엑셀다운로드(text=엑셀다운로드)"
+    },
+    {
+      "name": "시스템관리 > 체크리스트 문항 관리",
+      "url": "/surveyQuestion",
+      "expect": [
+        "#divTree1"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/survey/controller/SurveyQuestionController.java:35",
+      "_버튼": "⚠수정(text=수정) · 추가(text=추가) · ⚠삭제(text=삭제) · slide-button(text=slide-button) · 복제(text=복제) · 엑셀다운로드(text=엑셀다운로드) · 추가(#addQstBtn) · ⚠저장(text=저장)"
+    },
+    {
+      "name": "결재관리 > 통합 결재 라인 관리",
+      "url": "/sysAprvLineBas",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/aprv/controller/SysAprvLineBasController.java:47"
+    },
+    {
+      "name": "sys Aprv Line Bas > bas Add",
+      "url": "/sysAprvLineBas/basAdd",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/aprv/controller/SysAprvLineBasController.java:53"
+    },
+    {
+      "name": "sys Aprv Line Dtl",
+      "url": "/sysAprvLineDtl",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/aprv/controller/SysAprvLineDtlController.java:43"
+    },
+    {
+      "name": "sys Proxy Auth",
+      "url": "/sysProxyAuth",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/SysProxyController.java:47"
+    },
+    {
+      "name": "sys Survey Bas",
+      "url": "/sysSurveyBas",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/surveyBas/controller/SysSurveyBasController.java:47"
+    },
+    {
+      "name": "user",
+      "url": "/user",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/UserController.java:44"
+    },
+    {
+      "name": "user > add",
+      "url": "/user/add",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/UserController.java:56"
+    },
+    {
+      "name": "시스템관리 > 로그인이력",
+      "url": "/userLoginHist",
+      "expect": [
+        "#divGrid"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/UserLoginHstController.java:44",
+      "_버튼": "검색(text=검색) · 오늘(#setToday) · 1주일(#set1Week) · 1개월(#set1month) · 3개월(#set3month) · 6개월(#set6month) · 전체(#setAllmonth)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        }
+      ]
+    },
+    {
+      "name": "user Wdgt",
+      "url": "/userWdgt",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/sys/controller/UserWdgtController.java:31"
+    },
+    {
+      "name": "view Temp",
+      "url": "/viewTemp",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/viewTemp/controller/ViewTempController.java:25, src/main/java/com/wigo/voc/program/viewTemp/controller/ViewTempController.java:31"
+    },
+    {
+      "name": "VOC 설정 > VOC ACTIVITY 코드",
+      "url": "/vocActvBas",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/setting/controller/VocActvBasController.java:41"
+    },
+    {
+      "name": "voc Assignment List",
+      "url": "/vocAssignmentList",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocAssignmentListController.java:52"
+    },
+    {
+      "name": "VOC 설정 > VOC 기본절차 설정",
+      "url": "/vocBasMgmtPrcd",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/setting/controller/VocBasMgmtPrcdController.java:39"
+    },
+    {
+      "name": "VOC 설정 > 사전 분류체계 관리",
+      "url": "/vocCdCategory",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/keyword/controller/VocMoaraCategoryController.java:34"
+    },
+    {
+      "name": "VOC 관리 > VOC 보상관리 > 고객보상관리",
+      "url": "/vocCompensation/branchList",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/inspection/controller/VocCompensationListController.java:45"
+    },
+    {
+      "name": "VOC 관리 > VOC 보상관리 > 센터보상관리",
+      "url": "/vocCompensation/centerList",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/inspection/controller/VocCompensationListController.java:53"
+    },
+    {
+      "name": "voc Conclude List",
+      "url": "/vocConcludeList",
+      "expect": [
+        "#gridBtnBox"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocConcludeListController.java:42",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색) · 조회(text=조회) · 1주일(text=1주일) · 1개월(text=1개월) · 3개월(text=3개월) · 전체(text=전체) · 부서선택(text=부서선택) · 관심 VOC(text=관심 VOC) · 재분배요청(text=재분배요청) · 처리수락(text=처리수락) · ⚠일괄답변(text=일괄답변)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        },
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "voc Current List",
+      "url": "/vocCurrentList",
+      "expect": [
+        "#divTree"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocCurrentListController.java:37",
+      "_버튼": "새로고침(text=새로고침) · slide-button(text=slide-button) · ⚠등록(text=등록)",
+      "actions": [
+        {
+          "name": "새로고침",
+          "click": "text=새로고침"
+        }
+      ]
+    },
+    {
+      "name": "VOC 모니터링 > VOC 처리연장목록",
+      "url": "/vocDdlnExtdList",
+      "expect": [
+        "#divGrid1"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocDdlnExtdListController.java:48",
+      "_상세후보": "#divGrid1 tbody tr (더블클릭) — on('dblclick'). 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색) · 1주일(text=1주일) · 1개월(text=1개월) · 3개월(text=3개월) · 6개월(text=6개월) · 전체(text=전체) · 조회(text=조회)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        },
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "VOC 설정 > VOC 상세절차 설정",
+      "url": "/vocDtlMgmtPrcd",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/setting/controller/VocDtlMgmtPrcdController.java:41"
+    },
+    {
+      "name": "KPI/마일리지 > KPI 현황",
+      "url": "/vocDtlRelOrg/kpi",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/relOrgEval/controller/VocRelOrgEvalController.java:58"
+    },
+    {
+      "name": "KPI/마일리지 > 마일리지 현황 (업로드 금지)",
+      "url": "/vocDtlRelOrg/mileage",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/relOrgEval/controller/VocRelOrgEvalController.java:65"
+    },
+    {
+      "name": "voc Inspection List",
+      "url": "/vocInspectionList",
+      "expect": [
+        "#gridBtnBox"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/inspection/controller/VocInspectionListController.java:48",
+      "_상세후보": "#gridBtnBox tbody tr (더블클릭) — on('dblclick'). 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        }
+      ]
+    },
+    {
+      "name": "VOC 점검 > 분쟁조정 대상 점검",
+      "url": "/vocInspectionList/disputeMediation",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/inspection/controller/VocInspectionListController.java:169"
+    },
+    {
+      "name": "VOC 점검 > AI 조기경보 점검",
+      "url": "/vocInspectionList/earlyAlert",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/inspection/controller/VocInspectionListController.java:136"
+    },
+    {
+      "name": "VOC 점검 > VOC 후속관리 점검",
+      "url": "/vocInspectionList/followingMgmt",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/inspection/controller/VocInspectionListController.java:147"
+    },
+    {
+      "name": "VOC 점검 > 이슈민원 점검",
+      "url": "/vocInspectionList/issueComplaints",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/inspection/controller/VocInspectionListController.java:125"
+    },
+    {
+      "name": "VOC 점검 > 문제행동 고객 점검",
+      "url": "/vocInspectionList/problemBehaviorConsumer",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/inspection/controller/VocInspectionListController.java:158"
+    },
+    {
+      "name": "VOC 관리 > VOC 검색 > VOC 통합검색",
+      "url": "/vocIntegrationList",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocIntegrationListController.java:43"
+    },
+    {
+      "name": "VOC 관리 > MY VOC > 나의 관심VOC",
+      "url": "/vocInterestList",
+      "expect": [
+        "#divGrid1"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocInterestListController.java:47",
+      "_상세후보": "#divGrid1 tbody tr (더블클릭) — on('dblclick'). 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색) · 조회(text=조회) · 1주일(text=1주일) · 1개월(text=1개월) · 3개월(text=3개월) · 6개월(text=6개월) · 전체(text=전체) · 해제(text=해제)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        },
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "VOC 설정 > 단어 관리",
+      "url": "/vocKeyword",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/keyword/controller/VocKeywordController.java:31"
+    },
+    {
+      "name": "VOC 관리 > VOC 검색 > VOC 키워드검색",
+      "url": "/vocKeywordSearchList",
+      "expect": [
+        "#divGrid1"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocKeywordSearchListController.java:51",
+      "_상세후보": "#divGrid1 tbody tr (더블클릭) — on('dblclick'). 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색) · 조회(text=조회) · 1주일(text=1주일) · 1개월(text=1개월) · 3개월(text=3개월) · 전체(text=전체) · 관심 VOC(text=관심 VOC) · 엑셀다운로드(text=엑셀다운로드) · ⚠영구삭제(text=영구삭제)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        },
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "VOC 관리 > 악성 민원 > 악성민원 처리",
+      "url": "/vocMalignantPrcList",
+      "expect": [
+        "#gridBtnBox"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocMalignantPrcListController.java:40",
+      "_상세후보": "#gridBtnBox tbody tr (더블클릭) — on('dblclick'). 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색) · 1주일(text=1주일) · 1개월(text=1개월) · 3개월(text=3개월) · 전체(text=전체) · 조회(text=조회) · 관심 VOC(text=관심 VOC)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        },
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "VOC 관리 > 악성 민원 > 악성민원 등록 (조회만)",
+      "url": "/vocMalignantRegistration",
+      "expect": [
+        "#registerFrm"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocMalignantRegController.java:38",
+      "_버튼": "결재상태보기(text=결재상태보기) · 결재이력보기(text=결재이력보기) · ⚠결재회수(text=결재회수) · ⚠임시저장(text=임시저장) · 결재요청(text=결재요청) · 조회(text=조회) · 보기(#showCustVocHst) · 조회(#searchCpeseBtn)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "VOC 관리 > 악성 민원 > 악성민원 접수",
+      "url": "/vocMalignantRegList",
+      "expect": [
+        "#divGrid1"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocMalignantRegListController.java:39",
+      "_상세후보": "#divGrid1 tbody tr (더블클릭) — on('dblclick'). 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색) · 1주일(text=1주일) · 1개월(text=1개월) · 3개월(text=3개월) · 전체(text=전체) · 조회(text=조회) · ⚠신규등록(text=신규등록) · ⚠VOC삭제(text=VOC삭제)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        },
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "VOC 설정 > VOC 분류코드",
+      "url": "/vocMgmtCd",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/setting/controller/VocMgmtCdController.java:25"
+    },
+    {
+      "name": "VOC 모니터링 > VOC 지연처리목록",
+      "url": "/vocOverdueList",
+      "expect": [
+        "#divGrid1"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocOverdueListController.java:38",
+      "_상세후보": "#divGrid1 tbody tr (더블클릭) — on('dblclick'). 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색) · 1주일(text=1주일) · 1개월(text=1개월) · 3개월(text=3개월) · 전체(text=전체) · 조회(text=조회) · 재촉(text=재촉)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        },
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "voc Petition",
+      "url": "/vocPetition",
+      "expect": [
+        "#registerFrm"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocPetitionController.java:20",
+      "_버튼": "분배(#insertBtn) · 계약조회(text=계약조회) · 조회(text=조회) · 첨부파일 추가(text=첨부파일 추가) · 추가(text=추가) · X(text=X)",
+      "actions": [
+        {
+          "name": "계약조회",
+          "click": "text=계약조회"
+        },
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "VOC 설정 > VOC 절차 코드",
+      "url": "/vocPrcdBas",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/setting/controller/VocPrcdCdBasController.java:29"
+    },
+    {
+      "name": "VOC 관리 > 사전 신고 > 사전신고 처리 (조회만)",
+      "url": "/vocPreNoticePrcList",
+      "expect": [
+        "#gridBtnBox"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocPreNoticePrcListController.java:40",
+      "_상세후보": "#gridBtnBox tbody tr (더블클릭) — on('dblclick'). 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색) · 1주일(text=1주일) · 1개월(text=1개월) · 3개월(text=3개월) · 전체(text=전체) · 조회(text=조회) · 관심 VOC(text=관심 VOC)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        },
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "VOC 관리 > 사전 신고 > 사전신고 신규등록 (조회만, 상신 금지)",
+      "url": "/vocPreNoticeRegistration",
+      "expect": [
+        "#registerFrm"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocPreNoticeRegController.java:40",
+      "_버튼": "결재상태보기(text=결재상태보기) · 결재이력보기(text=결재이력보기) · ⚠결재회수(text=결재회수) · ⚠임시저장(text=임시저장) · 결재요청(text=결재요청) · 조회(text=조회) · 조회(#searchCpeseBtn) · 변경(text=변경) · 추가(text=추가)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "VOC 관리 > 사전 신고 > 사전신고 접수 (조회만)",
+      "url": "/vocPreNoticeRegList",
+      "expect": [
+        "#divGrid1"
+      ],
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocPreNoticeRegListController.java:39",
+      "_상세후보": "#divGrid1 tbody tr (더블클릭) — on('dblclick'). 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠초기화(text=초기화) · 검색(text=검색) · 1주일(text=1주일) · 1개월(text=1개월) · 3개월(text=3개월) · 전체(text=전체) · 조회(text=조회) · ⚠신규등록(text=신규등록) · ⚠VOC삭제(text=VOC삭제)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        },
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "VOC 관리 > VOC 민원 > VOC 처리",
+      "url": "/vocProcessList",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocProcessListController.java:65"
+    },
+    {
+      "name": "VOC 관리 > VOC 민원 > VOC 신규등록 (조회만)",
+      "url": "/vocRegistration",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocRegistrationController.java:53"
+    },
+    {
+      "name": "VOC 관리 > VOC 민원 > VOC 접수",
+      "url": "/vocRegistrationList",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocRegistrationListController.java:64"
+    },
+    {
+      "name": "VOC 관리 > MY VOC > 나의 답변관리",
+      "url": "/vocReplyTmplt",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/template/controller/VocReplyTmpltController.java:36"
+    },
+    {
+      "name": "voc Report Pg > report01",
+      "url": "/vocReportPg/report01",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/statistics/controller/VocReportPgController.java:17",
+      "_버튼": "조회(text=조회)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "voc Report Pg > report02",
+      "url": "/vocReportPg/report02",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/statistics/controller/VocReportPgController.java:22",
+      "_버튼": "조회(text=조회)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "voc Report Pg > report03",
+      "url": "/vocReportPg/report03",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/statistics/controller/VocReportPgController.java:27",
+      "_버튼": "조회(text=조회)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "voc Report Pg > report07",
+      "url": "/vocReportPg/report07",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/statistics/controller/VocReportPgController.java:32",
+      "_버튼": "조회(text=조회)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "voc Report Pg > report08",
+      "url": "/vocReportPg/report08",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/statistics/controller/VocReportPgController.java:37",
+      "_버튼": "조회(text=조회)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "voc Report Pg > report12",
+      "url": "/vocReportPg/report12",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/statistics/controller/VocReportPgController.java:42",
+      "_버튼": "1분기(text=1분기) · 2분기(text=2분기) · 3분기(text=3분기) · 4분기(text=4분기) · 전반기(text=전반기) · 하반기(text=하반기) · 조회(text=조회)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "voc Report Pg > report13",
+      "url": "/vocReportPg/report13",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/statistics/controller/VocReportPgController.java:47",
+      "_버튼": "1분기(text=1분기) · 2분기(text=2분기) · 3분기(text=3분기) · 4분기(text=4분기) · 전반기(text=전반기) · 하반기(text=하반기) · 조회(text=조회)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "voc Report Pg > report14",
+      "url": "/vocReportPg/report14",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/statistics/controller/VocReportPgController.java:52",
+      "_버튼": "조회(text=조회)",
+      "actions": [
+        {
+          "name": "조회",
+          "click": "text=조회"
+        }
+      ]
+    },
+    {
+      "name": "voc Spcp Emp Mng",
+      "url": "/vocSpcpEmpMng",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/setting/controller/VocSpcpEmpController.java:24"
+    },
+    {
+      "name": "VOC 설정 > VOC TASK 코드",
+      "url": "/vocTaskBas",
+      "_이미있음": "기본/wrb-voc.json (메뉴명도 거기서 가져옴)",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/setting/controller/VocTaskBasController.java:35"
+    },
+    {
+      "name": "voc Tmplt List",
+      "url": "/vocTmpltList",
+      "expect": [
+        "#divGrid"
+      ],
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/program/process/controller/VocTmpltController.java:38",
+      "_상세후보": "#divGrid tbody tr (더블클릭) — on('dblclick'). 행 클릭이 데이터를 바꾸지 않는지 확인한 뒤 detail 로 옮기세요",
+      "_버튼": "⚠등록(text=등록) · ⚠초기화(text=초기화) · 검색(text=검색) · 오늘(text=오늘) · 1주일(text=1주일) · 1개월(text=1개월) · 3개월(text=3개월) · 6개월(text=6개월) · 전체(text=전체) · 조회(#cpaUtilitiesO1) · 조회(#cpaUtilitiesE1) · 조회(#cpaUtilitiesO2) · 조회(#cpaUtilitiesE2)",
+      "actions": [
+        {
+          "name": "검색",
+          "click": "text=검색"
+        },
+        {
+          "name": "조회",
+          "click": "#cpaUtilitiesO1"
+        }
+      ]
+    },
+    {
+      "name": "wrb Cust Example",
+      "url": "/wrbCustExample",
+      "_출처": "컨트롤러 — src/main/java/com/wigo/voc/module/wrb/controller/WrbCustExampleController.java:27"
+    }
+  ]
+}

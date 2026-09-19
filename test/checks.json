@@ -1,0 +1,27 @@
+{
+  "_comment": "2순위 기능 검증용: 재시도(flaky) / 느린 화면 / 깨진 화면 / 분류·CSV. 실행: npm run mock 후 npm run test:checks",
+  "name": "checks 자체검증",
+  "baseUrl": "http://localhost:3999",
+  "browser": { "channel": "chrome", "headless": true },
+  "evidence": { "screenshotAll": false },
+  "retry": 1,
+  "slowMs": 2000,
+  "checks": { "images": true, "layout": true },
+  "login": {
+    "url": "/login",
+    "steps": [
+      { "action": "fill", "selector": "input[name=userId]", "value": "tester" },
+      { "action": "fill", "selector": "input[name=password]", "value": "1234" },
+      { "action": "click", "selector": "button[type=submit]" }
+    ],
+    "success": { "urlNotContains": "login" }
+  },
+  "menus": [
+    { "name": "정상화면", "url": "/main", "expect": ["#content"] },
+    { "name": "불안정화면", "url": "/flaky", "expect": ["#content"] },
+    { "name": "느린화면", "url": "/slow", "expect": ["#content"] },
+    { "name": "깨진화면", "url": "/broken", "expect": ["#content"] },
+    { "name": "다시그리는화면", "url": "/repaint", "expect": ["#content"] },
+    { "name": "서버오류", "url": "/err", "retry": 0 }
+  ]
+}

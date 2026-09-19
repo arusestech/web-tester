@@ -1,0 +1,75 @@
+{
+  "extends": "_공통.json",
+  "name": "권한테스트 P10 320 칭찬파트너",
+  "_comment": "활성 메뉴 3개 중 접근 가능 3개. VOC1019 기능권한(AP_FUNCTION_AUTH) 대상 + 전체VOC 엑셀(hasExcelRole). 계정 TEST_R320 (비번은 실행 시 입력). 근거: 권한별 통합테스트 시나리오 엑셀(2026-08-25) (6.시트 P10)",
+  "_expected_landing": "초기 탭 POR0003",
+  "_comment_baseUrl": "8080 = 로컬 Tomcat(SMTP 목업 적용). IDE Tomcat 은 8888(컨텍스트 없음)",
+  "_detail_reference": "상세 화면 버튼·폼·상태 규칙: 엑셀 8.9 시트 (detail_screens_20260825.json)",
+  "login": {
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#userid",
+        "value": "TEST_R320"
+      },
+      {
+        "action": "fill",
+        "selector": "#userpw",
+        "value": "{{password}}"
+      },
+      {
+        "action": "click",
+        "selector": "#login"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      },
+      {
+        "action": "goto",
+        "url": "/screen/POR0001.ub"
+      },
+      {
+        "action": "waitForLoad",
+        "state": "networkidle"
+      }
+    ]
+  },
+  "menus": [
+    {
+      "name": "포털 메인 (랜딩 탭 확인)",
+      "url": "/screen/POR0001.ub",
+      "expect": [
+        "#menu",
+        "#tabs"
+      ],
+      "_expected": "초기 탭 POR0003, 노출 메뉴 3개"
+    },
+    {
+      "name": "VOC 업무 > 업무요청/공유(매장)",
+      "url": "/screen/VOC1101.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search"
+    },
+    {
+      "name": "VOC 업무 > 전체 VOC (조회만)",
+      "url": "/screen/VOC1001.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#searchBtn a, #searchBtn",
+      "screenshot": false,
+      "_note": "개인정보 화면 — 캡처 제외"
+    },
+    {
+      "name": "VOC 조회 > 칭찬 파트너",
+      "url": "/screen/VOC1019.ub",
+      "expect": [
+        "table.ui-jqgrid-btable"
+      ],
+      "search": "#search a, #search"
+    }
+  ]
+}

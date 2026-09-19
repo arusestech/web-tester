@@ -1,0 +1,118 @@
+{
+  "baseUrl": "http://dev-ivoc.istarbucks.co.kr:8888",
+  "browser": {
+    "channel": "chrome",
+    "headless": false,
+    "viewport": {
+      "width": 1600,
+      "height": 950
+    }
+  },
+  "stubServer": {
+    "_comment_enabled": "2026-09-01: 대상이 원격 개발서버(dev-ivoc)라 OFF. 원격 앱은 테스터 PC 의 localhost:9900 을 부를 수 없어 켜 봐야 의미가 없다. 스타벅스 앱을 로컬에 기동해 붙일 때만 true 로 올린다(로컬=ON / 개발·운영=OFF).",
+    "enabled": false,
+    "port": 9900,
+    "routes": [
+      {
+        "path": "/Startup",
+        "method": "POST",
+        "headers": {
+          "resultCode": "000",
+          "resultMessage": "OK"
+        },
+        "json": {
+          "userId": "test01",
+          "tokenKey": "MOCK-TOKEN-{{uuid}}",
+          "tokenExpireDate": "20991231235959",
+          "msrMemberYn": "Y"
+        }
+      },
+      {
+        "path": "/member/eReceiptList",
+        "method": "POST",
+        "headers": {
+          "resultCode": "000",
+          "resultMessage": "OK"
+        },
+        "json": {
+          "resultList": [],
+          "totalCount": 0
+        }
+      },
+      {
+        "path": "notification/message/push/send",
+        "method": "POST",
+        "headers": {
+          "resultCode": "0000",
+          "resultMessage": "OK"
+        },
+        "json": {
+          "result": "success"
+        }
+      },
+      {
+        "path": "re:/webif(_release)?/",
+        "method": "POST",
+        "headers": {
+          "resultCode": "000",
+          "resultMessage": "OK"
+        },
+        "json": {}
+      },
+      {
+        "path": "/_search",
+        "method": "POST",
+        "json": {
+          "took": 1,
+          "timed_out": false,
+          "_shards": {
+            "total": 1,
+            "successful": 1,
+            "skipped": 0,
+            "failed": 0
+          },
+          "hits": {
+            "total": {
+              "value": 0,
+              "relation": "eq"
+            },
+            "max_score": null,
+            "hits": []
+          }
+        }
+      },
+      {
+        "path": "/_sql/translate",
+        "method": "POST",
+        "json": {
+          "size": 0,
+          "query": {
+            "match_all": {}
+          }
+        }
+      },
+      {
+        "path": "/_sql",
+        "method": "POST",
+        "json": {
+          "columns": [],
+          "rows": []
+        }
+      },
+      {
+        "path": "/_bulk",
+        "method": "POST",
+        "json": {
+          "took": 1,
+          "errors": false,
+          "items": []
+        }
+      },
+      {
+        "path": "re:/_mapping",
+        "method": "GET",
+        "json": {}
+      }
+    ]
+  }
+}

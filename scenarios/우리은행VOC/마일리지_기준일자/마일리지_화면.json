@@ -1,0 +1,43 @@
+{
+  "extends": "../_공통.json",
+  "name": "결함30·48 마일리지 기준일자 (833999ca6c)",
+  "_comment": "커밋 833999ca6c. 엑셀 업로드 중복·오류·빈행 처리와 STANDARD_YMD 기준일 컬럼을 넣었다. **엑셀 업로드는 프로젝트 금지 행위**라 화면 로드와 조회까지만 본다. 업로드 결과 알림(등록/중복/오류/빈행)은 데이터 반영이 가능한 환경에서 수동 확인할 것",
+  "_comment_기지": "2026-08-22 기준 마일리지 현황이 488(STANDARD_YMD DDL 미반영)이었다. 이 시나리오가 그 해소 여부를 같이 확인한다",
+  "menus": [
+    {
+      "name": "마일리지 현황 (업로드 금지)",
+      "url": "/vocDtlRelOrg/mileage",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    },
+    {
+      "name": "KPI 현황",
+      "url": "/vocDtlRelOrg/kpi",
+      "steps": [
+        {
+          "action": "waitForLoad",
+          "state": "networkidle"
+        },
+        {
+          "action": "wait",
+          "ms": 1500
+        }
+      ],
+      "expect": [
+        "body"
+      ]
+    }
+  ],
+  "crud": []
+}

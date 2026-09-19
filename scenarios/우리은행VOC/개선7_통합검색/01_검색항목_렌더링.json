@@ -1,0 +1,59 @@
+{
+  "extends": "_공통.json",
+  "name": "개선7-01 검색항목 렌더링",
+
+  "_comment": "[개선7] 통합검색에 추가한 검색항목 14종이 상세검색(.moreBox) 안에 렌더되고, 관리코드 9종의 옵션이 실제로 로딩되는지 확인한다. 데이터(TB_VOC_BAS) 없이도 판정 가능한 항목만 모았다. 근거: vocIntegrationList.jsp:451~648(폼 14종), :693~698(SEARCH_WRAPPER_IDS)",
+  "_comment_items": "관리코드 9종 = vocTaskRsltCd(VOC010-048/I) prosecutorTransferYn(008) publicAnnounceYn(013) complaintOccrPointCd(026) irrationalDiscrimCd(029) complaintTpCd(027) finesPrePerceptYn(062) merchandiseJoinPath(007) tipOffYn(055) / Y·N select 5종 = cpesCenterYn finesExpectYn problemBehaviorConsumerCd lawInquiryYn issueVocYn",
+
+  "menus": [
+    {
+      "name": "01-1 검색항목 14종 렌더링",
+      "url": "/vocIntegrationList",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#vocTaskRsltCdWrapper select" },
+        { "action": "waitForLoad", "state": "networkidle" }
+      ],
+      "expect": [
+        "#vocTaskRsltCdWrapper select",
+        "#prosecutorTransferYnWrapper select",
+        "#publicAnnounceYnWrapper select",
+        "#complaintOccrPointCdWrapper select",
+        "#irrationalDiscrimCdWrapper select",
+        "#complaintTpCdWrapper select",
+        "#finesPrePerceptYnWrapper select",
+        "#merchandiseJoinPathWrapper select",
+        "#tipOffYnWrapper select",
+        "select[name=cpesCenterYn]",
+        "select[name=finesExpectYn]",
+        "select[name=problemBehaviorConsumerCd]",
+        "select[name=lawInquiryYn]",
+        "select[name=issueVocYn]"
+      ]
+    },
+    {
+      "name": "01-2 관리코드 9종 옵션 로딩",
+      "url": "/vocIntegrationList",
+      "_note": "선택지가 0건인 카테고리를 이름으로 알려 준다. CCCOWN 기준 사전인지여부(VOC010-062)는 코드 0건이 알려진 상태 — 여기서 걸리면 '코드 미등록'이지 소스 결함이 아니다(내부 DB 에서 재확인 필요)",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#tipOffYnWrapper select" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "eval", "script": "(() => { const ids = ['vocTaskRsltCdWrapper','prosecutorTransferYnWrapper','publicAnnounceYnWrapper','complaintOccrPointCdWrapper','irrationalDiscrimCdWrapper','complaintTpCdWrapper','finesPrePerceptYnWrapper','merchandiseJoinPathWrapper','tipOffYnWrapper']; const miss = [], empty = []; ids.forEach(id => { const w = document.getElementById(id); if (!w) { miss.push(id); return; } const s = w.querySelector('select'); if (!s) { miss.push(id + '(select 미생성)'); return; } if (s.options.length < 2) empty.push(id + ' = VOC010-' + (w.dataset.comnCd || '?')); }); if (miss.length) throw new Error('필드 없음: ' + miss.join(', ')); if (empty.length) throw new Error('관리코드 0건(선택지 없음): ' + empty.join(' / ')); })()" }
+      ],
+      "expect": ["#tipOffYnWrapper select"]
+    },
+    {
+      "name": "01-3 SEARCH_WRAPPER_IDS 상수 정합성",
+      "url": "/vocIntegrationList",
+      "_note": "개선7 의 구조 수정분 회귀 가드. 조회(loadGrid)와 엑셀다운로드가 같은 목록을 쓰도록 상수로 합쳤으므로, 추가한 9종이 상수에 빠지면 조건이 조용히 누락된다",
+      "steps": [
+        { "action": "eval", "script": "(() => { const b = document.querySelector('.moreBox'); if (b && getComputedStyle(b).display === 'none') document.querySelector('.moreBtn').click(); })()" },
+        { "action": "waitFor", "selector": "#tipOffYnWrapper select" },
+        { "action": "eval", "script": "(() => { if (typeof SEARCH_WRAPPER_IDS === 'undefined') throw new Error('SEARCH_WRAPPER_IDS 상수 없음 — [개선7] 통합 목록이 적용되지 않았다'); const need = ['vocTaskRsltCdWrapper','prosecutorTransferYnWrapper','publicAnnounceYnWrapper','complaintOccrPointCdWrapper','irrationalDiscrimCdWrapper','complaintTpCdWrapper','finesPrePerceptYnWrapper','merchandiseJoinPathWrapper','tipOffYnWrapper','imptcdWrapper']; const missing = need.filter(id => !SEARCH_WRAPPER_IDS.includes(id)); if (missing.length) throw new Error('상수에 빠진 wrapper(조회·엑셀에서 조건 누락됨): ' + missing.join(', ')); const ghost = SEARCH_WRAPPER_IDS.filter(id => !document.getElementById(id)); if (ghost.length) throw new Error('상수에만 있고 화면에 없는 wrapper: ' + ghost.join(', ')); })()" }
+      ],
+      "expect": ["#divGrid1"]
+    }
+  ],
+  "crud": []
+}

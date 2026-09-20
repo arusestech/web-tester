@@ -3,7 +3,7 @@
   "name": "QA결함회귀 VOC 설정",
   "_comment_source": "QA 260916 test.md FAIL 40건 중 VOC 설정 영역 15건(VC_TC_1204,1206,1236,1245,1267,1306,1323,1327,1335,1339,1387,1408,1427,1458,1507).",
   "_comment_screen": "스토어케어 분류관리=STC0102 / VOC 배분관리=VOC1024(추가 팝업 VOC1032) / 순차배분예외설정=VOC1022(등록 팝업 VOC1023) / 상용구관리=VOC0023 / 업무요청·공유 양식=VOC1104 / VOC업무문의 양식=VOC1114 / 안내팝업 관리=VOC1207 / 콜센터(KPI) 입력=VOC0030 / 상담지원 업무=VOC1201(등록 VOC1202) / 문자발송 팝업=POP0007 / 고객메모 관리=VOC1501(상세 VOC1503)",
-  "_comment_paging": "Rows/Page 는 jqGrid 페이저의 select.ui-pg-selbox 다. VOC0023 은 rowList [20,30,50] 인데 rowNum 이 \"15\" 라(VOC0023.jsp:41,43) 목록에 없는 값이 선택되어 공란으로 보인다 — TC_1306 의 원인으로 의심되는 지점. VOC1207 은 setGrid 에 rowList·rowNum 자체가 없어 프레임워크 기본값(uxl-jqgrid rowNum \"10\")만 적용된다(VOC1207.jsp:41~52) — TC_1387 관련.",
+  "_comment_paging": "Rows/Page 는 프레임워크가 만드는 select.page-rows(id=listPaging) 다 — jqGrid 기본 페이저(.ui-pg-selbox)가 아니다. option 은 JSP 의 rowList 로 만들고 선택값은 **서버 응답의 pageSize** 로 정한다(uxl/grid/uxl-jqgrid-3.0.0.starbucks_jq3.js:479~485). 둘이 어긋나면 공란으로 보인다. VOC0023 은 rowList [20,30,50] 인데 rowNum 이 \"15\" 라(VOC0023.jsp:41,43) 목록에 없는 값이 선택되어 공란으로 보인다 — TC_1306 의 원인으로 의심되는 지점. VOC1207 은 setGrid 에 rowList·rowNum 자체가 없어 프레임워크 기본값(uxl-jqgrid rowNum \"10\")만 적용된다(VOC1207.jsp:41~52) — TC_1387 관련.",
   "crud": [
     {
       "name": "VC_TC_1306 [Major] 상용구관리 페이징 Rows/Page 기본값 20 표시",
@@ -17,7 +17,7 @@
         { "action": "wait", "ms": 2500 },
         {
           "action": "eval",
-          "script": "(()=>{const s=document.querySelector('select.ui-pg-selbox');if(!s)throw new Error('페이징 Rows/Page 셀렉트(select.ui-pg-selbox)가 없음 — 목록이 0건이면 페이저가 안 그려질 수 있다');const opts=[...s.options].map(o=>o.value);if(s.value!=='20')throw new Error('Rows/Page 기본값이 20 이 아님 — 실제 선택값: \"'+s.value+'\" / 옵션: '+opts.join(',')+(opts.includes(s.value)?'':' (선택값이 옵션에 없어 공란으로 보임)'));})()"
+          "script": "(()=>{const s=document.querySelector('select.page-rows, #listPaging, select.ui-pg-selbox');if(!s)throw new Error('페이징 Rows/Page 셀렉트(select.page-rows)가 없음 — 목록이 0건이면 페이저가 안 그려질 수 있다');const opts=[...s.options].map(o=>o.value);if(s.value!=='20')throw new Error('Rows/Page 기본값이 20 이 아님 — 실제 선택값: \"'+s.value+'\" / 옵션: '+opts.join(',')+(opts.includes(s.value)?'':' (선택값이 옵션에 없어 공란으로 보임)'));})()"
         },
         { "action": "screenshot", "name": "상용구관리-페이징" }
       ]
@@ -33,7 +33,7 @@
         { "action": "wait", "ms": 2500 },
         {
           "action": "eval",
-          "script": "(()=>{const s=document.querySelector('select.ui-pg-selbox');if(!s)throw new Error('페이징 Rows/Page 셀렉트(select.ui-pg-selbox)가 없음 — 목록이 0건이면 페이저가 안 그려질 수 있다');const opts=[...s.options].map(o=>o.value);if(s.value!=='10')throw new Error('Rows/Page 기본값이 10 이 아님 — 실제 선택값: \"'+s.value+'\" / 옵션: '+opts.join(',')+(opts.includes(s.value)?'':' (선택값이 옵션에 없어 공란으로 보임)'));})()"
+          "script": "(()=>{const s=document.querySelector('select.page-rows, #listPaging, select.ui-pg-selbox');if(!s)throw new Error('페이징 Rows/Page 셀렉트(select.page-rows)가 없음 — 목록이 0건이면 페이저가 안 그려질 수 있다');const opts=[...s.options].map(o=>o.value);if(s.value!=='10')throw new Error('Rows/Page 기본값이 10 이 아님 — 실제 선택값: \"'+s.value+'\" / 옵션: '+opts.join(',')+(opts.includes(s.value)?'':' (선택값이 옵션에 없어 공란으로 보임)'));})()"
         },
         { "action": "screenshot", "name": "안내팝업관리-페이징" }
       ]

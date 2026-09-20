@@ -1,0 +1,28 @@
+{
+  "extends": "스타벅스/04_QA시나리오/_공통.json",
+  "name": "[진단] 분류 자동완성 대·중·소 채움",
+  "_comment": "자동완성에서 현행 대분류 소속 항목(3단계)을 골라 대/중/소분류가 모두 채워지는지 본다. VOC0001 등의 select 핸들러 수정(2026-09-20, chainCombo 직후 .val() → defaultvalue + change 연쇄)이 실제로 듣는지 확인하는 용도. 조회 전용.",
+  "crud": [
+    {
+      "name": "VOC1025 3단계 분류 선택 후 대·중·소 덤프",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1025.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        { "action": "click", "selector": "#NM_VOC_CAUSE_AUTO" },
+        { "action": "type", "selector": "#NM_VOC_CAUSE_AUTO", "value": "회원" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "_comment": "현행 대분류 소속이면서 '>' 가 2개인 것(=소분류까지 있는 3단계)을 고른다",
+          "script": "(()=>{const ul=[...document.querySelectorAll('ul.ui-autocomplete')].find(u=>u.offsetParent!==null&&u.querySelectorAll('li').length);if(!ul)throw new Error('자동완성 목록 없음');const tops=[...document.querySelectorAll('#CD_VOC_CAUSE_1 option')].map(o=>o.text.trim()).filter(t=>t&&!/전체|선택/.test(t));const items=[...ul.querySelectorAll('li')];const deep=items.filter(li=>tops.some(t=>li.textContent.trim().startsWith(t))&&(li.textContent.match(/>/g)||[]).length>=2);if(!deep.length)throw new Error('3단계 항목 없음 / 후보: '+items.map(x=>x.textContent.trim()).slice(0,8).join(' / '));sessionStorage.setItem('diag_pick',deep[0].textContent.trim());(deep[0].querySelector('.ui-menu-item-wrapper, a')||deep[0]).click();})()"
+        },
+        { "action": "wait", "ms": 3000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const g=id=>{const e=document.getElementById(id);return e?(e.value||'(빈값)'):'(없음)';};throw new Error('고른 항목=\"'+sessionStorage.getItem('diag_pick')+'\" → 대분류='+g('CD_VOC_CAUSE_1')+' / 중분류='+g('CD_VOC_CAUSE_2')+' / 소분류='+g('CD_VOC_CAUSE_3'));})()"
+        }
+      ]
+    }
+  ]
+}

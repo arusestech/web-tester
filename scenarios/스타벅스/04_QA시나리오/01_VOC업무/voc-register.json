@@ -1,7 +1,7 @@
 {
   "extends": "../_공통.json",
   "name": "QA VOC등록",
-  "_comment_source": "QA 시나리오.md VC_TC_018~110 (VOC 업무 > VOC등록). 화면 VOC0001 = meta/voc/VOC0001R00.jsp(마크업) + app/standard/voc/VOC0001.jsp(스크립트). 팝업은 page/js/popup.js: 고객검색 POP0013(btnCustSerachPhone/btnCustSerachCust), 사이렌이력 VOC1210, VOC이력 VOC1007, 부서(매장)검색 POP1001, 제품 POP1002, 프로모션 POP1003, 이벤트 POP1004 — 전부 uxl.openWindow(새 창). 등록(데이터 생성) 흐름은 _보류_CRUD/01a_voc-register.json.",
+  "_comment_source": "QA test.md(260916) VC_TC_018~111 (VOC 업무 > VOC등록). 화면 VOC0001 = meta/voc/VOC0001R00.jsp(마크업) + app/standard/voc/VOC0001.jsp(스크립트). 팝업은 page/js/popup.js: 고객검색 POP0013(btnCustSerachPhone/btnCustSerachCust), 사이렌이력 VOC1210, VOC이력 VOC1007, 부서(매장)검색 POP1001, 제품 POP1002, 프로모션 POP1003, 이벤트 POP1004 — 전부 uxl.openWindow(새 창). 등록(데이터 생성) 흐름은 _보류_CRUD/01a_voc-register.json.",
   "_comment_selectors": "고객정보 h2[for=custLayout]/#custLayout(VOC0001R00.jsp:37,57), 접수정보 h2[for=vocOrgLayout]/#vocOrgLayout(:125,126), 접수내용 h2[for=vocOrgLayout2]/#vocOrgLayout2(:234,235). 접기/펼치기는 uxl-ui-3.0.0_starbucks.js:782~866(h2 클릭 → for 대상 slideUp/Down, 자식 클릭은 stopPropagation 이라 h2 자체에 .click()). 채널 코드 C=Call, T=Chat(VOC0001.jsp:411~445), 고객센터 라디오 = #layout-1_2_2 input[type=radio]. 분류 chainCombo(VOC0001.jsp:182~184) 는 AJAX → change 후 대기 필요. 알림은 alert/uxl.showMessage(네이티브) → expectDialog.",
   "_comment_data": "회원 연락처/아이디·고객메모 등록 고객이 필요한 TC(023,025,028,029,031,032) 는 실데이터 의존이라 수동. 비회원 검사는 010-9999-9999 / TEST_QA_NOUSER 가 회원이 아니라는 가정.",
   "mask": [
@@ -83,12 +83,12 @@
           "expectText": "제품/상품 목록"
         },
         {
-          "name": "VC_TC_090 제품/상품 미선택 상태에서 - 버튼 → '선택한 상품이 없습니다' 알림",
+          "name": "VC_TC_091 제품/상품 미선택 상태에서 - 버튼 → '선택한 상품이 없습니다' 알림",
           "click": "#btnRemoveGoods",
           "expectDialog": "선택한 상품이 없습니다"
         },
         {
-          "name": "VC_TC_100 필수 항목 미입력 [등록] → '[문의유형*] 은(는) 필수 항목입니다' 알림",
+          "name": "VC_TC_101 필수 항목 미입력 [등록] → '[문의유형*] 은(는) 필수 항목입니다' 알림",
           "click": "#btnRegister a",
           "allowForbidden": ["^\\s*등록\\s*$"],
           "expectDialog": "필수 항목입니다",
@@ -99,7 +99,7 @@
   ],
   "crud": [
     {
-      "name": "VC_TC_020,043,093 섹션 타이틀 클릭 → 항목 접힘/다시 펼침 (고객정보·접수정보·접수내용)",
+      "name": "VC_TC_020,043,094 섹션 타이틀 클릭 → 항목 접힘/다시 펼침 (고객정보·접수정보·접수내용)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC0001.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -311,7 +311,7 @@
       ]
     },
     {
-      "name": "VC_TC_081~089,091 제품/상품 팝업 — 전체 검색(컬럼·페이징)·카테고리 항목/연동·Sku/제품명 검색·1개/2개 선택 [확인]·- 버튼 삭제",
+      "name": "VC_TC_081~087,089,090,092 제품/상품 팝업 — 전체 검색(컬럼·페이징)·카테고리 항목/연동·Sku/제품명 검색·1개/2개 선택 [확인]·- 버튼 삭제",
       "_note": "POP1002.jsp: multiselect 체크박스 #jqg_list_<rowid>, #conFirm → 부모 #CD_GOODS 에 option 추가 후 close(VOC0001.jsp:620 goodsCallBack). 카테고리 기대 항목(음료/푸드/커피/상품)은 운영 코드 기준. 제품명 '카푸치노' 검색은 데이터 의존.",
       "steps": [
         { "action": "goto", "url": "/screen/VOC0001.ub" },
@@ -368,7 +368,7 @@
       ]
     },
     {
-      "name": "VC_TC_034,092 비회원 체크 → 아이디 입력창 비활성(readonly)·검색 아이콘 숨김 / Risk VOC·악성 VOC 체크·해제",
+      "name": "VC_TC_034,093 비회원 체크 → 아이디 입력창 비활성(readonly)·검색 아이콘 숨김 / Risk VOC·악성 VOC 체크·해제",
       "steps": [
         { "action": "goto", "url": "/screen/VOC0001.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -384,7 +384,7 @@
       ]
     },
     {
-      "name": "VC_TC_041,042,079,094 입력 문자(한글/숫자/특수/한자) 허용 및 결제정보 30자 제한 속성, 고객정보 초기화",
+      "name": "VC_TC_041,042,079,095 입력 문자(한글/숫자/특수/한자) 허용 및 결제정보 30자 제한 속성, 고객정보 초기화",
       "_note": "결제정보 DS_NO_BILL maxLength=30(VOC0001R00.jsp:201) — QA 는 30byte 라 하나 속성은 30자. 실제 byte 제한 여부는 수동 확인. 초기화 = fnClearCustDiv(VOC0001.jsp:878) 가 #custLayout 텍스트 입력(연락처 제외) 비움.",
       "steps": [
         { "action": "goto", "url": "/screen/VOC0001.ub" },
@@ -400,7 +400,7 @@
       ]
     },
     {
-      "name": "VC_TC_095,096 내용 입력 허용 문자 및 한글 2500자 초과 시 알림",
+      "name": "VC_TC_096,097 내용 입력 허용 문자 및 한글 2500자 초과 시 알림",
       "_note": "fnChkByte(VOC0001.jsp:846) 는 keyup 에서 5000byte 초과면 alert 후 잘라냄. 2500자를 값으로 넣은 뒤 1자를 타이핑해 keyup 유발.",
       "steps": [
         { "action": "goto", "url": "/screen/VOC0001.ub" },

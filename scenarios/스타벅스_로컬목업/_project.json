@@ -1,0 +1,80 @@
+{
+  "_comment": "스타벅스 VOC — 사외(외부) 개발 PC 로컬 기동 확인용. 흐름은 '스타벅스' 프로젝트와 동일하고 접속 주소·외부연동 목업만 다르다. 시나리오는 스타벅스/04_QA시나리오 를 extends 로 그대로 끌어 쓴다(복제본 아님).",
+  "_comment_baseUrl": "로컬 Tomcat 11.0.22 배포 기준: 컨텍스트 /voc, 포트 8080 (STARBUCKS-VOC-MASTER/CLAUDE.md '기동/접속', 2026-08-17 검증). 포트를 바꿔 띄웠으면 여기만 고친다.",
+  "baseUrl": "http://localhost:8080/voc",
+  "browser": {
+    "channel": "chrome",
+    "headless": false,
+    "viewport": {
+      "width": 1600,
+      "height": 950
+    }
+  },
+  "_comment_stubServer": "앱이 같은 PC 에 떠 있으므로 stub(localhost:9900)이 실제로 의미가 있다 → ON. 다만 앱이 stub 을 부르게 하려면 config.xml 의 external.system.* URL 을 localhost:9900 으로 바꿔야 한다(README '외부연동' 참고). 바꾸지 않으면 앱은 사내 주소로 나가다 실패하고, 그 화면만 영향을 받는다.",
+  "stubServer": {
+    "enabled": true,
+    "port": 9900,
+    "routes": [
+      {
+        "path": "/Startup",
+        "method": "POST",
+        "headers": { "resultCode": "000", "resultMessage": "OK" },
+        "json": {
+          "userId": "test01",
+          "tokenKey": "MOCK-TOKEN-{{uuid}}",
+          "tokenExpireDate": "20991231235959",
+          "msrMemberYn": "Y"
+        }
+      },
+      {
+        "path": "/member/eReceiptList",
+        "method": "POST",
+        "headers": { "resultCode": "000", "resultMessage": "OK" },
+        "json": { "resultList": [], "totalCount": 0 }
+      },
+      {
+        "path": "notification/message/push/send",
+        "method": "POST",
+        "headers": { "resultCode": "0000", "resultMessage": "OK" },
+        "json": { "result": "success" }
+      },
+      {
+        "path": "re:/webif(_release)?/",
+        "method": "POST",
+        "headers": { "resultCode": "000", "resultMessage": "OK" },
+        "json": {}
+      },
+      {
+        "path": "/_search",
+        "method": "POST",
+        "json": {
+          "took": 1,
+          "timed_out": false,
+          "_shards": { "total": 1, "successful": 1, "skipped": 0, "failed": 0 },
+          "hits": { "total": { "value": 0, "relation": "eq" }, "max_score": null, "hits": [] }
+        }
+      },
+      {
+        "path": "/_sql/translate",
+        "method": "POST",
+        "json": { "size": 0, "query": { "match_all": {} } }
+      },
+      {
+        "path": "/_sql",
+        "method": "POST",
+        "_comment": "ElasticUtil 은 OpenSearch SQL format=jdbc 응답(schema/datarows)만 파싱한다 → 빈 결과라도 이 형태로 돌려줘야 화면이 예외 없이 그려진다",
+        "json": { "schema": [], "datarows": [], "total": 0, "size": 0, "columns": [], "rows": [] }
+      },
+      {
+        "path": "/_bulk",
+        "method": "POST",
+        "json": { "took": 1, "errors": false, "items": [] }
+      },
+      {
+        "path": "re:/_mapping",
+        "method": "GET",
+        "json": {}
+      }
+    ]
+  }
+}

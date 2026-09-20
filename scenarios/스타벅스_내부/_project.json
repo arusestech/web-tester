@@ -1,0 +1,17 @@
+{
+  "_comment": "스타벅스 VOC — 내부망(POD/개발서버) 실행용. 흐름은 '스타벅스' 프로젝트와 동일하고 접속 주소만 다르다. 시나리오는 스타벅스/04_QA시나리오 를 extends 로 끌어 쓴다(복제본 아님).",
+  "_comment_baseUrl": "🔴 반입 후 이 값을 내부 실제 주소로 바꾼다. 컨텍스트 경로까지 적는다(로그인 화면 = <baseUrl>/screen/BCO0001.ub). 예) http://dev-ivoc.istarbucks.co.kr:8888  ·  컨테이너(POD) 배포는 ROOT 컨텍스트라 경로 없이 호스트만.",
+  "baseUrl": "https://voc-내부.change-me.invalid",
+  "_comment_browser": "channel 을 비워 두면 Chrome → Edge 순으로 자동 선택된다(내부 PC 에 Chrome 이 없을 수 있어 고정하지 않음). 처음에는 headless false 로 눈으로 보고, 익숙해지면 --headless 로 돌린다.",
+  "browser": {
+    "headless": false,
+    "viewport": {
+      "width": 1600,
+      "height": 950
+    }
+  },
+  "_comment_stubServer": "내부망에는 실제 연동(CTI·MSR·홈페이지·EP·메일·OpenSearch)이 살아 있으므로 목업을 쓰지 않는다. 앱이 테스터 PC 의 localhost:9900 을 부를 수도 없다.",
+  "stubServer": {
+    "enabled": false
+  }
+}

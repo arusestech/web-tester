@@ -1,7 +1,7 @@
 {
   "extends": "../_공통.json",
   "name": "QA VOC 조회 > Vital Few",
-  "_comment_source": "QA 시나리오.md VC_TC_745~878. 목록 = VOC1025 (meta/voc/VOC1025R00.jsp 검색폼 id, app/standard/voc/VOC1025.jsp colModel·팝업 호출), 상세 = VOC1003 (ondblClickRow → uxl.getScreenURL('VOC1003') VOC1025.jsp:126). 상세는 고객정보 VOC0003 / 접수정보·접수내용 VOC0011 / 답변 VOC0007 / 추가사항 VOC0013 / 업무요청·공유 VOC0005 를 uxl.loadPage 로 AJAX 삽입(VOC1003.jsp:107~154), 탭 = 처리이력 VOC1004(#vocHistList) · 상담이역 VOC1006(#list, 고객ID 있을 때만) · 통보이력 VOC1009(#dispatchList).",
+  "_comment_source": "QA test.md(260916) VC_TC_747~880. 목록 = VOC1025 (meta/voc/VOC1025R00.jsp 검색폼 id, app/standard/voc/VOC1025.jsp colModel·팝업 호출), 상세 = VOC1003 (ondblClickRow → uxl.getScreenURL('VOC1003') VOC1025.jsp:126). 상세는 고객정보 VOC0003 / 접수정보·접수내용 VOC0011 / 답변 VOC0007 / 추가사항 VOC0013 / 업무요청·공유 VOC0005 를 uxl.loadPage 로 AJAX 삽입(VOC1003.jsp:107~154), 탭 = 처리이력 VOC1004(#vocHistList) · 상담이역 VOC1006(#list, 고객ID 있을 때만) · 통보이력 VOC1009(#dispatchList).",
   "_comment_popups": "팝업은 모두 uxl.openWindow(window.open): 접수자 = POP0001(page/js/popup.js:26), 방문매장 = POP1001(popup.js:62), 개인정보 상세 = POP1007(popup.js:105), 문자발송 = POP0007(popup.js:153), 사이렌 이력 = VOC1210(popup.js:98), 고객 VOC 이력 = VOC1007(popup.js:92). 알림은 uxl.showMessage/alert = 네이티브 → expectDialog.",
   "_comment_assumptions": "① 기본 기간(일주일 전~오늘)은 서버가 채우므로 실행 당일 기준으로 계산해 비교. ② 필터 결과 검증은 그리드 컬럼(td[aria-describedby=list_컬럼]) 텍스트로. 0건이면 '데이터 없음'으로 ❌ — 데이터 부족으로 분류. ③ 상세 진입은 2024-01-01~ 오늘 범위로 넓게 조회해 첫 행을 더블클릭. ④ 고객정보의 조회/복사 버튼은 값이 없으면 소스가 지움(VOC0003.jsp:95~100) → 회원 VOC 데이터가 있어야 통과. ⑤ VOC1025R00.jsp 에는 엑셀다운로드 버튼이 없다 — QA 문서(TC_746)와 불일치 후보, 항목으로 남겨 실측.",
   "mask": [
@@ -10,7 +10,7 @@
   ],
   "menus": [
     {
-      "name": "VC_TC_746 Vital Few 화면 구성(검색조건·검색버튼·목록)",
+      "name": "VC_TC_748 Vital Few 화면 구성(검색조건·검색버튼·목록)",
       "url": "/screen/VOC1025.ub",
       "expect": [
         "#DT_VOC_REG_START",
@@ -38,7 +38,7 @@
       "search": "#searchBtn a",
       "actions": [
         {
-          "name": "VC_TC_768 접수자 검색 아이콘 → 파트너검색 팝업(부서검색·조직도·파트너찾기·목록)",
+          "name": "VC_TC_770 접수자 검색 아이콘 → 파트너검색 팝업(부서검색·조직도·파트너찾기·목록)",
           "click": "#btnEmpSearch",
           "popup": true,
           "expect": [
@@ -51,7 +51,7 @@
           ]
         },
         {
-          "name": "VC_TC_770 방문매장 검색 아이콘 → 부서검색 팝업(부서입력·조직도·폐점미포함)",
+          "name": "VC_TC_772 방문매장 검색 아이콘 → 부서검색 팝업(부서입력·조직도·폐점미포함)",
           "click": "#btnVisitStrSerach",
           "popup": true,
           "expect": [
@@ -68,7 +68,7 @@
   ],
   "crud": [
     {
-      "name": "VC_TC_746 엑셀다운로드 버튼 존재",
+      "name": "VC_TC_748 엑셀다운로드 버튼 존재",
       "_note": "QA 문서는 엑셀다운로드를 화면 구성에 포함하지만 VOC1025R00.jsp 에는 엑셀 버튼 마크업이 없다(VOC1001 은 #btnExcel). ❌ 면 QA 문서 오류인지 기능 누락인지 확인",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -81,7 +81,7 @@
       ]
     },
     {
-      "name": "VC_TC_747 등록일 기본값(시작=일주일 전, 종료=오늘)",
+      "name": "VC_TC_749 등록일 기본값(시작=일주일 전, 종료=오늘)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -93,7 +93,7 @@
       ]
     },
     {
-      "name": "VC_TC_748 등록일 시작일>종료일 → 알림",
+      "name": "VC_TC_750 등록일 시작일>종료일 → 알림",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -108,7 +108,7 @@
       ]
     },
     {
-      "name": "VC_TC_749 등록일 정상 범위 검색 → 기간 내 목록",
+      "name": "VC_TC_751 등록일 정상 범위 검색 → 기간 내 목록",
       "_note": "0건이면 데이터 부족. 행의 등록일시 컬럼이 설정 기간 안인지 확인",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -129,7 +129,7 @@
       ]
     },
     {
-      "name": "VC_TC_750,752,758 진행단계·고객센터·문의유형 셀렉트 항목·기본값(전체)",
+      "name": "VC_TC_752,754,760 진행단계·고객센터·문의유형 셀렉트 항목·기본값(전체)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -141,7 +141,7 @@
       ]
     },
     {
-      "name": "VC_TC_754 채널 체크박스 항목(Call·Chat·Web/App·기타)",
+      "name": "VC_TC_756 채널 체크박스 항목(Call·Chat·Web/App·기타)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -153,7 +153,7 @@
       ]
     },
     {
-      "name": "VC_TC_772 답변진행 셀렉트 항목(전체·답변·미답변)·라디오 기본 전체",
+      "name": "VC_TC_774 답변진행 셀렉트 항목(전체·답변·미답변)·라디오 기본 전체",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -165,7 +165,7 @@
       ]
     },
     {
-      "name": "VC_TC_777 검색 셀렉트 항목(VOC번호 기본 외 8종)",
+      "name": "VC_TC_779 검색 셀렉트 항목(VOC번호 기본 외 8종)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -177,7 +177,7 @@
       ]
     },
     {
-      "name": "VC_TC_751 진행단계 필터(처리완료) → 결과 행 진행상태 일치",
+      "name": "VC_TC_753 진행단계 필터(처리완료) → 결과 행 진행상태 일치",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -196,7 +196,7 @@
       ]
     },
     {
-      "name": "VC_TC_753 고객센터 필터(대표번호) 검색 실행",
+      "name": "VC_TC_755 고객센터 필터(대표번호) 검색 실행",
       "_note": "목록에 고객센터 컬럼이 없어(VOC1025.jsp colModel) 값 대조 불가 — 검색이 오류 없이 수행되는지만. 부분",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -214,7 +214,7 @@
       ]
     },
     {
-      "name": "VC_TC_755~757 채널 1개·다중·전체해제 필터 → 결과 채널 일치",
+      "name": "VC_TC_757~759 채널 1개·다중·전체해제 필터 → 결과 채널 일치",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -256,7 +256,7 @@
       ]
     },
     {
-      "name": "VC_TC_759 문의유형 필터(불만) → 결과 문의유형 일치",
+      "name": "VC_TC_761 문의유형 필터(불만) → 결과 문의유형 일치",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -275,7 +275,7 @@
       ]
     },
     {
-      "name": "VC_TC_760~764 분류 대/중/소 체인 콤보",
+      "name": "VC_TC_762~766 분류 대/중/소 체인 콤보",
       "_note": "uxl.bindComboCode/chainCombo(VOC1025.jsp:90~92) — 대분류 미선택이면 중·소분류는 '중분류 전체' 한 항목만. 대분류 목록은 코드 데이터라 dev DB 와 다르면 '옵션 누락' 로 나온다",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -293,7 +293,7 @@
       ]
     },
     {
-      "name": "VC_TC_765~767 분류 자동완성(비유효 미표시·유효 표시·선택 시 콤보 자동입력)",
+      "name": "VC_TC_767~769 분류 자동완성(비유효 미표시·유효 표시·선택 시 콤보 자동입력)",
       "_note": "uxl.autocomplete(minLength 2, VOC1025.jsp:159) = jQuery UI autocomplete → .ui-autocomplete .ui-menu-item",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -323,7 +323,7 @@
       ]
     },
     {
-      "name": "VC_TC_769 파트너검색 팝업 부서검색→부서 선택→파트너 선택→확인 → 접수자 입력",
+      "name": "VC_TC_771 파트너검색 팝업 부서검색→부서 선택→파트너 선택→확인 → 접수자 입력",
       "_note": "POP0001.jsp: 부서 검색 #fnSearch_dept → #list_dept 행 선택(onSelectRow 가 파트너 검색) → #list 행 선택 → #conFirm → fnPushToOpener. 부서 '서초' 데이터 필요",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -356,7 +356,7 @@
       ]
     },
     {
-      "name": "VC_TC_771 부서검색 팝업 부서 선택→확인 → 방문매장 입력",
+      "name": "VC_TC_773 부서검색 팝업 부서 선택→확인 → 방문매장 입력",
       "_note": "POP1001.jsp:136 conFirm — 매장이 아닌 부서를 고르면 alert('선택한 부서는 매장이 아닙니다'). 검색결과 중 지역/담당/팀 이 아닌 행을 고른다",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -384,7 +384,7 @@
       ]
     },
     {
-      "name": "VC_TC_773~776 답변진행 셀렉트(답변/미답변)·라디오(전체/30h/48h) 필터",
+      "name": "VC_TC_775~778 답변진행 셀렉트(답변/미답변)·라디오(전체/30h/48h) 필터",
       "_note": "답변/미답변은 목록 답변여부(FG_VOC_ANSWER) 컬럼으로 대조. 시간 초과 라디오는 대조 컬럼이 없어 실행만(부분)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -440,7 +440,7 @@
       ]
     },
     {
-      "name": "VC_TC_778,779 검색 VOC번호·제목 키워드 → 해당 행만",
+      "name": "VC_TC_780,781 검색 VOC번호·제목 키워드 → 해당 행만",
       "_note": "먼저 넓게 조회해 첫 행의 VOC번호·제목 앞 2글자를 키워드로 쓴다",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -478,7 +478,7 @@
       ]
     },
     {
-      "name": "VC_TC_780~786 검색 구분(내용·답변·제목+내용·제목+내용+답변·고객ID·고객명·고객연락처) 조회 실행",
+      "name": "VC_TC_782~788 검색 구분(내용·답변·제목+내용·제목+내용+답변·고객ID·고객명·고객연락처) 조회 실행",
       "_note": "목록에 내용/답변/고객 컬럼이 없어 결과 대조 불가 — 구분별로 검색이 오류 없이 수행되는지만(부분). 키워드는 흔한 글자 '고'",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -493,7 +493,7 @@
       ]
     },
     {
-      "name": "VC_TC_787~790 공개/업무요청/공유 여부 체크(1개·다중·전체·미체크) 검색 실행",
+      "name": "VC_TC_789~792 공개/업무요청/공유 여부 체크(1개·다중·전체·미체크) 검색 실행",
       "_note": "체크 조건과 목록 컬럼(업무요청 REQ_CNT 만 있음)의 대응이 소스로 확정되지 않아 실행만(부분). 캡처로 건수 변화를 본다",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -512,7 +512,7 @@
       ]
     },
     {
-      "name": "VC_TC_791 검색결과 목록 컬럼(VOC번호~진행상태 11개)",
+      "name": "VC_TC_793 검색결과 목록 컬럼(VOC번호~진행상태 11개)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -524,7 +524,7 @@
       ]
     },
     {
-      "name": "VC_TC_792,794 페이징 영역·Rows/Page 항목(15 기본·20·50)",
+      "name": "VC_TC_794,796 페이징 영역·Rows/Page 항목(15 기본·20·50)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -537,7 +537,7 @@
       ]
     },
     {
-      "name": "VC_TC_793,795 페이지 이동·Rows/Page 변경 반영",
+      "name": "VC_TC_795,797 페이지 이동·Rows/Page 변경 반영",
       "_note": "총 건수가 한 페이지(15)를 넘을 때만 다음 페이지 이동을 검증. 넘지 않으면 이동 검증은 건너뛰고 Rows/Page 변경만 본다",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -562,7 +562,7 @@
       ]
     },
     {
-      "name": "VC_TC_796~798 목록 더블클릭 → 상세 화면(6영역·탭·헤더)·목록 버튼 복귀",
+      "name": "VC_TC_798~800 목록 더블클릭 → 상세 화면(6영역·탭·헤더)·목록 버튼 복귀",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -592,7 +592,7 @@
       ]
     },
     {
-      "name": "VC_TC_799,801,820,823,826,829,847,832,833,840 상세 고객정보 항목·마스킹·MSR·악성건/등록건 색상",
+      "name": "VC_TC_801,803,822,825,828,831,834,835,842,849 상세 고객정보 항목·마스킹·MSR·악성건/등록건 색상",
       "_note": "VOC0003R00.jsp 라벨·버튼 id 기준. 값이 비어 있으면(비회원 VOC) 마스킹 검사는 건너뜀. 악성건 색상: 소스(VOC0003.jsp:37~49)는 vocCnt 만 빨간색, sirenCnt 는 2건 초과 시 아이콘만 → TC_833 은 소스상 미구현으로 ❌ 예상",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -617,7 +617,7 @@
       ]
     },
     {
-      "name": "VC_TC_800,851,853,855,857,866,868,870,872,874 상세 각 영역 타이틀 클릭 접기/펼치기",
+      "name": "VC_TC_802,853,855,857,859,868,870,872,874,876 상세 각 영역 타이틀 클릭 접기/펼치기",
       "_note": "h2.ub-control.title[hfold=1][for=레이아웃id] (VOC0003R00:32, VOC0011R00:31/98, VOC0007R00:30, VOC0013R00:30, VOC0005R00:30). 답변/업무요청 영역은 데이터에 따라 없을 수 있어 있는 것만 검사",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -641,7 +641,7 @@
       ]
     },
     {
-      "name": "VC_TC_852,854,856,858,867,869,871,873,875 상세 접수정보·접수내용·답변내용·추가사항·업무요청/공유 항목 라벨",
+      "name": "VC_TC_854,856,858,860,869,871,873,875,877 상세 접수정보·접수내용·답변내용·추가사항·업무요청/공유 항목 라벨",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -665,7 +665,7 @@
       ]
     },
     {
-      "name": "VC_TC_802 연락처 [조회] → 개인정보 상세 팝업(마스킹 해제·유의사항·닫기)",
+      "name": "VC_TC_804 연락처 [조회] → 개인정보 상세 팝업(마스킹 해제·유의사항·닫기)",
       "_note": "POP1007R00.jsp: #DATA(disabled input), 유의사항 .caution-txt, #btnClose. 연락처 없는 VOC 면 버튼이 없어 ❌(데이터 부족)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -696,7 +696,7 @@
       ]
     },
     {
-      "name": "VC_TC_821,824,827,830,848 가입연락처·생년월일·이름·아이디·가입이메일 [조회] 팝업",
+      "name": "VC_TC_823,826,829,832,850 가입연락처·생년월일·이름·아이디·가입이메일 [조회] 팝업",
       "_note": "버튼이 있는 항목만 순서대로 열어 #DATA 에 * 가 없는지 확인 (window.open 을 eval 로 열고 opener 에서 읽음). 회원 VOC 데이터 필요",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -720,7 +720,7 @@
       ]
     },
     {
-      "name": "VC_TC_803~805,808,809,810,813,814,818 연락처 [문자발송] 팝업 구성·수신번호 편집·발신번호 라디오·상용구 검색/선택·Rows/Page·닫기",
+      "name": "VC_TC_805~807,810~812,815,816,820 연락처 [문자발송] 팝업 구성·수신번호 편집·발신번호 라디오·상용구 검색/선택·Rows/Page·닫기",
       "_note": "POP0007. [발송] 은 실제 SMS 라 여기서 누르지 않는다(815~817 은 _보류_CRUD/02_voc-inquiry.json). 상용구 '안내' 키워드 데이터 필요",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -791,7 +791,7 @@
       ]
     },
     {
-      "name": "VC_TC_806,807,811 문자발송 내용 2000byte 카운터·초과 알림·상용구 선택 초과 알림",
+      "name": "VC_TC_808,809,813 문자발송 내용 2000byte 카운터·초과 알림·상용구 선택 초과 알림",
       "_note": "fnChkByte(POP0007.jsp:185) — 한글 2byte, 초과 시 alert '한글 1000자 / 영문 2000자를 초과 입력할 수 없습니다.' 후 잘라냄",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -841,7 +841,7 @@
       ]
     },
     {
-      "name": "VC_TC_834~838 [사이렌 이력] 팝업 구성·기본 기간(3개월)·검색·컬럼·페이징",
+      "name": "VC_TC_836~840 [사이렌 이력] 팝업 구성·기본 기간(3개월)·검색·컬럼·페이징",
       "_note": "VOC1210 (popup.js:98). 839 목록 더블클릭 → 또 다른 팝업은 도구 제약으로 수동",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -877,7 +877,7 @@
       ]
     },
     {
-      "name": "VC_TC_841~845 [VOC이력] 팝업 구성·기본 기간(2주)·검색·컬럼·페이징",
+      "name": "VC_TC_843~847 [VOC이력] 팝업 구성·기본 기간(2주)·검색·컬럼·페이징",
       "_note": "VOC1007 (popup.js:92). 846 목록 더블클릭 → 또 다른 팝업은 수동",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },
@@ -913,7 +913,7 @@
       ]
     },
     {
-      "name": "VC_TC_859,860,862,863,876,877 상세 처리이력·상담이력·통보이력 탭 목록/컬럼/페이징",
+      "name": "VC_TC_861,862,864,865,878,879 상세 처리이력·상담이력·통보이력 탭 목록/컬럼/페이징",
       "_note": "탭 = uxl.DivTabs(jQuery UI Tabs, li>a>label). 상담이력 탭은 고객ID 있는 VOC 에만(VOC1003.jsp:79). 페이지 이동(861/864/878)은 데이터 10건 초과 필요 → 부분",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1025.ub" },

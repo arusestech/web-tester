@@ -1,0 +1,164 @@
+{
+  "extends": "../_공통.json",
+  "name": "QA결함회귀 VOC 조회",
+  "_comment_source": "QA 260916 test.md FAIL 40건 중 VOC 조회 영역 6건(VC_TC_769,924,941,942,943,953).",
+  "_comment_screen": "Vital Few=VOC1025 / 삭제 VOC 목록=VOC1017, 상세=VOC1018 (VOC1017.jsp:134). 삭제 VOC 상세 영역: #cstmrView 고객정보 · #vocView 접수정보 · #ansView 답변 · #addView 추가사항 · #requestView 업무요청/공유 · #tabs 처리·상담·통보 이력 (VOC1018R00.jsp).",
+  "_comment_search": "TC_941~943 은 dev 에 실제로 존재하는 고객ID·고객명·연락처가 있어야 판정된다. 삭제 VOC 목록 colModel(VOC1017.jsp:106~122)에는 고객 컬럼이 없어 화면에서 값을 자동으로 얻을 수 없다 → 아래 vars 에 dev 유효값을 넣고 실행한다. 비워 두면 '검색어 미지정' 으로 실패한다(거짓 통과 방지).",
+  "vars": {
+    "qaCustId": "",
+    "qaCustNm": "",
+    "qaCustTel": ""
+  },
+  "crud": [
+    {
+      "name": "VC_TC_769 [Major] Vital Few 분류 자동완성 선택 → 대·중·소분류 자동 입력",
+      "_note": "VOC1025 분류 영역. VOC등록(058)·My VOC(448)·삭제 VOC(924) 와 같은 결함 묶음.",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1025.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "click", "selector": "#NM_VOC_CAUSE_AUTO" },
+        { "action": "type", "selector": "#NM_VOC_CAUSE_AUTO", "value": "회원" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const ul=[...document.querySelectorAll('ul.ui-autocomplete')].find(u=>u.offsetParent!==null&&u.querySelectorAll('li').length);if(!ul)throw new Error(\"분류 자동완성 목록이 표시되지 않음(키워드 '회원') — dev 분류 데이터 확인 필요\");const t=ul.querySelector('li .ui-menu-item-wrapper, li a, li');t.click();})()"
+        },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=document.getElementById('CD_VOC_CAUSE_1');if(!v)throw new Error('#CD_VOC_CAUSE_1 없음');if(!v.value)throw new Error('Vital Few 분류 선택 후 대분류가 자동 입력되지 않음');})()"
+        },
+        { "action": "screenshot", "name": "VitalFew-분류자동입력" }
+      ]
+    },
+    {
+      "name": "VC_TC_924 [Major] 삭제 VOC 분류 자동완성 선택 → 대·중·소분류 자동 입력",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1017.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "click", "selector": "#NM_VOC_CAUSE_AUTO" },
+        { "action": "type", "selector": "#NM_VOC_CAUSE_AUTO", "value": "회원" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const ul=[...document.querySelectorAll('ul.ui-autocomplete')].find(u=>u.offsetParent!==null&&u.querySelectorAll('li').length);if(!ul)throw new Error(\"분류 자동완성 목록이 표시되지 않음(키워드 '회원')\");const t=ul.querySelector('li .ui-menu-item-wrapper, li a, li');t.click();})()"
+        },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=document.getElementById('CD_VOC_CAUSE_1');if(!v)throw new Error('#CD_VOC_CAUSE_1 없음');if(!v.value)throw new Error('삭제 VOC 분류 선택 후 대분류가 자동 입력되지 않음');})()"
+        },
+        { "action": "screenshot", "name": "삭제VOC-분류자동입력" }
+      ]
+    },
+    {
+      "name": "VC_TC_953 [Minor] 삭제 VOC 상세 화면 고객정보 영역 노출",
+      "_note": "목록 첫 행 더블클릭 → VOC1018. 결함은 '고객정보 영역 노출되지 않음'. 개인정보 화면이라 캡처는 mask 로 가린다. 고객정보 외 영역(접수정보·접수내용·답변·추가사항·업무요청/공유·이력 탭)도 함께 확인한다.",
+      "mask": [
+        "#cstmrView td",
+        "td[aria-describedby$='NM_CSTMR']",
+        "#DS_CSTMR_CTTPC"
+      ],
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1017.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1000 },
+        { "action": "click", "selector": "#searchBtn a, #searchBtn" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=document.querySelectorAll('#list tr.jqgrow');if(!r.length)throw new Error('삭제 VOC 목록이 0건 — 기간 조건이나 dev 데이터 확인 필요');})()"
+        },
+        { "action": "dblclick", "selector": "#list tr.jqgrow >> nth=0" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        { "action": "expectUrl", "contains": "VOC1018" },
+        {
+          "action": "eval",
+          "script": "(()=>{const need={cstmrView:'고객정보',vocView:'VOC 접수정보',ansView:'VOC 답변내용',addView:'VOC 추가사항',requestView:'업무요청/공유',tabs:'처리/상담/통보 이력'};const miss=Object.keys(need).filter(id=>{const e=document.getElementById(id);return !e||e.offsetParent===null});if(miss.length)throw new Error('삭제 VOC 상세에서 영역이 노출되지 않음: '+miss.map(k=>need[k]+'(#'+k+')').join(', '));})()"
+        },
+        { "action": "screenshot", "name": "삭제VOC-상세영역" }
+      ]
+    },
+    {
+      "name": "VC_TC_941 [Minor] 삭제 VOC 검색구분 '고객ID' 로 검색 → 결과 목록 출력",
+      "_note": "검색구분 #CD_VOC_SEARCH 는 코드(CD_VOC_SEARCH) 기반이라 value 가 환경마다 다를 수 있어 옵션 '글자' 로 고른다. 검색어는 vars.qaCustId (dev 유효값 필요).",
+      "_comment_vars": "{{이름}} 치환은 fill/goto/text 등에만 적용되고 eval 의 script 에는 적용되지 않는다(src/runner.js:57 의 sub() 사용처). 그래서 검색어는 반드시 fill 로 넣고, eval 은 입력란 값을 읽어 쓴다.",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1017.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH');if(!s)throw new Error('#CD_VOC_SEARCH 없음');const o=[...s.options].find(x=>x.text.replace(/\\s+/g,'').includes('고객ID'));if(!o)throw new Error(\"검색구분에 '고객ID' 옵션 없음 / 실제: \"+[...s.options].map(x=>x.text.trim()).join('|'));s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "fill", "selector": "#DS_SEARCH", "value": "{{qaCustId}}" },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(document.getElementById('DS_SEARCH')||{}).value||'';if(!v.trim())throw new Error('검색어 미지정 — 02_VOC조회.json 의 vars.qaCustId 에 dev 에 존재하는 고객ID 를 넣고 실행해야 판정할 수 있다');})()"
+        },
+        { "action": "click", "selector": "#searchBtn a, #searchBtn" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const kw=(document.getElementById('DS_SEARCH')||{}).value||'';const n=document.querySelectorAll('#list tr.jqgrow').length;if(!n)throw new Error(\"고객ID '\"+kw+\"' 로 검색했으나 결과가 0건\");})()"
+        },
+        { "action": "screenshot", "name": "삭제VOC-고객ID검색" }
+      ]
+    },
+    {
+      "name": "VC_TC_942 [Minor] 삭제 VOC 검색구분 '고객명' 으로 검색 → 결과 목록 출력",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1017.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH');const o=[...s.options].find(x=>x.text.replace(/\\s+/g,'').includes('고객명'));if(!o)throw new Error(\"검색구분에 '고객명' 옵션 없음 / 실제: \"+[...s.options].map(x=>x.text.trim()).join('|'));s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "fill", "selector": "#DS_SEARCH", "value": "{{qaCustNm}}" },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(document.getElementById('DS_SEARCH')||{}).value||'';if(!v.trim())throw new Error('검색어 미지정 — vars.qaCustNm 에 dev 에 존재하는 고객명(full name)을 넣어야 한다');})()"
+        },
+        { "action": "click", "selector": "#searchBtn a, #searchBtn" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const kw=(document.getElementById('DS_SEARCH')||{}).value||'';const n=document.querySelectorAll('#list tr.jqgrow').length;if(!n)throw new Error(\"고객명 '\"+kw+\"' 로 검색했으나 결과가 0건\");})()"
+        },
+        { "action": "screenshot", "name": "삭제VOC-고객명검색" }
+      ]
+    },
+    {
+      "name": "VC_TC_943 [Major] 삭제 VOC 검색구분 '고객연락처' 로 검색 → 결과 목록 출력",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1017.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_VOC_SEARCH');const o=[...s.options].find(x=>{const t=x.text.replace(/\\s+/g,'');return t.includes('연락처')||t.includes('전화')});if(!o)throw new Error(\"검색구분에 '고객연락처' 옵션 없음 / 실제: \"+[...s.options].map(x=>x.text.trim()).join('|'));s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "fill", "selector": "#DS_SEARCH", "value": "{{qaCustTel}}" },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(document.getElementById('DS_SEARCH')||{}).value||'';if(!v.trim())throw new Error('검색어 미지정 — vars.qaCustTel 에 dev 에 존재하는 고객연락처(full number)를 넣어야 한다');})()"
+        },
+        { "action": "click", "selector": "#searchBtn a, #searchBtn" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const kw=(document.getElementById('DS_SEARCH')||{}).value||'';const n=document.querySelectorAll('#list tr.jqgrow').length;if(!n)throw new Error(\"고객연락처 '\"+kw+\"' 로 검색했으나 결과가 0건\");})()"
+        },
+        { "action": "screenshot", "name": "삭제VOC-연락처검색" }
+      ]
+    }
+  ]
+}

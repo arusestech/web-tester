@@ -1,0 +1,360 @@
+{
+  "extends": "../_공통.json",
+  "name": "QA결함회귀 VOC 설정",
+  "_comment_source": "QA 260916 test.md FAIL 40건 중 VOC 설정 영역 15건(VC_TC_1204,1206,1236,1245,1267,1306,1323,1327,1335,1339,1387,1408,1427,1458,1507).",
+  "_comment_screen": "스토어케어 분류관리=STC0102 / VOC 배분관리=VOC1024(추가 팝업 VOC1032) / 순차배분예외설정=VOC1022(등록 팝업 VOC1023) / 상용구관리=VOC0023 / 업무요청·공유 양식=VOC1104 / VOC업무문의 양식=VOC1114 / 안내팝업 관리=VOC1207 / 콜센터(KPI) 입력=VOC0030 / 상담지원 업무=VOC1201(등록 VOC1202) / 문자발송 팝업=POP0007 / 고객메모 관리=VOC1501(상세 VOC1503)",
+  "_comment_paging": "Rows/Page 는 jqGrid 페이저의 select.ui-pg-selbox 다. VOC0023 은 rowList [20,30,50] 인데 rowNum 이 \"15\" 라(VOC0023.jsp:41,43) 목록에 없는 값이 선택되어 공란으로 보인다 — TC_1306 의 원인으로 의심되는 지점. VOC1207 은 setGrid 에 rowList·rowNum 자체가 없어 프레임워크 기본값(uxl-jqgrid rowNum \"10\")만 적용된다(VOC1207.jsp:41~52) — TC_1387 관련.",
+  "crud": [
+    {
+      "name": "VC_TC_1306 [Major] 상용구관리 페이징 Rows/Page 기본값 20 표시",
+      "_note": "공란으로 보이는 결함. select.ui-pg-selbox 의 value 와 옵션 목록을 같이 뽑아 원인(값이 옵션에 없음)을 메시지에 남긴다.",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC0023.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1000 },
+        { "action": "click", "selector": "#search a, #search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.querySelector('select.ui-pg-selbox');if(!s)throw new Error('페이징 Rows/Page 셀렉트(select.ui-pg-selbox)가 없음 — 목록이 0건이면 페이저가 안 그려질 수 있다');const opts=[...s.options].map(o=>o.value);if(s.value!=='20')throw new Error('Rows/Page 기본값이 20 이 아님 — 실제 선택값: \"'+s.value+'\" / 옵션: '+opts.join(',')+(opts.includes(s.value)?'':' (선택값이 옵션에 없어 공란으로 보임)'));})()"
+        },
+        { "action": "screenshot", "name": "상용구관리-페이징" }
+      ]
+    },
+    {
+      "name": "VC_TC_1387 [Major] 안내팝업 관리 페이징 Rows/Page 기본값 10 표시",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1207.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1000 },
+        { "action": "click", "selector": "#searchBtn a, #searchBtn" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.querySelector('select.ui-pg-selbox');if(!s)throw new Error('페이징 Rows/Page 셀렉트(select.ui-pg-selbox)가 없음 — 목록이 0건이면 페이저가 안 그려질 수 있다');const opts=[...s.options].map(o=>o.value);if(s.value!=='10')throw new Error('Rows/Page 기본값이 10 이 아님 — 실제 선택값: \"'+s.value+'\" / 옵션: '+opts.join(',')+(opts.includes(s.value)?'':' (선택값이 옵션에 없어 공란으로 보임)'));})()"
+        },
+        { "action": "screenshot", "name": "안내팝업관리-페이징" }
+      ]
+    },
+    {
+      "name": "VC_TC_1206 [Minor] 스토어케어 분류관리 신규등록 사용여부 기본값 Yes",
+      "_note": "STC0102.jsp:23 uxl.bindComboCode('FG_USE','FLAG_YN',{emptyOption:false}) — 공란 옵션이 없어야 한다. 분류구조 트리에서 노드 하나를 고른 뒤 [신규등록](#addNewNode) → 상세의 #FG_USE 기본값 확인. 저장하지 않는다.",
+      "steps": [
+        { "action": "goto", "url": "/screen/STC0102.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=document.getElementById('storecareCauseTree');if(!t)throw new Error('#storecareCauseTree 없음');const n=t.querySelector('a, span.node_name, li');if(!n)throw new Error('분류구조 트리에 노드가 없음 — dev 데이터 확인 필요');n.click();})()"
+        },
+        { "action": "wait", "ms": 2000 },
+        { "action": "click", "selector": "#addNewNode a, #addNewNode" },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('FG_USE');if(!s)throw new Error('#FG_USE 없음 — [신규등록] 후 상세 영역이 열리지 않았을 수 있다');const opts=[...s.options].map(o=>o.value+':'+o.text.trim());if(s.value!=='Y')throw new Error('사용여부 기본값이 Yes(Y) 가 아님 — 실제: \"'+s.value+'\" / 옵션: '+opts.join('|'));})()"
+        },
+        { "action": "screenshot", "name": "스토어케어분류-사용여부" }
+      ]
+    },
+    {
+      "name": "VC_TC_1204 [Minor] 스토어케어 분류관리 유형코드에 한글 입력 시 저장되지 않아야 함",
+      "_warn": "저장 버튼을 누른다(forbidden '저장' 해제). 기대 동작은 '저장되지 않음' 이라 정상이면 데이터가 생기지 않는다. 결함이 있으면 유형코드 '한글테스트' 노드가 생기므로 실행 후 확인·정리 대상.",
+      "allowForbidden": ["저장", "Save"],
+      "_note": "QA 비고: '유형코드에 한글/한자 입력 시 저장되지 않음 — 개발팀 정상 컨펌, 검증 시 동일 현상이면 OK'. 즉 저장이 막히는 것이 기대값이다. 저장 클릭 후 트리에 해당 코드가 추가되지 않았는지로 판정한다(알림 문구는 환경마다 달라 근거로 쓰지 않음).",
+      "_note_length": "2026-09-20 실행에서 '한글테스트'(5글자)는 길이 검증('[분류코드] 은(는) 3글자로 작성하셔야 합니다')에 먼저 막혀 한글 검증까지 가지 못했다 → 유형코드를 3글자 한글('한글코')로 바꿈.",
+      "steps": [
+        { "action": "goto", "url": "/screen/STC0102.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=document.getElementById('storecareCauseTree');const n=t&&t.querySelector('a, span.node_name, li');if(!n)throw new Error('분류구조 트리에 노드가 없음 — dev 데이터 확인 필요');n.click();})()"
+        },
+        { "action": "wait", "ms": 2000 },
+        { "action": "click", "selector": "#addNewNode a, #addNewNode" },
+        { "action": "wait", "ms": 2000 },
+        { "action": "fill", "selector": "#CD_STORECARE_CAUSE", "value": "한글코" },
+        { "action": "fill", "selector": "#NM_STORECARE_CAUSE", "value": "{{qaPrefix}}_1204" },
+        {
+          "action": "eval",
+          "_comment": "{{이름}} 치환은 fill 에만 적용되고 eval script 에는 적용되지 않으므로(src/runner.js:57), 채워진 값을 DOM 에서 읽어 보관한 뒤 검증에 쓴다",
+          "script": "(()=>{const nm=(document.getElementById('NM_STORECARE_CAUSE')||{}).value||'';const cd=(document.getElementById('CD_STORECARE_CAUSE')||{}).value||'';if(!nm||!cd)throw new Error('유형코드/유형명 입력란에 값이 들어가지 않음 (코드=\"'+cd+'\", 명=\"'+nm+'\")');sessionStorage.setItem('qa1204_nm',nm);sessionStorage.setItem('qa1204_cd',cd);})()"
+        },
+        { "action": "click", "selector": "#updateBtn a, #updateBtn" },
+        { "action": "wait", "ms": 3000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const nm=sessionStorage.getItem('qa1204_nm')||'';const cd=sessionStorage.getItem('qa1204_cd')||'';const t=document.getElementById('storecareCauseTree');const txt=t?t.innerText:'';if((nm&&txt.includes(nm))||(cd&&txt.includes(cd)))throw new Error('유형코드에 한글(\"'+cd+'\")을 넣었는데 저장되어 트리에 추가됨 (기대: 저장 불가)');})()"
+        },
+        { "action": "screenshot", "name": "스토어케어분류-한글유형코드" }
+      ]
+    },
+    {
+      "name": "VC_TC_1236 [Minor] VOC 배분관리 일반 추가 저장 후 목록에 즉시 표시",
+      "_warn": "배분자 1건을 실제로 등록한다(forbidden '저장' 해제). 결함/정상 모두 dev 에 배분 설정이 1건 늘어난다 — 실행 후 VOC1024 에서 삭제할 것.",
+      "allowForbidden": ["저장", "Save"],
+      "_note": "VOC1024.jsp:62~64 [추가](#btnAddNormal) → 팝업 VOC1032?FG_DIVID_SE=0. 팝업 필드: #SEQ_DIVID 순서, #ID_DIVID_EMP 배분자, #FG_USE 사용/중지, #btnSave 저장. 결함현상은 '저장 완료 시 목록이 사라지고 재접속해야 보임' 이므로 저장 직후 opener 의 #list_normal 행 수 증가로 판정한다. 기존에 없는 순서·배분자를 화면에서 골라 쓴다.",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1024.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list_normal tr.jqgrow').length;sessionStorage.setItem('qa1236_before',String(n));})()"
+        },
+        { "action": "click", "selector": "#btnAddNormal a, #btnAddNormal", "popup": true },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#ID_DIVID_EMP" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const sel=document.getElementById('ID_DIVID_EMP');const used=[...(window.opener?window.opener.document.querySelectorAll('#list_normal tr.jqgrow'):[])].map(r=>r.innerText);const cand=[...sel.options].filter(o=>o.value&&!used.some(u=>u.includes(o.text.trim())));if(!cand.length)throw new Error('미등록 배분자 후보가 없음 — 배분자 셀렉트 옵션이 모두 이미 등록되어 있다');sel.value=cand[0].value;sel.dispatchEvent(new Event('change',{bubbles:true}));const seqs=[...(window.opener?window.opener.document.querySelectorAll('#list_normal tr.jqgrow td:first-child'):[])].map(td=>parseInt(td.innerText.trim(),10)).filter(n=>!isNaN(n));const next=(seqs.length?Math.max(...seqs):0)+1;const s=document.getElementById('SEQ_DIVID');s.value=String(next);s.dispatchEvent(new Event('input',{bubbles:true}));const u=document.getElementById('FG_USE');if(u){if(u.tagName==='SELECT'){u.value='Y';u.dispatchEvent(new Event('change',{bubbles:true}));}else{const r=document.querySelector(\"input[name='FG_USE'][value='Y']\");if(r)r.click();}}sessionStorage.setItem('qa1236_emp',cand[0].text.trim());})()"
+        },
+        { "action": "screenshot", "name": "배분관리-추가팝업" },
+        { "action": "click", "selector": "#btnSave a, #btnSave" },
+        { "action": "wait", "ms": 3000 },
+        { "action": "closePopup" },
+        { "action": "wait", "ms": 3000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const before=parseInt(sessionStorage.getItem('qa1236_before')||'0',10);const rows=document.querySelectorAll('#list_normal tr.jqgrow');if(!rows.length)throw new Error('저장 후 배분관리 일반 목록이 비어 있음 (저장 전 '+before+'건) — 결함현상과 동일');if(rows.length<=before)throw new Error('저장 후에도 일반 목록 건수가 늘지 않음 (전 '+before+' → 후 '+rows.length+')');})()"
+        },
+        { "action": "screenshot", "name": "배분관리-일반목록" }
+      ]
+    },
+    {
+      "name": "VC_TC_1245 [Minor] VOC 배분관리 Vital Few 추가 저장 후 목록에 즉시 표시",
+      "_warn": "Vital Few 배분자 1건을 실제로 등록한다. 실행 후 VOC1024 에서 삭제할 것.",
+      "allowForbidden": ["저장", "Save"],
+      "_note": "VOC1024.jsp:70~71 [추가](#btnAddVital) → VOC1032?FG_DIVID_SE=1. 판정은 TC_1236 과 동일하게 opener 의 #list_vital 행 수 증가.",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1024.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list_vital tr.jqgrow').length;sessionStorage.setItem('qa1245_before',String(n));})()"
+        },
+        { "action": "click", "selector": "#btnAddVital a, #btnAddVital", "popup": true },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#ID_DIVID_EMP" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const sel=document.getElementById('ID_DIVID_EMP');const used=[...(window.opener?window.opener.document.querySelectorAll('#list_vital tr.jqgrow'):[])].map(r=>r.innerText);const cand=[...sel.options].filter(o=>o.value&&!used.some(u=>u.includes(o.text.trim())));if(!cand.length)throw new Error('미등록 Vital Few 배분자 후보가 없음');sel.value=cand[0].value;sel.dispatchEvent(new Event('change',{bubbles:true}));const seqs=[...(window.opener?window.opener.document.querySelectorAll('#list_vital tr.jqgrow td:first-child'):[])].map(td=>parseInt(td.innerText.trim(),10)).filter(n=>!isNaN(n));const next=(seqs.length?Math.max(...seqs):0)+1;const s=document.getElementById('SEQ_DIVID');s.value=String(next);s.dispatchEvent(new Event('input',{bubbles:true}));const u=document.getElementById('FG_USE');if(u){if(u.tagName==='SELECT'){u.value='Y';u.dispatchEvent(new Event('change',{bubbles:true}));}else{const r=document.querySelector(\"input[name='FG_USE'][value='Y']\");if(r)r.click();}}})()"
+        },
+        { "action": "click", "selector": "#btnSave a, #btnSave" },
+        { "action": "wait", "ms": 3000 },
+        { "action": "closePopup" },
+        { "action": "wait", "ms": 3000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const before=parseInt(sessionStorage.getItem('qa1245_before')||'0',10);const rows=document.querySelectorAll('#list_vital tr.jqgrow');if(!rows.length)throw new Error('저장 후 Vital Few 목록이 비어 있음 (저장 전 '+before+'건) — 결함현상과 동일');if(rows.length<=before)throw new Error('저장 후에도 Vital Few 목록 건수가 늘지 않음 (전 '+before+' → 후 '+rows.length+')');})()"
+        },
+        { "action": "screenshot", "name": "배분관리-VitalFew목록" }
+      ]
+    },
+    {
+      "name": "VC_TC_1267 [Minor] 순차배분 예외관리 중복 적용기간 등록 시 검증 알림",
+      "_warn": "등록 버튼을 누른다(forbidden 해제). 기대 동작은 '예외일자를 확인해주세요' 알림으로 막히는 것. 결함이 남아 있으면 중복 예외 1건이 dev 에 생성된다 — 실행 후 VOC1022 에서 삭제할 것.",
+      "allowForbidden": ["저장", "Save", "등록"],
+      "_note": "VOC1022.jsp:79~80 [등록](#btnOpenRegist) → 팝업 VOC1023. 기존 목록 첫 행의 배분자·적용기간을 그대로 다시 넣어 중복을 만든다. 목록이 0건이면 중복을 만들 수 없어 데이터 부족으로 보고된다.",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1022.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "click", "selector": "#search a, #search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=document.querySelector('#list tr.jqgrow');if(!r)throw new Error('순차배분 예외 목록이 0건 — 중복 등록 검증을 하려면 기존 예외가 1건 이상 필요하다');const tds=[...r.querySelectorAll('td')].map(td=>td.innerText.trim());sessionStorage.setItem('qa1267_row',JSON.stringify(tds));})()"
+        },
+        { "action": "click", "selector": "#btnOpenRegist a, #btnOpenRegist", "popup": true },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#ID_DIVID_EMP" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const tds=JSON.parse(sessionStorage.getItem('qa1267_row')||'[]');const dates=tds.filter(t=>/^\\d{4}[-.\\/]?\\d{2}[-.\\/]?\\d{2}$/.test(t));const emp=tds.find(t=>/^[가-힣]{2,4}$/.test(t));const sel=document.getElementById('ID_DIVID_EMP');const o=[...sel.options].find(x=>emp&&x.text.trim().includes(emp))||[...sel.options].find(x=>x.value);if(!o)throw new Error('배분자 셀렉트에 선택 가능한 항목이 없음');sel.value=o.value;sel.dispatchEvent(new Event('change',{bubbles:true}));if(dates.length<1)throw new Error('기존 예외 행에서 적용기간 날짜를 읽지 못함 / 행 내용: '+tds.join('|'));const set=(id,v)=>{const e=document.getElementById(id);if(e&&v){e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));}};set('DT_BEGIN',dates[0]);set('DT_END',dates[1]||dates[0]);})()"
+        },
+        { "action": "screenshot", "name": "순차배분예외-등록팝업" },
+        { "action": "click", "selector": "#btnSave a, #btnSave" },
+        { "action": "expectDialog", "text": "예외일자" },
+        { "action": "closePopup" }
+      ]
+    },
+    {
+      "name": "VC_TC_1323 [Major] 업무요청/공유 양식 Web 양식 편집창 렌더링",
+      "_note": "VOC1104.jsp:47~58 NamoSE('EDITOR_DS_CONTENT') 를 #layout-1_2_4 안에 그린다. 결함은 '빈화면'. 에디터 컨테이너에 실제 편집 영역(iframe 또는 크기 있는 자식)이 생겼는지로 판정한다. 저장하지 않는다.",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1104.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_REQEST_TY');if(!s)throw new Error('#CD_REQEST_TY 없음');const o=[...s.options].find(x=>x.value);if(!o)throw new Error('요청 유형 옵션이 없음 — dev 코드 데이터 확인 필요');s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "wait", "ms": 4000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const host=document.getElementById('layout-1_2_4')||document.getElementById('EDITOR_DS_CONTENT');if(!host)throw new Error('Web 양식 편집창 영역(#layout-1_2_4 / #EDITOR_DS_CONTENT)이 없음');const fr=[...host.querySelectorAll('iframe')].filter(f=>f.clientHeight>50&&f.clientWidth>50);const vis=[...host.children].filter(c=>c.offsetParent!==null&&c.clientHeight>50);if(!fr.length&&!vis.length)throw new Error('Web 양식 내용 편집창이 빈 화면 — 에디터 iframe 도 크기 있는 자식 요소도 없음');})()"
+        },
+        { "action": "screenshot", "name": "업무요청양식-편집창" }
+      ]
+    },
+    {
+      "name": "VC_TC_1327 [Major] 업무요청/공유 양식 [저장] 버튼 동작",
+      "_warn": "저장 버튼을 실제로 누른다(forbidden 해제). 편집창 내용을 **바꾸지 않고** 그대로 저장해 양식이 변하지 않게 한다. 결함(저장 버튼 미작동) 여부만 본다.",
+      "allowForbidden": ["저장", "Save"],
+      "_note": "VOC1104.jsp:91~99 #save → fnSave. 컨펌 '저장하시겠습니까?' 가 뜨는지로 버튼 동작을 판정한다(web-tester 는 다이얼로그를 자동 확인하므로 같은 내용으로 저장까지 진행된다).",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1104.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_REQEST_TY');const o=[...s.options].find(x=>x.value);if(!o)throw new Error('요청 유형 옵션이 없음');s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "wait", "ms": 4000 },
+        { "action": "click", "selector": "#save a, #save" },
+        { "action": "expectDialog", "text": "저장" },
+        { "action": "screenshot", "name": "업무요청양식-저장" }
+      ]
+    },
+    {
+      "name": "VC_TC_1335 [Major] VOC업무문의 양식 Web 양식 편집창 렌더링",
+      "_note": "VOC1114 는 VOC1104 와 같은 구조(NamoSE). 판정 방식 동일.",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1114.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_REQEST_TY');if(!s)throw new Error('#CD_REQEST_TY 없음');const o=[...s.options].find(x=>x.value);if(!o)throw new Error('요청 유형 옵션이 없음');s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "wait", "ms": 4000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const host=document.getElementById('layout-1_2_4')||document.getElementById('EDITOR_DS_CONTENT');if(!host)throw new Error('Web 양식 편집창 영역이 없음');const fr=[...host.querySelectorAll('iframe')].filter(f=>f.clientHeight>50&&f.clientWidth>50);const vis=[...host.children].filter(c=>c.offsetParent!==null&&c.clientHeight>50);if(!fr.length&&!vis.length)throw new Error('Web 양식 내용 편집창이 빈 화면 — 에디터 iframe 도 크기 있는 자식 요소도 없음');})()"
+        },
+        { "action": "screenshot", "name": "VOC업무문의양식-편집창" }
+      ]
+    },
+    {
+      "name": "VC_TC_1339 [Major] VOC업무문의 양식 [저장] 버튼 동작",
+      "_warn": "저장 버튼을 실제로 누른다(내용은 바꾸지 않음).",
+      "allowForbidden": ["저장", "Save"],
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1114.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_REQEST_TY');const o=[...s.options].find(x=>x.value);if(!o)throw new Error('요청 유형 옵션이 없음');s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "wait", "ms": 4000 },
+        { "action": "click", "selector": "#save a, #save" },
+        { "action": "expectDialog", "text": "저장" },
+        { "action": "screenshot", "name": "VOC업무문의양식-저장" }
+      ]
+    },
+    {
+      "name": "VC_TC_1408 [Major] 콜센터(KPI) 입력 저장",
+      "_warn": "저장 버튼을 실제로 누른다(forbidden 해제). **현재 값을 읽어 같은 값으로 다시 저장**하므로 수치는 변하지 않는다.",
+      "allowForbidden": ["저장", "Save"],
+      "_note": "VOC0030.jsp — 조회(#search) 후 목록(#list) 의 입력필드에 값이 들어 있다. 저장(#btnSave) → 컨펌 → '수정이 완료되었습니다' 알림. 결함현상은 '저장 실패'.",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC0030.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "click", "selector": "#search a, #search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=document.querySelectorAll('#list tr.jqgrow');if(!rows.length)throw new Error('콜센터(KPI) 목록이 0건 — 기준 연/월 확인 필요');const ins=document.querySelectorAll('#list input[type=text]');if(!ins.length)throw new Error('목록에 입력필드가 없음');ins.forEach(i=>{const v=i.value;i.value=v;i.dispatchEvent(new Event('input',{bubbles:true}));i.dispatchEvent(new Event('change',{bubbles:true}));});})()"
+        },
+        { "action": "click", "selector": "#btnSave a, #btnSave" },
+        { "action": "expectDialog", "text": "수정이 완료되었습니다", "timeout": 30000 },
+        { "action": "screenshot", "name": "콜센터KPI-저장" }
+      ]
+    },
+    {
+      "name": "VC_TC_1427 [Major] 상담지원 업무 신규등록 첨부파일 업로드",
+      "_note": "VOC1201 [신규등록] → VOC1202 (uxl.ext.Upload('file'), VOC1202.jsp:21). 업로드까지만 하고 저장하지 않는다 — 결함현상이 '첨부파일 업로드 미완료' 이기 때문.",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1202.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        { "action": "upload", "selector": "input[type=file]", "files": "scenarios/스타벅스/04_QA시나리오/09_결함회귀_260916/_files/TEST_QA_첨부.txt" },
+        { "action": "wait", "ms": 5000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const box=document.getElementById('uploadedFiles_file');if(!box)throw new Error('#uploadedFiles_file 영역 없음');const txt=box.textContent||'';const prog=document.getElementById('uploadProgress_file');const progOn=prog&&prog.offsetParent!==null;if(!txt.includes('TEST_QA_첨부'))throw new Error('업로드 후 첨부파일명이 표시되지 않음'+(progOn?' (로딩 표시가 아직 떠 있음 — 업로드 미완료)':'')+' / 영역 내용: '+txt.trim().slice(0,80));})()"
+        },
+        { "action": "screenshot", "name": "상담지원업무-첨부업로드" }
+      ]
+    },
+    {
+      "name": "VC_TC_1458 [Major] 문자발송 상용구 선택 → 발송정보 내용에 반영(undefined 아님)",
+      "_note": "POP0007(문자발송 팝업). 상용구 검색 #DS_TITLE + #search → 그리드 #list 체크 → [선택] #selectContent → 좌측 내용 #DS_CONTENT 에 상용구 본문이 들어가야 한다. 결함은 'undefined 노출'. POP0007.jsp:115 는 free-jqGrid 4.15.5 getRowData 인자 수정(76e9a57)이 이미 들어간 자리라 회귀 확인 가치가 크다. 발송은 하지 않는다(#sendBtn 미클릭).",
+      "steps": [
+        { "action": "goto", "url": "/screen/POP0007.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        { "action": "click", "selector": "#search a, #search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=document.querySelectorAll('#list tr.jqgrow');if(!rows.length)throw new Error('문자 상용구 목록이 0건 — dev 상용구 데이터 확인 필요');const cb=rows[0].querySelector(\"input[type=checkbox]\");if(cb){cb.click();}else{rows[0].click();}document.getElementById('DS_CONTENT').value='';})()"
+        },
+        { "action": "click", "selector": "#selectContent a, #selectContent" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(document.getElementById('DS_CONTENT')||{}).value||'';if(v.includes('undefined'))throw new Error(\"상용구 선택 후 내용에 undefined 가 들어감 / 실제: '\"+v.slice(0,80)+\"'\");if(!v.trim())throw new Error('상용구 선택 후 내용이 비어 있음');})()"
+        },
+        { "action": "screenshot", "name": "문자발송-상용구선택" }
+      ]
+    },
+    {
+      "name": "VC_TC_1507 [Major] 고객 메모 상세 연락처 [조회] → 개인정보 상세 팝업(Page Not Found 아님)",
+      "_note": "VOC1501 목록 더블클릭 → VOC1503(VOC1501.jsp:77). 연락처 조회 버튼 #btnSbscrbSttpcDetail → fnCstmrInfoDetailPopup → POP1007 (popup.js:105~108). TC_1008 과 같은 팝업이라 원인이 같을 수 있다.",
+      "mask": ["#DATA_TEXT", "#DS_CSTMR_SBSCRB_STTPC", "#NM_CSTMR"],
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1501.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "click", "selector": "#searchBtn a, #searchBtn" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=document.querySelectorAll('#list tr.jqgrow');if(!r.length)throw new Error('고객 메모 목록이 0건 — 기간 조건(3개월 제한)이나 dev 데이터 확인 필요');})()"
+        },
+        { "action": "dblclick", "selector": "#list tr.jqgrow >> nth=0" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        { "action": "expectUrl", "contains": "VOC1503" },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.getElementById('btnSbscrbSttpcDetail');if(!b)throw new Error('연락처 [조회] 버튼(#btnSbscrbSttpcDetail)이 없음');if(b.offsetParent===null)throw new Error('연락처 [조회] 버튼이 숨겨져 있음 — 권한 또는 데이터 조건(VOC1503.jsp:59,64)');})()"
+        },
+        { "action": "click", "selector": "#btnSbscrbSttpcDetail a, #btnSbscrbSttpcDetail", "popup": true },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        { "action": "screenshot", "name": "고객메모-연락처팝업" },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.body?document.body.innerText:'';if(/Page\\s*Not\\s*Found|HTTP Status 404|404\\s*-\\s*Not Found/i.test(b))throw new Error('연락처 조회 팝업이 Page Not Found — 본문: '+b.trim().slice(0,120));const ok=document.getElementById('detailLay')||document.getElementById('DATA_TEXT')||document.getElementById('btnClose');if(!ok)throw new Error('개인정보 상세 팝업(POP1007)의 요소가 없음 — 본문: '+b.trim().slice(0,120));})()"
+        },
+        { "action": "closePopup" }
+      ]
+    }
+  ]
+}

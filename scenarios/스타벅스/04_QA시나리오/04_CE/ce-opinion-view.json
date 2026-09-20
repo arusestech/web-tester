@@ -1,12 +1,12 @@
 {
   "extends": "../_공통.json",
   "name": "QA CE 고객의견 조회",
-  "_comment_source": "QA 시나리오.md VC_TC_1011~1027. 화면 VOC1034 = app/standard/voc/VOC1034.jsp (meta 없음). 기준년월 #YY_STD/#MM_STD(ub:code-select, :74~75), 조회구분 라디오 input[name=FG_END] value N/Y(:81~82), 소속팀 #NM_DEPT + #btnDeptSearch → POP0017(popup.js:19~22), 주관부서 #NM_CHARGE_DEPT + #btnChargeDept → POP0002(popup.js:13~16), 검색 #searchBtn(:154), 그리드 #list(:161). 마감조회일 때만 의견유형/분류/주관부서 컬럼 showCol(:226~234).",
+  "_comment_source": "QA test.md(260916) VC_TC_1013~1029. 화면 VOC1034 = app/standard/voc/VOC1034.jsp (meta 없음). 기준년월 #YY_STD/#MM_STD(ub:code-select, :74~75), 조회구분 라디오 input[name=FG_END] value N/Y(:81~82), 소속팀 #NM_DEPT + #btnDeptSearch → POP0017(popup.js:19~22), 주관부서 #NM_CHARGE_DEPT + #btnChargeDept → POP0002(popup.js:13~16), 검색 #searchBtn(:154), 그리드 #list(:161). 마감조회일 때만 의견유형/분류/주관부서 컬럼 showCol(:226~234).",
   "_comment_default": "QA 기대는 기준년월 '당해년월' 이지만 소스는 YM_BEF(현재월의 이전달, VOC1034.jsp:50~51,74~75) 를 기본값으로 넣는다. 실행 시 ❌ 가 나면 QA 기대값과 구현 차이 — 결함/사양 확인 필요.",
   "_comment_popup": "부서검색 팝업(POP0017/POP0002) 셀렉터: 부서 입력 #DEPT_NM, 검색 #fnSearch_dept, 조직도 #showTree, 트리 #deptTree, 목록 #list_dept, 확인 #conFirm (POP0017.jsp:54,65,68,73 / POP0002.jsp:51,63,68). 확인 시 uxl.pushToParent 로 부모 필드 채우고 팝업 닫힘.",
   "menus": [
     {
-      "name": "VC_TC_1011,1012 CE 고객의견 조회 화면 진입(기준년월·조회구분·소속팀/지역·주관부서·검색결과)",
+      "name": "VC_TC_1013,1014 CE 고객의견 조회 화면 진입(기준년월·조회구분·소속팀/지역·주관부서·검색결과)",
       "url": "/screen/VOC1034.ub",
       "search": false,
       "expect": [
@@ -22,7 +22,7 @@
       ],
       "actions": [
         {
-          "name": "VC_TC_1020 소속팀/지역 검색 아이콘 → 부서검색 팝업(부서 입력·검색·조직도·트리)",
+          "name": "VC_TC_1022 소속팀/지역 검색 아이콘 → 부서검색 팝업(부서 입력·검색·조직도·트리)",
           "click": "#btnDeptSearch",
           "popup": true,
           "expect": [
@@ -34,7 +34,7 @@
           "expectText": "부서검색"
         },
         {
-          "name": "VC_TC_1022 주관부서 검색 아이콘 → 부서검색 팝업",
+          "name": "VC_TC_1024 주관부서 검색 아이콘 → 부서검색 팝업",
           "click": "#btnChargeDept",
           "popup": true,
           "expect": [
@@ -50,7 +50,7 @@
   ],
   "crud": [
     {
-      "name": "VC_TC_1013~1015 기준년월 기본값(당해년월)·연도(2017~2026)·월(1~12) 셀렉트 항목",
+      "name": "VC_TC_1015~1017 기준년월 기본값(당해년월)·연도(2017~2026)·월(1~12) 셀렉트 항목",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1034.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -66,7 +66,7 @@
       ]
     },
     {
-      "name": "VC_TC_1017~1019 조회구분 기본 원본조회 → 원본조회 컬럼(의견유형/분류/주관부서 숨김) → 마감조회 컬럼 표시",
+      "name": "VC_TC_1019~1021 조회구분 기본 원본조회 → 원본조회 컬럼(의견유형/분류/주관부서 숨김) → 마감조회 컬럼 표시",
       "_note": "컬럼 표시 판정 = jqGrid 헤더 th#list_NM_VOC_DEMAND 의 display (VOC1034.jsp:226~234 showCol/hideCol). 결과 0건이어도 헤더는 판정 가능. 매장코드 컬럼명 잘림(QA Fail시)은 캡처로 확인.",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1034.ub" },
@@ -96,7 +96,7 @@
       ]
     },
     {
-      "name": "VC_TC_1016 기준년월 연도/월 선택 후 검색 → 오류 없이 결과 표시",
+      "name": "VC_TC_1018 기준년월 연도/월 선택 후 검색 → 오류 없이 결과 표시",
       "_note": "8월(당해년) 선택. 결과 0건도 정상(개발 DB 데이터 의존) → 건수는 title 에 기록, 값 대조는 캡처로.",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1034.ub" },
@@ -118,7 +118,7 @@
       ]
     },
     {
-      "name": "VC_TC_1021 소속팀/지역 부서검색 팝업 → 검색·선택·확인 → 입력필드 + 조직도 경로 표시",
+      "name": "VC_TC_1023 소속팀/지역 부서검색 팝업 → 검색·선택·확인 → 입력필드 + 조직도 경로 표시",
       "_note": "POP0017: 부서명 '서초' 검색 → 첫 행 선택(onSelectRow 체크) → #conFirm → 부모 #NM_DEPT/#NM_DEPT_FULL 채움(VOC1034.jsp:263~270). 검색 결과가 없으면 '행 없음' 으로 실패(데이터 부족).",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1034.ub" },
@@ -145,7 +145,7 @@
       ]
     },
     {
-      "name": "VC_TC_1023 주관부서 부서검색 팝업 → 검색·선택·확인 → 주관부서 입력필드 표시",
+      "name": "VC_TC_1025 주관부서 부서검색 팝업 → 검색·선택·확인 → 주관부서 입력필드 표시",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1034.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -170,7 +170,7 @@
       ]
     },
     {
-      "name": "VC_TC_1024,1026 검색결과 페이징 UI(Total·페이지 이동)·Rows/Page 항목(10/20/50/100, 기본 10)",
+      "name": "VC_TC_1026,1028 검색결과 페이징 UI(Total·페이지 이동)·Rows/Page 항목(10/20/50/100, 기본 10)",
       "_note": "jqGrid 페이저: Rows/Page = select.ui-pg-selbox. VOC1034.jsp 그리드 옵션에 rowList 가 없어 프레임워크 기본값 — QA 기대(10/20/50/100)와 다르면 실제 옵션을 메시지로 남김.",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1034.ub" },

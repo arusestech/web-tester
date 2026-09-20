@@ -1,7 +1,7 @@
 {
   "extends": "../_공통.json",
   "name": "QA 전체 VOC (목록·검색조건)",
-  "_comment_source": "QA 시나리오.md VC_TC_111~240 (전체 VOC 목록/검색조건/팝업/엑셀/검색결과). 상세 화면(VC_TC_241~432)은 voc-all-detail.json.",
+  "_comment_source": "QA test.md(260916) VC_TC_112~241 (전체 VOC 목록/검색조건/팝업/엑셀/검색결과). 상세 화면(VC_TC_242~433)은 voc-all-detail.json.",
   "_comment_selectors": "meta/voc/VOC1001R00.jsp: 등록일구분 #CD_VOC_SEARCH_2(:55) 기간 #DT_VOC_REG_START/#DT_VOC_REG_END(:56) 진행단계 #CD_VOC_STTUS(:58) 채널 #vocChannelBox>input[name=CD_VOC_CHANNEL_3](:60, app VOC1001.jsp:65 동적생성) 문의유형 #TP_VOC_DEMAND(:66) 고객센터 #CD_VOC_CENTER(:68) 접수자 #NM_VOC_RECV_EMP+#btnEmpSearch(:70) 분류 #NM_VOC_CAUSE_AUTO #CD_VOC_CAUSE_1/2/3 #CauseAddBtn(:75) #CAUSE_CONTENT #CauseDelBtn(:84) 방문매장 #NM_VISIT_STR+#btnVisitStrSerach(:79) 프로모션 #NM_PROMOTION+#btnPromotionSerach(:86) 주관부서 #NM_CHARGE_DEPT(:88) 이벤트 #NM_EVENT+#btnEventSearch(:94) 제품명 #NM_PRDUCT+#btnGoodsSearch(:96) 답변진행 #FG_CUST_ANSWER + radio[name=CD_CUST_ANSWER](:101) 검색 #CD_VOC_SEARCH #DS_SEARCH + 체크박스 FG_REQ_REPLY/FG_REQ_NONE/FG_SHARE_NONE/FG_CSTMR_PARTICIPATE(:105) 검색버튼 #searchBtn a(:115) 엑셀 #btnExcel a(:121) 그리드 #list(:126) 페이저 .ub-control.pagging[for=list](:130). 그리드 컬럼(app VOC1001.jsp:153~174): ID_VOC,DT_VOC_REG,NM_VOC_CENTER,NM_CD_VOC_CHANNEL,NM_TP_VOC_DEMAND,NM_VOC_CAUSE_3,NM_VISIT_STR,DS_VOC_TITLE,NM_VOC_RECV_EMP,REQ_CNT,FG_VOC_ANSWER,NM_CD_VOC_STTUS,FG_FILE — 셀은 td[aria-describedby='list_<컬럼>']. rowList [15,20,50] → Rows/Page select#listPaging.page-rows (uxl-jqgrid-3.0.0.starbucks_jq3.js:477), Total = .total-count(:458). 상세 더블클릭 → VOC1002(:181~184, form #detailForm).",
   "_comment_popups": "page/js/popup.js: 접수자 POP0001(:26~28, 파트너검색 — 부서 #DEPT_NM #fnSearch_dept #showTree, 파트너찾기 #INCUMBENT_CD #NM_USER #fnSearch, 그리드 #list_dept/#list, 확인 #conFirm, 미선택 alert '부서 선택 후 직원목록에서 선택해 주세요.' POP0001.jsp:272) · 방문매장 POP1001(:62~64, 부서검색 — #DEPT_NM(필수) #fnSearch_dept #showTree #CD_STORE_CHK(폐점미포함, 기본 체크) #deptTree #list_dept #conFirm; 매장 아닌 부서 확인 시 서버 메시지 '선택한 부서는 매장이 아닙니다.' SearchDeptManageSO.java:316 → uxl.showMessage=alert) · 프로모션 POP1003(#NM_PROMOTION #YN_USE #searchBtn #list 더블클릭 선택) · 이벤트 POP1004(#NM_EVENT #YN_USE #searchBtn #list 더블클릭) · 제품 POP1002(#CD_PROD_CATE_1/#CD_PROD_CATE_2 chainCombo, #NO_SKU #NM_PRDUCT #YN_END(단종제외 기본체크) #searchBtn #list multiselect(allVoc 단일) #conFirm, 미선택 alert '선택된 항목이 없습니다.'). 모두 uxl.openWindow=window.open → popup:true.",
   "_comment_messages": "message-voc.properties:43 '[{0}]의 종료일이 시작일보다 이전입니다.' · message-common_ko.properties:73 '[{0}] 은(는) 필수 항목입니다.' · VOC1001.jsp:327 alert('대분류를 선택해 주세요') :284/:336 alert('중복된 선택입니다') :277/:331 alert('같은 레벨의 분류를 선택해 주세요') — QA 문서의 마침표는 실제 문구에 없으므로 마침표 없이 매칭.",
@@ -11,7 +11,7 @@
   ],
   "menus": [
     {
-      "name": "VC_TC_111,236,240 전체 VOC 화면 구성·검색결과 목록·상세 진입",
+      "name": "VC_TC_112,237,241 전체 VOC 화면 구성·검색결과 목록·상세 진입",
       "url": "/screen/VOC1001.ub",
       "expect": [
         "#searchForm",
@@ -64,7 +64,7 @@
       },
       "actions": [
         {
-          "name": "VC_TC_138 접수자 검색 아이콘 → 파트너검색 팝업(부서/조직도/파트너찾기/목록)",
+          "name": "VC_TC_139 접수자 검색 아이콘 → 파트너검색 팝업(부서/조직도/파트너찾기/목록)",
           "click": "#btnEmpSearch",
           "popup": true,
           "expect": [
@@ -80,7 +80,7 @@
           ]
         },
         {
-          "name": "VC_TC_167 방문매장 검색 아이콘 → 부서검색 팝업(부서/검색/조직도/폐점미포함/조직트리)",
+          "name": "VC_TC_168 방문매장 검색 아이콘 → 부서검색 팝업(부서/검색/조직도/폐점미포함/조직트리)",
           "click": "#btnVisitStrSerach",
           "popup": true,
           "expect": [
@@ -94,7 +94,7 @@
           "expectText": "스타벅스커피코리아"
         },
         {
-          "name": "VC_TC_174 프로모션명 검색 → 프로모션 목록 팝업",
+          "name": "VC_TC_175 프로모션명 검색 → 프로모션 목록 팝업",
           "click": "#btnPromotionSerach",
           "popup": true,
           "expect": [
@@ -105,7 +105,7 @@
           ]
         },
         {
-          "name": "VC_TC_183 이벤트명 검색 → 이벤트 목록 팝업",
+          "name": "VC_TC_184 이벤트명 검색 → 이벤트 목록 팝업",
           "click": "#btnEventSearch",
           "popup": true,
           "expect": [
@@ -116,7 +116,7 @@
           ]
         },
         {
-          "name": "VC_TC_190 제품명 검색 → 제품/상품 목록 팝업",
+          "name": "VC_TC_191 제품명 검색 → 제품/상품 목록 팝업",
           "click": "#btnGoodsSearch",
           "popup": true,
           "expect": [
@@ -131,7 +131,7 @@
           ]
         },
         {
-          "name": "VC_TC_229 엑셀다운로드 → Download Result 레이어(전체 선택·기본/선택 항목)",
+          "name": "VC_TC_230 엑셀다운로드 → Download Result 레이어(전체 선택·기본/선택 항목)",
           "click": "#btnExcel a",
           "expect": [
             "#exportListViewer",
@@ -149,7 +149,7 @@
   ],
   "crud": [
     {
-      "name": "VC_TC_112,113 등록일 구분 항목(등록일/답변일/처리완료일)·기본 기간(7일 전~오늘)",
+      "name": "VC_TC_113,114 등록일 구분 항목(등록일/답변일/처리완료일)·기본 기간(7일 전~오늘)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -166,7 +166,7 @@
       ]
     },
     {
-      "name": "VC_TC_114~116 등록일/답변일/처리완료일 구분 검색 결과(정렬·답변여부Y·처리완료)",
+      "name": "VC_TC_115~117 등록일/답변일/처리완료일 구분 검색 결과(정렬·답변여부Y·처리완료)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -207,7 +207,7 @@
       ]
     },
     {
-      "name": "VC_TC_117~119 등록일/답변일/처리완료일 종료일이 시작일보다 이전 → 알림",
+      "name": "VC_TC_118~120 등록일/답변일/처리완료일 종료일이 시작일보다 이전 → 알림",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -233,7 +233,7 @@
       ]
     },
     {
-      "name": "VC_TC_120~124 진행단계 항목·필터(전체/접수대기/처리중/처리완료)",
+      "name": "VC_TC_121~125 진행단계 항목·필터(전체/접수대기/처리중/처리완료)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -288,7 +288,7 @@
       ]
     },
     {
-      "name": "VC_TC_125~127 채널 체크 필터(1개/2개 이상/전체)",
+      "name": "VC_TC_126~128 채널 체크 필터(1개/2개 이상/전체)",
       "_note": "채널 체크박스는 CD_VOC_CHANNEL_3 코드로 동적 생성(VOC1001.jsp:65). 라벨 = 코드명, 그리드 채널 컬럼 NM_CD_VOC_CHANNEL 과 대조",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
@@ -333,7 +333,7 @@
       ]
     },
     {
-      "name": "VC_TC_128~133 문의유형 항목·필터(전체/칭찬/제안/불만/문의)",
+      "name": "VC_TC_129~134 문의유형 항목·필터(전체/칭찬/제안/불만/문의)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -398,7 +398,7 @@
       ]
     },
     {
-      "name": "VC_TC_134~137 고객센터 항목·필터(전체/대표번호/딜리버스)",
+      "name": "VC_TC_135~138 고객센터 항목·필터(전체/대표번호/딜리버스)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -441,7 +441,7 @@
       ]
     },
     {
-      "name": "VC_TC_139~145,147~149 파트너검색 팝업(부서검색·조직도·파트너찾기·미선택 알림·선택 반영)",
+      "name": "VC_TC_140~146,148~150 파트너검색 팝업(부서검색·조직도·파트너찾기·미선택 알림·선택 반영)",
       "_note": "POP0001.jsp. 부서 '서초' 와 파트너 이름 '김' 은 데이터 의존. 재직 기본값 = INCUMBENT_CD defaultValue 0(POP0001.jsp:76). 확인 미선택 alert POP0001.jsp:272",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
@@ -519,7 +519,7 @@
       ]
     },
     {
-      "name": "VC_TC_150~164,166 분류 자동완성·대/중/소 연동·추가/중복/레벨 알림·삭제",
+      "name": "VC_TC_151~165,167 분류 자동완성·대/중/소 연동·추가/중복/레벨 알림·삭제",
       "_note": "자동완성 uxl.autocomplete(minLength 2, VOC1001.jsp:253) → jQuery UI .ui-autocomplete li. [삭제] 는 forbidden 매칭이라 eval 로 클릭(옵션만 제거, 서버 호출 없음). 알림 문구는 소스 기준(마침표 없음)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
@@ -648,7 +648,7 @@
       ]
     },
     {
-      "name": "VC_TC_168~173,181,182 부서검색 팝업(필수 알림·폐점미포함·매장 아님 알림·조직도·선택 반영·주관부서)",
+      "name": "VC_TC_169~174,182,183 부서검색 팝업(필수 알림·폐점미포함·매장 아님 알림·조직도·선택 반영·주관부서)",
       "_note": "POP1001.jsp. '지역' 이 포함된 부서 행을 매장 아닌 부서로 간주(QA 예: 서초 지역). 매장 선택 시 콜백이 NM_VISIT_STR + NM_CHARGE_DEPT(주관부서) 를 채움(VOC1001.jsp:207~212) → TC_182. 주관부서 없는 매장(TC_181)은 데이터 의존이라 필드 readonly 여부만 확인",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
@@ -729,7 +729,7 @@
       ]
     },
     {
-      "name": "VC_TC_175~178,180 프로모션 목록 팝업(키워드/비유효/사용여부 항목/전체 검색/더블클릭 선택)",
+      "name": "VC_TC_176~179,181 프로모션 목록 팝업(키워드/비유효/사용여부 항목/전체 검색/더블클릭 선택)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -777,7 +777,7 @@
       ]
     },
     {
-      "name": "VC_TC_184~187,189 이벤트 목록 팝업(키워드/비유효/상태 항목/전체 검색/더블클릭 선택)",
+      "name": "VC_TC_185~188,190 이벤트 목록 팝업(키워드/비유효/상태 항목/전체 검색/더블클릭 선택)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -825,7 +825,7 @@
       ]
     },
     {
-      "name": "VC_TC_191~195,198,200~206 제품/상품 목록 팝업(카테고리 연동·검색·Rows/Page 항목·SKU·제품명·단종제외·선택 반영)",
+      "name": "VC_TC_192~196,199,201~207 제품/상품 목록 팝업(카테고리 연동·검색·Rows/Page 항목·SKU·제품명·단종제외·선택 반영)",
       "_note": "POP1002.jsp. allVoc 파라미터로 단일 선택. Rows/Page 는 uxl 기본 rowList [10,20,50,100] → select#listPaging. 단종제외 해제(TC_205) 는 소스상 전체(Y+N) 조회라 QA 기대('Y만')와 다름 → 결과 존재만 확인",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
@@ -935,7 +935,7 @@
       ]
     },
     {
-      "name": "VC_TC_207~213 답변진행 항목·필터(답변/미답변)·시간 초과 라디오(분홍 강조)",
+      "name": "VC_TC_208~214 답변진행 항목·필터(답변/미답변)·시간 초과 라디오(분홍 강조)",
       "_note": "FG_CUST_ANSWER(전체/답변/미답변) → 그리드 FG_VOC_ANSWER Y/N 대조. 라디오 CD_CUST_ANSWER OVER_1/OVER_2(라벨 = CD_ANSWER_HOUR 코드명 + '시간 초과'). 초과 행 강조는 VOC1001.jsp:459~466 setRowData background #FFEB9C/#FFC0CB",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
@@ -1003,7 +1003,7 @@
       ]
     },
     {
-      "name": "VC_TC_214~216 검색 구분 항목·VOC번호/제목 키워드 검색",
+      "name": "VC_TC_215~217 검색 구분 항목·VOC번호/제목 키워드 검색",
       "_note": "VOC번호·제목 키워드는 전체 검색 첫 행에서 가져와 재검색(데이터 자립). 옵션 value 는 DB 코드라 라벨 텍스트로 선택",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
@@ -1044,7 +1044,7 @@
       ]
     },
     {
-      "name": "VC_TC_217~224 검색 구분 내용/답변/제목+내용/제목+내용+답변/고객ID/고객명/고객연락처/4자리 키워드 검색(오류 없음)",
+      "name": "VC_TC_218~225 검색 구분 내용/답변/제목+내용/제목+내용+답변/고객ID/고객명/고객연락처/4자리 키워드 검색(오류 없음)",
       "_note": "본문·답변·고객정보는 그리드에 노출되지 않아 결과 일치 여부를 화면에서 판정할 수 없다 → 각 구분으로 검색이 오류 없이 수행되는지(alert/JS에러 없음)만 자동, 결과 적합성은 부분(수동 대조)",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
@@ -1120,7 +1120,7 @@
       ]
     },
     {
-      "name": "VC_TC_225~228 회신여부/업무요청여부/공유여부/만족도참여여부 체크 검색",
+      "name": "VC_TC_226~229 회신여부/업무요청여부/공유여부/만족도참여여부 체크 검색",
       "_note": "회신·공유·만족도는 그리드 컬럼이 없어 결과 적합성은 부분(캡처 대조). 업무요청여부는 그리드 REQ_CNT(업무요청) 컬럼으로 대조",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
@@ -1159,7 +1159,7 @@
       ]
     },
     {
-      "name": "VC_TC_230~232 엑셀다운로드 레이어 전체선택 토글·다운로드 링크 생성",
+      "name": "VC_TC_231~233 엑셀다운로드 레이어 전체선택 토글·다운로드 링크 생성",
       "_note": "fnexportExcelBtn(VOC1001.jsp:477) 레이어 → 전체 선택(FG_ALL_CHK) 토글(:529~559) → 내부 [엑셀다운로드](fnexportExcel :600) 는 서버에 엑셀 파일을 생성하고 링크만 만든다(DB 변경 없음, 파일 다운로드는 하지 않음). 개인정보조회로그가 남을 수 있음",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
@@ -1198,7 +1198,7 @@
       ]
     },
     {
-      "name": "VC_TC_236,238,239 검색결과 컬럼 구성·15건/페이지·Rows/Page 항목(15/20/50)·변경 반영",
+      "name": "VC_TC_237,239,240 검색결과 컬럼 구성·15건/페이지·Rows/Page 항목(15/20/50)·변경 반영",
       "steps": [
         { "action": "goto", "url": "/screen/VOC1001.ub" },
         { "action": "waitForLoad", "state": "networkidle" },

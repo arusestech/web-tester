@@ -1,7 +1,7 @@
 {
   "extends": "../_공통.json",
   "name": "QA 로그인·홈 대시보드",
-  "_comment_source": "QA 시나리오.md VC_TC_001~017. 로그인 화면 = BCO0001.jsp(app/standard/bco), 대시보드 = POR1001.jsp(app/standard/por, 포털 POR0001 의 첫 탭 iframe). 대시보드는 직접 URL 진입.",
+  "_comment_source": "QA test.md(260916) VC_TC_001~017. 로그인 화면 = BCO0001.jsp(app/standard/bco), 대시보드 = POR1001.jsp(app/standard/por, 포털 POR0001 의 첫 탭 iframe). 대시보드는 직접 URL 진입.",
   "_comment_login_tc": "VC_TC_003/004 오류 메시지는 uxl.error → 레이어(showDebug) 라 expectText 로 본다. 계정 잠금(패스워드 실패 허용횟수) 위험 때문에 존재하지 않는 아이디로 검사하고, 비밀번호 오입력(TC_004)은 수동. TC_006 세션 만료 대기는 수동.",
   "menus": [
     {

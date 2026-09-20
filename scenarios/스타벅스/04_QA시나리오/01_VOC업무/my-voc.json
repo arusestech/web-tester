@@ -1,7 +1,7 @@
 {
   "extends": "../_공통.json",
   "name": "QA My VOC",
-  "_comment_source": "QA 시나리오.md VC_TC_433~523. 목록 = VRE1101 (meta/vre/VRE1101R00.jsp 마크업, app/standard/vre/VRE1101.jsp 스크립트). 상세 = VRE1102(업무요청)/VRE1103(공유) — VRE1101.jsp:203~218 ondblClickRow. 상세 섹션은 loadPage 로 삽입: 접수정보 VRE1003(#vocLayout/#vocOrgLayout), 답변 VRE1002(#ansLayout), 업무요청/공유 VRE1008(#reqLayout, #processList) → 회신사항 VRE1006/1009(#reqEmpDetailView). 처리이력 탭 = VOC1011(#vocHistList, divTab=div 로딩·iframe 아님).",
+  "_comment_source": "QA test.md(260916) VC_TC_434~524. 목록 = VRE1101 (meta/vre/VRE1101R00.jsp 마크업, app/standard/vre/VRE1101.jsp 스크립트). 상세 = VRE1102(업무요청)/VRE1103(공유) — VRE1101.jsp:203~218 ondblClickRow. 상세 섹션은 loadPage 로 삽입: 접수정보 VRE1003(#vocLayout/#vocOrgLayout), 답변 VRE1002(#ansLayout), 업무요청/공유 VRE1008(#reqLayout, #processList) → 회신사항 VRE1006/1009(#reqEmpDetailView). 처리이력 탭 = VOC1011(#vocHistList, divTab=div 로딩·iframe 아님).",
   "_comment_selectors": "검색 #searchBtn a (VRE1101R00.jsp:39) · 요청일자 #DT_VOC_REG_START/#DT_VOC_REG_END(:55, 필수) · 진행단계 #CD_REQ_STATUS(:57) · 구분 #CD_VOC_SE(:59) · 문의유형 #TP_VOC_DEMAND(:63) · 접수자 #btnRecvEmpSearch→POP0001(:65, VRE1101.jsp:84) · 분류 #NM_VOC_CAUSE_AUTO/#CD_VOC_CAUSE_1~3(:69) · 방문매장 #btnVisitStrSerach→POP1001(:71) · Vital Few #vitalFewBox input[name=CD_VITALFEW](VRE1101.jsp:61) · 주관부서 #NM_CHARGE_DEPT readonly(:77) · 검색 #CD_VOC_SEARCH/#DS_SEARCH(:81) · 제품명 #btnGoodsSearch→POP1002(:83) · 엑셀 #btnExcel(:99, uxl.excelDaolog → #exportViewer 다이얼로그) · 그리드 #list 컬럼 ID_VOC_2,NM_VOC_SE,NM_CD_VOC_CHANNEL,NM_TP_VOC_DEMAND,NM_VOC_CAUSE,DS_VOC_TITLE,NM_VISIT_STR,NM_REQ_USER,DT_REQ,DT_REQ_PROCESS_TMLMT,NM_REQ_STATUS(VRE1101.jsp:171~182). 날짜 역순 알림 = uxl.showMessage(alert) '[접수일]의 종료일이 시작일보다 이전입니다.'(VRE1101.jsp:237, message-voc.properties:43).",
   "_comment_data": "test01 에 배분된 업무요청/공유가 없으면 그리드가 0건이라 필터·상세 검증이 '데이터 없음(사전조건…)' 으로 실패한다. 이는 시나리오 오류가 아니라 사전조건 미충족 — 03_프로세스 E2E01 로 TEST_ 업무요청을 만든 뒤 돌리거나 test01 을 처리자로 지정한 VOC 를 준비한다.",
   "_comment_manual": "수동: 481(툴팁 마우스오버) 468/475/480(파일 다운로드 내용) 509/510(팝업 안 팝업 — 중첩 팝업은 러너가 본 창으로 복귀해 검증 불가) 517~520(타 메뉴에서 상태 변경 후 확인) 523(페이징 이동). 데이터 변경(482~504, 515~516, 521) 은 _보류_CRUD/01d_my-team-req-voc.json.",
@@ -11,7 +11,7 @@
   ],
   "menus": [
     {
-      "name": "VC_TC_433 My VOC 화면 구성(조회조건·엑셀·목록)",
+      "name": "VC_TC_434 My VOC 화면 구성(조회조건·엑셀·목록)",
       "url": "/screen/VRE1101.ub",
       "expect": [
         "#searchForm",
@@ -38,7 +38,7 @@
       "search": "#searchBtn a",
       "actions": [
         {
-          "name": "VC_TC_443 접수자 검색 아이콘 → 파트너검색 팝업(부서·조직도·파트너찾기·목록)",
+          "name": "VC_TC_444 접수자 검색 아이콘 → 파트너검색 팝업(부서·조직도·파트너찾기·목록)",
           "click": "#btnRecvEmpSearch",
           "popup": true,
           "expect": [
@@ -53,7 +53,7 @@
           ]
         },
         {
-          "name": "VC_TC_453 방문매장 검색 아이콘 → 부서검색 팝업(부서·조직도·폐점미포함)",
+          "name": "VC_TC_454 방문매장 검색 아이콘 → 부서검색 팝업(부서·조직도·폐점미포함)",
           "click": "#btnVisitStrSerach",
           "popup": true,
           "expect": [
@@ -65,7 +65,7 @@
           ]
         },
         {
-          "name": "VC_TC_465 제품명 검색 아이콘 → 제품/상품 목록 팝업",
+          "name": "VC_TC_466 제품명 검색 아이콘 → 제품/상품 목록 팝업",
           "click": "#btnGoodsSearch",
           "popup": true,
           "expect": [
@@ -80,7 +80,7 @@
           ]
         },
         {
-          "name": "VC_TC_467,468 엑셀다운로드 → Download Result 레이어(0건이면 '다운로드할 데이터가 존재하지 않습니다')",
+          "name": "VC_TC_468,469 엑셀다운로드 → Download Result 레이어(0건이면 '다운로드할 데이터가 존재하지 않습니다')",
           "click": "#btnExcel a",
           "expect": [
             "#exportViewer"
@@ -92,7 +92,7 @@
   ],
   "crud": [
     {
-      "name": "VC_TC_434 요청일자 기본값 = 일주일 전 ~ 오늘",
+      "name": "VC_TC_435 요청일자 기본값 = 일주일 전 ~ 오늘",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -104,7 +104,7 @@
       ]
     },
     {
-      "name": "VC_TC_435 요청일자 시작일>종료일 검색 → 알림 [접수일]의 종료일이 시작일보다 이전입니다",
+      "name": "VC_TC_436 요청일자 시작일>종료일 검색 → 알림 [접수일]의 종료일이 시작일보다 이전입니다",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -116,7 +116,7 @@
       ]
     },
     {
-      "name": "VC_TC_436,438 정상 기간 검색 → 결과 그리드 컬럼(VOC번호~진행단계) 표시",
+      "name": "VC_TC_437,439 정상 기간 검색 → 결과 그리드 컬럼(VOC번호~진행단계) 표시",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -133,7 +133,7 @@
       ]
     },
     {
-      "name": "VC_TC_437 진행단계 셀렉트 항목(전체·배정·확정·반송·회신·재요청·완료) + 기본 전체",
+      "name": "VC_TC_438 진행단계 셀렉트 항목(전체·배정·확정·반송·회신·재요청·완료) + 기본 전체",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -144,7 +144,7 @@
       ]
     },
     {
-      "name": "VC_TC_438 진행단계=완료 검색 → 모든 행 진행단계 '완료'",
+      "name": "VC_TC_439 진행단계=완료 검색 → 모든 행 진행단계 '완료'",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -161,7 +161,7 @@
       ]
     },
     {
-      "name": "VC_TC_439 구분 셀렉트 항목(전체·공유·업무요청) + 기본 전체",
+      "name": "VC_TC_440 구분 셀렉트 항목(전체·공유·업무요청) + 기본 전체",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -172,7 +172,7 @@
       ]
     },
     {
-      "name": "VC_TC_440 구분=업무요청 검색 → 모든 행 구분 '업무요청'",
+      "name": "VC_TC_441 구분=업무요청 검색 → 모든 행 구분 '업무요청'",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -189,7 +189,7 @@
       ]
     },
     {
-      "name": "VC_TC_441 문의유형 셀렉트 항목(전체·칭찬·제안·불만·문의) + 기본 전체",
+      "name": "VC_TC_442 문의유형 셀렉트 항목(전체·칭찬·제안·불만·문의) + 기본 전체",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -200,7 +200,7 @@
       ]
     },
     {
-      "name": "VC_TC_442 문의유형=불만 검색 → 모든 행 유형 '불만'",
+      "name": "VC_TC_443 문의유형=불만 검색 → 모든 행 유형 '불만'",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -217,7 +217,7 @@
       ]
     },
     {
-      "name": "VC_TC_444 파트너검색 팝업 → 재직 검색 → 첫 행 선택 → 확인 → 접수자 필드 입력",
+      "name": "VC_TC_445 파트너검색 팝업 → 재직 검색 → 첫 행 선택 → 확인 → 접수자 필드 입력",
       "_note": "POP0001: 파트너찾기 #INCUMBENT_CD(기본 재직)/#NM_USER/#fnSearch, 목록 #list multiselect, 확인 #conFirm(title=Save 라 forbidden 매칭 → eval 로 클릭. 조회용 팝업 확인 버튼이라 데이터 변경 없음). 선택 없이 확인 시 alert '부서 선택 후 직원목록에서 선택해 주세요.'(POP0001.jsp:272)",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
@@ -244,7 +244,7 @@
       ]
     },
     {
-      "name": "VC_TC_445~447 분류 자동완성(비유효 키워드 미표시 / 유효 키워드 표시 / 선택 시 대·중·소 자동 입력)",
+      "name": "VC_TC_446~448 분류 자동완성(비유효 키워드 미표시 / 유효 키워드 표시 / 선택 시 대·중·소 자동 입력)",
       "_note": "uxl.autocomplete minLength 2 (VRE1101.jsp:123). 유효 키워드 '회원'(대분류명), 비유효 '회사'. 결과는 jQuery UI ul.ui-autocomplete. 선택 후 CD_VOC_CAUSE_1 value 채워짐(:135). 자동완성 데이터가 dev DB 분류 명칭에 의존 → 부분",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
@@ -271,7 +271,7 @@
       ]
     },
     {
-      "name": "VC_TC_448 대분류 셀렉트 항목(회원·결제/환불·음료/푸드/상품/세트2·매장·딜리버스(배달)·이벤트/프로모션·파트너칭찬)",
+      "name": "VC_TC_449 대분류 셀렉트 항목(회원·결제/환불·음료/푸드/상품/세트2·매장·딜리버스(배달)·이벤트/프로모션·파트너칭찬)",
       "_note": "uxl.bindComboCode CD_VOC_CAUSE_1 (VRE1101.jsp:152). 명칭은 운영 코드 기준 — dev 와 다르면 '실제:' 목록으로 비교",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
@@ -284,7 +284,7 @@
       ]
     },
     {
-      "name": "VC_TC_449~452 분류 연동(대분류 미선택→중·소 미출력 / 대분류 선택→중분류 출력 / 중분류 미선택→소 미출력 / 중분류 선택→소분류 출력)",
+      "name": "VC_TC_450~453 분류 연동(대분류 미선택→중·소 미출력 / 대분류 선택→중분류 출력 / 중분류 미선택→소 미출력 / 중분류 선택→소분류 출력)",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -314,7 +314,7 @@
       ]
     },
     {
-      "name": "VC_TC_454 부서검색 팝업 → 매장 검색 → 선택 → 확인 → 방문매장 필드 입력",
+      "name": "VC_TC_455 부서검색 팝업 → 매장 검색 → 선택 → 확인 → 방문매장 필드 입력",
       "_note": "POP1001: #DEPT_NM 입력 → #fnSearch_dept → #list_dept 행 선택 → #conFirm(title=Save → eval 클릭). 매장이 아닌 부서를 고르면 alert '선택한 부서는 매장이 아닙니다' 라 매장명(양재강남빌딩)으로 검색. 주관부서(#NM_CHARGE_DEPT) 는 선택 매장의 TEAM_NM 으로 채워짐(VRE1101.jsp:104) → 459 부분 검증",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
@@ -342,7 +342,7 @@
       ]
     },
     {
-      "name": "VC_TC_455~457 Vital Few 체크박스(Risk VOC·악성 VOC) 체크/해제 검색",
+      "name": "VC_TC_456~458 Vital Few 체크박스(Risk VOC·악성 VOC) 체크/해제 검색",
       "_note": "체크박스는 코드 CD_VITALFEW 로 동적 생성(VRE1101.jsp:61). 그리드에 Vital Few 컬럼이 없어 결과 정합성은 대조 불가 → 검색 수행·오류 없음까지만(부분)",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
@@ -374,7 +374,7 @@
       ]
     },
     {
-      "name": "VC_TC_458,459 주관부서 입력필드 readonly(직접 입력 불가) + 초기 빈값",
+      "name": "VC_TC_459,460 주관부서 입력필드 readonly(직접 입력 불가) + 초기 빈값",
       "_note": "VRE1101R00.jsp:77 readonly. 매장 선택 시 채워지는지는 454 흐름의 charge= 캡처로 확인",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
@@ -386,7 +386,7 @@
       ]
     },
     {
-      "name": "VC_TC_460 검색 셀렉트 항목(VOC번호·제목·내용·제목+내용) + 기본 VOC번호",
+      "name": "VC_TC_461 검색 셀렉트 항목(VOC번호·제목·내용·제목+내용) + 기본 VOC번호",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -397,7 +397,7 @@
       ]
     },
     {
-      "name": "VC_TC_461~464 검색(VOC번호/제목/내용/제목+내용) — 목록 첫 행 값으로 검색해 결과 확인",
+      "name": "VC_TC_462~465 검색(VOC번호/제목/내용/제목+내용) — 목록 첫 행 값으로 검색해 결과 확인",
       "_note": "첫 행의 VOC번호·제목 앞 2글자를 키워드로 사용(window.__qa). 내용 검색(463)은 본문을 알 수 없어 제목 키워드로 수행하고 오류 없음까지만 → 부분",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
@@ -449,7 +449,7 @@
       ]
     },
     {
-      "name": "VC_TC_466 제품/상품 팝업 → 전체 검색 → 1개 선택 → 확인 → 제품명 필드 입력",
+      "name": "VC_TC_467 제품/상품 팝업 → 전체 검색 → 1개 선택 → 확인 → 제품명 필드 입력",
       "_note": "POP1002: #searchBtn a → #list 행 클릭(체크) → #conFirm a(title=Save → eval). allVoc 파라미터라 1개만 선택 가능(POP1002.jsp:36)",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
@@ -475,7 +475,7 @@
       ]
     },
     {
-      "name": "VC_TC_469,472,474,477,479,506,522 My VOC 상세 진입 → 헤더·섹션(접수정보/접수내용/답변/업무요청·공유/VOC업무문의/처리이력) 구성",
+      "name": "VC_TC_470,473,475,478,480,507,523 My VOC 상세 진입 → 헤더·섹션(접수정보/접수내용/답변/업무요청·공유/VOC업무문의/처리이력) 구성",
       "_note": "구분=업무요청 으로 걸러 VRE1102 로 진입. 답변내용(#ansLayout) 은 답변완료+공개(FG_JOB_ANSWER_OPEN=Y) 일 때만 로드(VRE1102.jsp:205) → 있으면 검사, 없으면 title 에 기록. 회신사항(#reqEmpDetailView) 은 처리자 행 선택 후 로드 → 라벨 존재만 확인",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
@@ -534,7 +534,7 @@
       ]
     },
     {
-      "name": "VC_TC_471,473,476,478,505 상세 아코디언(접수정보·접수내용·답변내용·업무요청/공유·VOC업무문의) 접기/펼치기",
+      "name": "VC_TC_472,474,477,479,506 상세 아코디언(접수정보·접수내용·답변내용·업무요청/공유·VOC업무문의) 접기/펼치기",
       "_note": "h2.title[hfold=1] 클릭 → for 대상 div toggle (uxl-ui-3.0.0_starbucks.js:782~). 애니메이션 'slow' 라 1.2초 대기",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
@@ -566,7 +566,7 @@
       ]
     },
     {
-      "name": "VC_TC_470 상세 [목록] 버튼 → My VOC 목록 복귀",
+      "name": "VC_TC_471 상세 [목록] 버튼 → My VOC 목록 복귀",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },
         { "action": "waitForLoad", "state": "networkidle" },
@@ -591,7 +591,7 @@
       ]
     },
     {
-      "name": "VC_TC_507,508,511~514 VOC업무문의(매장) 등록 팝업 구성 + 필수값/내용 없음 알림(저장 안 됨)",
+      "name": "VC_TC_508,509,512~515 VOC업무문의(매장) 등록 팝업 구성 + 필수값/내용 없음 알림(저장 안 됨)",
       "_note": "POP0008(meta/pop/POP0008R00.jsp): #ID_VOC, 신청매장 #NM_DEPT/#btnDeptSearch, 요청유형 #CD_COMPLAIN_TY, 제목 #DS_TITLE, 유의사항 #TMP_CONTENT, 신청사유 #DS_CONTENT, 첨부파일, 저장 #save(title=Save → 팝업 안에서 eval 클릭; 필수값 누락으로 저장은 일어나지 않음). '작성된 내용이 없습니다.'(POP0008.jsp:164). 등록 버튼(#btnComplainEx)은 진행단계≠배정 이고 신청기한 내일 때만 노출(VRE1102.jsp:274~310) → 미노출이면 사전조건 오류로 기록. 신청매장 선택(509/510)은 팝업 안 팝업이라 수동",
       "steps": [
         { "action": "goto", "url": "/screen/VRE1101.ub" },

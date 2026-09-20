@@ -1,0 +1,264 @@
+{
+  "extends": "../_공통.json",
+  "name": "QA결함회귀 홈 대시보드·VOC 업무",
+  "_comment_source": "QA 260916 test.md 기준 TO-BE DEV FAIL 40건 중 홈 대시보드·VOC 업무 영역 11건(VC_TC_007,057,058,099,445,448,651,655,676,683,720). 결함 상세는 QA 관련/260916/260916_err.md.",
+  "_comment_tcid": "TC 번호는 test.md(1989건) 기준이다. 기존 04_QA시나리오 파일들은 시나리오.md(1986건) 기준이라 같은 번호가 다른 TC 를 가리킨다 — _TC매핑.csv 의 '구번호' 열로 대조할 것.",
+  "_comment_screen": "VOC등록=VOC0001 / My VOC=VRE1101 / 업무요청·공유(매장) 목록=VOC1101, 신규등록=VOC1102, 상세=VOC1105, 수정=VOC1103 / VOC업무문의(매장) 목록=VOC1301, 상세=VOC1302 (VOC1101.jsp:109,124 · VOC1105.jsp:132 · VOC1301.jsp:103)",
+  "_comment_upload": "첨부 위젯은 uxl.ext.Upload → SWFUpload non-flash 가 동적 생성하는 input[type=file] (uxl/ext/swfupload/swfupload-non-flash.js:318). 버튼을 누르지 않고 upload 액션으로 직접 파일을 넣는다. 첨부 업로드 0건 결함은 web.xml multipart-config(d9a6667)·S3 2차(43ae830) 로 고친 항목이라 회귀 가치가 높다.",
+  "menus": [
+    {
+      "name": "VC_TC_720 [Minor] VOC업무문의(매장) 상세 진입 — 시스템 오류 화면 없이 상세 표시",
+      "url": "/screen/VOC1301.ub",
+      "expect": ["#searchForm", "#list"],
+      "detail": {
+        "selector": "#list tr.jqgrow",
+        "dblclick": true,
+        "expect": ["#detailForm", "#DS_TITLE"]
+      },
+      "_comment_detail": "VOC1301.jsp:103 ondblClickRow → VOC1302. 결함현상은 '상세 화면 호출 시 시스템 오류 화면 노출' 이므로 _공통.json 의 errorPatterns('시스템 오류','HTTP Status 5xx')가 잡는다. 목록이 0건이면 detail 을 못 타므로 데이터 부족으로 보고된다."
+      }
+  ],
+  "crud": [
+    {
+      "name": "VC_TC_007 [Minor] 홈 대시보드 KPI 평균통화시간 표시 형식(00분 00초)",
+      "_note": "AS-IS 는 2자리 0채움(00분 00초), TO-BE 는 0분 0초 로 나온다는 결함. POR1001.jsp:609,611 의 #CALLTIME_AVG_M / #CALLTIME_AVG_S 텍스트가 2자리인지 판정한다. 값 자체(집계)는 보지 않는다.",
+      "steps": [
+        { "action": "goto", "url": "/screen/POR1001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const m=document.getElementById('CALLTIME_AVG_M'),s=document.getElementById('CALLTIME_AVG_S');if(!m||!s)throw new Error('평균통화시간 영역(#CALLTIME_AVG_M/#CALLTIME_AVG_S) 없음');const mv=m.textContent.trim(),sv=s.textContent.trim();if(!/^\\d{2}$/.test(mv)||!/^\\d{2}$/.test(sv))throw new Error('평균통화시간 자리수 불일치 — AS-IS 는 00분 00초 / 실제: '+mv+'분 '+sv+'초');})()"
+        },
+        { "action": "screenshot", "name": "대시보드-평균통화시간" }
+      ]
+    },
+    {
+      "name": "VC_TC_057 [Minor] VOC등록 분류 자동완성 드롭다운이 하위 영역에 가려지지 않는지",
+      "_note": "jQuery UI 1.13 겹침 결함. 070a6f0(.ui-front)·a39a236(호버 스타일) 로 고친 항목. 드롭다운 첫 항목의 중심점을 elementFromPoint 로 히트테스트해 실제로 클릭 가능한지 본다(단순 visible 만으로는 겹침을 못 잡음).",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC0001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "click", "selector": "#NM_VOC_CAUSE_AUTO" },
+        { "action": "type", "selector": "#NM_VOC_CAUSE_AUTO", "value": "회원" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const ul=[...document.querySelectorAll('ul.ui-autocomplete')].find(u=>u.offsetParent!==null&&u.querySelectorAll('li').length);if(!ul)throw new Error(\"분류 자동완성 목록이 표시되지 않음(키워드 '회원') — dev 분류 데이터 확인 필요\");const li=ul.querySelector('li');const r=li.getBoundingClientRect();if(r.width===0||r.height===0)throw new Error('자동완성 항목 크기가 0');const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);if(!hit||!ul.contains(hit))throw new Error('자동완성 드롭다운이 다른 영역에 가려짐 — 그 지점의 실제 요소: <'+(hit?hit.tagName.toLowerCase()+' class=\"'+hit.className+'\"':'없음')+'>');})()"
+        },
+        { "action": "screenshot", "name": "VOC등록-분류드롭다운" }
+      ]
+    },
+    {
+      "name": "VC_TC_058 [Major] VOC등록 분류 자동완성 선택 → 대·중·소분류 자동 입력",
+      "_note": "선택 후 #CD_VOC_CAUSE_1(대분류) 이 채워지는지. 중·소분류는 선택한 항목의 depth 에 따라 빌 수 있어 대분류만 필수로 본다(VOC0001R00.jsp:분류 td).",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC0001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "click", "selector": "#NM_VOC_CAUSE_AUTO" },
+        { "action": "type", "selector": "#NM_VOC_CAUSE_AUTO", "value": "회원" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const ul=[...document.querySelectorAll('ul.ui-autocomplete')].find(u=>u.offsetParent!==null&&u.querySelectorAll('li').length);if(!ul)throw new Error(\"분류 자동완성 목록이 표시되지 않음(키워드 '회원')\");const t=ul.querySelector('li .ui-menu-item-wrapper, li a, li');t.click();})()"
+        },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=document.getElementById('CD_VOC_CAUSE_1');if(!v)throw new Error('#CD_VOC_CAUSE_1 없음');if(!v.value)throw new Error('자동완성 선택 후 대분류가 자동 입력되지 않음 (중분류='+(document.getElementById('CD_VOC_CAUSE_2')||{}).value+', 소분류='+(document.getElementById('CD_VOC_CAUSE_3')||{}).value+')');})()"
+        },
+        { "action": "screenshot", "name": "VOC등록-분류자동입력" }
+      ]
+    },
+    {
+      "name": "VC_TC_099 [Major] VOC등록 첨부파일 업로드 → 우측에 파일명 표시",
+      "_note": "저장하지 않고 업로드만 한다(데이터 변경 없음). #uploadProgress_voc_file 이 로딩 표시, #uploadedFiles_voc_file 이 파일명 영역(VOC0001R00.jsp). 업로드가 끝나면 진행 표시가 사라지고 파일명이 남아야 한다.",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC0001.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "upload", "selector": "input[type=file]", "files": "scenarios/스타벅스/04_QA시나리오/09_결함회귀_260916/_files/TEST_QA_첨부.txt" },
+        { "action": "wait", "ms": 5000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const box=document.getElementById('uploadedFiles_voc_file');if(!box)throw new Error('#uploadedFiles_voc_file 영역 없음');const txt=box.textContent||'';const prog=document.getElementById('uploadProgress_voc_file');const progOn=prog&&prog.offsetParent!==null;if(!txt.includes('TEST_QA_첨부'))throw new Error('업로드 후 첨부파일명이 표시되지 않음'+(progOn?' (로딩 표시가 아직 떠 있음 — 업로드 미완료)':'')+' / 영역 내용: '+txt.trim().slice(0,80));})()"
+        },
+        { "action": "screenshot", "name": "VOC등록-첨부업로드" }
+      ]
+    },
+    {
+      "name": "VC_TC_445 [Major] My VOC 파트너검색 팝업 확인 → 접수자 입력필드에 이름 반영",
+      "_note": "VRE1101R00 의 #btnEmpSearch → 파트너검색 팝업(POP0001). 부서 검색 후 부서 행 선택 → 파트너 행 선택 → #conFirm → fnPushToOpener 로 #NM_VOC_RECV_EMP 채움. 부서 '서초' 데이터가 dev 에 있어야 한다(없으면 '데이터 부족' 으로 보고됨).",
+      "steps": [
+        { "action": "goto", "url": "/screen/VRE1101.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1000 },
+        { "action": "click", "selector": "#btnEmpSearch a, #btnEmpSearch", "popup": true },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#DEPT_NM" },
+        { "action": "fill", "selector": "#DEPT_NM", "value": "서초" },
+        { "action": "click", "selector": "#fnSearch_dept" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=document.querySelector('#list_dept tr.jqgrow');if(!r)throw new Error(\"부서 검색결과 없음(서초) — dev 데이터 부족\");const tds=r.querySelectorAll('td');(tds[tds.length-1]).click();})()"
+        },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=document.querySelector('#list tr.jqgrow');if(!r)throw new Error('파트너 검색결과 없음 — dev 데이터 부족');const tds=r.querySelectorAll('td');(tds[2]||tds[1]||tds[0]).click();})()"
+        },
+        { "action": "screenshot", "name": "MyVOC-파트너검색팝업" },
+        { "action": "click", "selector": "#conFirm a" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "closePopup" },
+        { "action": "wait", "ms": 800 },
+        {
+          "action": "eval",
+          "script": "(()=>{const e=document.getElementById('NM_VOC_RECV_EMP');if(!e)throw new Error('#NM_VOC_RECV_EMP 없음');if(!e.value.trim())throw new Error('파트너검색 확인 후 접수자 입력필드에 이름이 들어오지 않음');})()"
+        },
+        { "action": "screenshot", "name": "MyVOC-접수자반영" }
+      ]
+    },
+    {
+      "name": "VC_TC_448 [Major] My VOC 분류 자동완성 선택 → 대·중·소분류 자동 입력",
+      "_note": "VRE1101 의 분류 영역. VOC등록(TC_058)·Vital Few(TC_769)·삭제 VOC(TC_924) 와 같은 결함 묶음이라 네 화면을 같은 방식으로 검사한다.",
+      "steps": [
+        { "action": "goto", "url": "/screen/VRE1101.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "click", "selector": "#NM_VOC_CAUSE_AUTO" },
+        { "action": "type", "selector": "#NM_VOC_CAUSE_AUTO", "value": "회원" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const ul=[...document.querySelectorAll('ul.ui-autocomplete')].find(u=>u.offsetParent!==null&&u.querySelectorAll('li').length);if(!ul)throw new Error(\"분류 자동완성 목록이 표시되지 않음(키워드 '회원')\");const t=ul.querySelector('li .ui-menu-item-wrapper, li a, li');t.click();})()"
+        },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=document.getElementById('CD_VOC_CAUSE_1');if(!v)throw new Error('#CD_VOC_CAUSE_1 없음');if(!v.value)throw new Error('My VOC 분류 선택 후 대분류가 자동 입력되지 않음');})()"
+        },
+        { "action": "screenshot", "name": "MyVOC-분류자동입력" }
+      ]
+    },
+    {
+      "name": "VC_TC_651 [Major] 업무요청/공유(매장) 신규등록 첨부파일 업로드",
+      "_note": "VOC1102(신규등록). uxl.ext.Upload('file') (VOC1102.jsp:150) → 표시 영역 #uploadedFiles_file. 저장하지 않으므로 데이터는 생기지 않는다.",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1102.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "upload", "selector": "input[type=file]", "files": "scenarios/스타벅스/04_QA시나리오/09_결함회귀_260916/_files/TEST_QA_첨부.txt" },
+        { "action": "wait", "ms": 5000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const box=document.getElementById('uploadedFiles_file');if(!box)throw new Error('#uploadedFiles_file 영역 없음');const txt=box.textContent||'';const prog=document.getElementById('uploadProgress_file');const progOn=prog&&prog.offsetParent!==null;if(!txt.includes('TEST_QA_첨부'))throw new Error('업로드 후 첨부파일명이 표시되지 않음'+(progOn?' (로딩 표시가 아직 떠 있음 — 업로드 미완료)':'')+' / 영역 내용: '+txt.trim().slice(0,80));})()"
+        },
+        { "action": "screenshot", "name": "업무요청등록-첨부업로드" }
+      ]
+    },
+    {
+      "name": "VC_TC_655 [Major] 업무요청/공유(매장) 내용 미입력 등록 시 필수 검증 알림",
+      "_warn": "저장(등록) 버튼을 실제로 누른다. 기대 동작은 '작성된 내용이 없습니다.' 알림으로 막히는 것 — 결함이 남아 있으면 제목 TEST_QA_... 인 업무요청 1건이 dev 에 생성된다. 실행 후 정리 대상.",
+      "allowForbidden": ["저장", "Save", "등록"],
+      "_note": "내용(NamoSE 에디터 #EDITOR_DS_CONTENT ↔ hidden #DS_CONTENT)을 비운 채 제목만 넣고 #save 클릭.",
+      "_note_fix": "2026-09-20 실행에서 두 가지로 막혔다 — ① 요청매장이 **필수**('[요청매장*] 은(는) 필수 항목입니다')인데 안 채웠다 ② NamoSE 에디터 초기화 전에 저장을 눌러 '에디터가 실행중 입니다 (GetTextValue Method)' 알림이 먼저 떴다(VOC1102.jsp:146 이 저장 시 object.GetTextValue() 를 부른다). → 요청매장을 부서검색 팝업(POP0002, popup.js fnSearchDeptPopup)으로 먼저 채우고, 에디터가 뜬 것을 확인한 뒤 저장한다.",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1102.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 3000 },
+        { "action": "click", "selector": "#btnDeptSearch a, #btnDeptSearch", "popup": true },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "waitFor", "selector": "#DEPT_NM" },
+        { "action": "click", "selector": "#fnSearch_dept" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=document.querySelector('#list tr.jqgrow');if(!r)throw new Error('부서검색 팝업(POP0002) 결과가 0건 — dev 조직 데이터 부족');const ev=new MouseEvent('dblclick',{bubbles:true,cancelable:true,view:window});r.dispatchEvent(ev);})()"
+        },
+        { "action": "wait", "ms": 1200 },
+        { "action": "closePopup" },
+        { "action": "wait", "ms": 1000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=(document.getElementById('NM_DEPT')||{}).value||'';if(!v.trim())throw new Error('부서검색 후 요청매장(#NM_DEPT)이 채워지지 않음 — 이 TC 는 요청매장이 있어야 내용 검증까지 간다');})()"
+        },
+        { "action": "fill", "selector": "#DS_TITLE", "value": "{{qaPrefix}}_655_{{now}}" },
+        { "action": "wait", "ms": 4000 },
+        {
+          "action": "eval",
+          "_comment": "에디터가 초기화되기 전에 저장하면 'GetTextValue' 알림이 먼저 떠서 내용 검증에 도달하지 못한다. 편집 영역이 그려졌는지 확인하고 hidden 내용은 비운다.",
+          "script": "(()=>{const host=document.getElementById('layout-1_4_8')||document.getElementById('EDITOR_DS_CONTENT');const ready=host&&[...host.querySelectorAll('iframe')].some(f=>f.clientHeight>50);if(!ready)throw new Error('내용 에디터(NamoSE)가 아직 초기화되지 않음 — 대기 시간을 늘려야 한다');const h=document.getElementById('DS_CONTENT');if(h)h.value='';})()"
+        },
+        { "action": "click", "selector": "#save a, #save" },
+        { "action": "expectDialog", "text": "작성된 내용이 없습니다" },
+        { "action": "screenshot", "name": "업무요청등록-내용미입력" }
+      ]
+    },
+    {
+      "name": "VC_TC_676 [Major] 업무요청/공유(매장) 수정 화면에서 내용 편집 가능",
+      "_note": "VOC1101 목록 → 행 더블클릭 → 상세 VOC1105 → #btnUpdate → 수정 VOC1103. 수정 화면의 내용은 NamoSE('EDITOR_DS_CONTENT') (VOC1103.jsp:85). 에디터가 뜨고 입력 가능(편집영역 존재·readonly 아님)한지까지 판정하고 저장은 하지 않는다. 상세에서 #btnUpdate 가 숨겨져 있으면(작성자·권한 조건, VOC1105.jsp:105~114) 데이터 조건 문제로 보고된다.",
+      "allowForbidden": ["수정"],
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1101.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=document.querySelector('#list tr.jqgrow');if(!r)throw new Error('업무요청/공유(매장) 목록이 0건 — 기간 조건이나 dev 데이터 확인 필요');})()"
+        },
+        { "action": "dblclick", "selector": "#list tr.jqgrow >> nth=0" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.getElementById('btnUpdate');if(!b)throw new Error('상세 화면에 #btnUpdate 없음 — 상세 진입 실패 가능');if(b.offsetParent===null)throw new Error('상세 화면에서 [수정] 버튼이 숨겨져 있음 — 상태(요청중)·권한 조건에 맞는 건을 골라야 함(VOC1105.jsp:105~114)');})()"
+        },
+        { "action": "click", "selector": "#btnUpdate a, #btnUpdate" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 3000 },
+        { "action": "expectUrl", "contains": "VOC1103" },
+        {
+          "action": "eval",
+          "script": "(()=>{const host=document.getElementById('EDITOR_DS_CONTENT');if(!host)throw new Error('수정 화면에 내용 에디터(#EDITOR_DS_CONTENT) 없음');const fr=[...document.querySelectorAll('iframe')].filter(f=>f.offsetParent!==null&&f.clientHeight>50);const ta=host.offsetParent!==null&&!host.readOnly&&!host.disabled;if(!fr.length&&!ta)throw new Error('내용 편집 영역이 열리지 않음 — 에디터 iframe 없음 & textarea 도 편집 불가(readonly='+host.readOnly+', disabled='+host.disabled+')');const ed=fr[0];if(ed){const d=ed.contentDocument;if(!d)throw new Error('에디터 iframe 에 접근 불가');if(d.body&&d.body.isContentEditable===false&&d.designMode!=='on')throw new Error('내용 에디터가 편집 불가 상태(designMode='+d.designMode+')');}})()"
+        },
+        { "action": "screenshot", "name": "업무요청수정-내용편집" }
+      ]
+    },
+    {
+      "name": "VC_TC_683 [Major] 업무요청/공유(매장) 수정 화면 상태 완료 변경 시 고객정보·메모 입력창 노출",
+      "_note": "VOC1103.jsp:179~206 — 고객정보(#INDVDLINFO) 는 **요청유형 CD_REQEST_TY 가 '2'(고객정보 요청)일 때만** 상태 99(완료) 에서 노출된다. 메모 영역(#layout-1_7) 은 상태가 '01'(요청중) 이 아니면 노출된다. 따라서 요청유형이 2 가 아닌 건에서는 고객정보가 안 나오는 것이 정상이며, 시나리오도 요청유형을 먼저 확인해 그에 맞게 판정한다. QA 결함이 이 조건을 못 맞춘 건일 가능성이 있어 근거를 남긴다.",
+      "allowForbidden": ["수정"],
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1101.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        {
+          "action": "eval",
+          "_comment": "2026-09-20 실행에서 목록 0건이라 dblclick 이 15초 타임아웃으로 끝나 원인이 안 보였다 → TC_676 과 같은 가드를 앞에 둔다",
+          "script": "(()=>{const r=document.querySelector('#list tr.jqgrow');if(!r)throw new Error('업무요청/공유(매장) 목록이 0건 — 기간 조건이나 dev 데이터 확인 필요');})()"
+        },
+        { "action": "dblclick", "selector": "#list tr.jqgrow >> nth=0" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1500 },
+        { "action": "click", "selector": "#btnUpdate a, #btnUpdate" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 3000 },
+        { "action": "expectUrl", "contains": "VOC1103" },
+        {
+          "action": "eval",
+          "script": "(()=>{const s=document.getElementById('CD_REQEST_STATUS');if(!s)throw new Error('#CD_REQEST_STATUS 없음');const has=[...s.options].some(o=>o.value==='99');if(!has)throw new Error('상태 셀렉트에 완료(99) 옵션이 없음 / 실제: '+[...s.options].map(o=>o.value+':'+o.text).join('|'));s.value='99';s.dispatchEvent(new Event('change',{bubbles:true}));})()"
+        },
+        { "action": "wait", "ms": 1200 },
+        {
+          "action": "eval",
+          "script": "(()=>{const ty=(document.getElementById('CD_REQEST_TY')||{}).value;const info=document.getElementById('INDVDLINFO');const memo=document.getElementById('layout-1_7');const msgs=[];if(ty==='2'){if(!info||info.offsetParent===null)msgs.push('요청유형=2(고객정보 요청)인데 완료 변경 후 고객정보 입력창(#INDVDLINFO)이 노출되지 않음');}else{document.title='[참고] 요청유형='+ty+' → 고객정보 입력창은 노출 대상 아님(VOC1103.jsp:181)';}if(!memo||memo.offsetParent===null)msgs.push('완료 변경 후 메모 입력창(#layout-1_7)이 노출되지 않음');if(msgs.length)throw new Error(msgs.join(' / ')+' (요청유형='+ty+')');})()"
+        },
+        { "action": "screenshot", "name": "업무요청수정-완료상태" }
+      ]
+    }
+  ]
+}

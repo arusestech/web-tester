@@ -1,0 +1,54 @@
+{
+  "extends": "../_공통.json",
+  "name": "QA결함회귀 스토어 케어·CE",
+  "_comment_source": "QA 260916 test.md FAIL 40건 중 스토어 케어·CE 영역 2건(VC_TC_1008,1083).",
+  "_comment_screen": "스토어 케어 처리=STC0101 / CE 마감=VOC1035. 개인정보 상세 팝업은 공통 함수 fnCstmrInfoDetailPopup → POP1007 (page/js/popup.js:105~108). STC0101.jsp:128~137 에서 목록 더블클릭 시 이 팝업을 연다. 같은 팝업을 VOC1503(고객메모 상세, TC_1507)도 쓰므로 두 건은 같은 원인일 가능성이 높다.",
+  "crud": [
+    {
+      "name": "VC_TC_1008 [Minor] 스토어 케어 처리 목록 더블클릭 → 개인정보 상세 팝업(Page Not Found 아님)",
+      "_note": "팝업 = POP1007 (#detailLay, #DATA_TEXT, #btnClose). 결함현상은 'Page Not Found 오류'. 팝업 본문에 Not Found/404/오류 문구가 있는지와 POP1007 고유 요소가 그려졌는지를 함께 본다.",
+      "steps": [
+        { "action": "goto", "url": "/screen/STC0101.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "click", "selector": "#Search a, #Search" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const r=document.querySelectorAll('#list tr.jqgrow');if(!r.length)throw new Error('스토어 케어 처리 목록이 0건 — 기간 조건이나 dev 데이터 확인 필요');})()"
+        },
+        { "action": "dblclick", "selector": "#list tr.jqgrow >> nth=0", "popup": true },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2000 },
+        { "action": "screenshot", "name": "스토어케어-개인정보팝업" },
+        {
+          "action": "eval",
+          "script": "(()=>{const b=document.body?document.body.innerText:'';if(/Page\\s*Not\\s*Found|HTTP Status 404|404\\s*-\\s*Not Found/i.test(b))throw new Error('개인정보 상세 팝업이 Page Not Found — 본문: '+b.trim().slice(0,120));const ok=document.getElementById('detailLay')||document.getElementById('DATA_TEXT')||document.getElementById('btnClose');if(!ok)throw new Error('개인정보 상세 팝업(POP1007)의 요소(#detailLay/#DATA_TEXT/#btnClose)가 없음 — 본문: '+b.trim().slice(0,120));})()"
+        },
+        { "action": "closePopup" }
+      ]
+    },
+    {
+      "name": "VC_TC_1083 [Minor] CE 마감 목록 [업로드] → 작업 완료 알림",
+      "_warn": "실제로 CE 점수 업로드를 실행한다(forbidden '업로드' 해제). dev 환경 CE 마감 데이터가 바뀐다 — 사용자 승인 하에 포함한 흐름이므로, 돌리기 전 대상 월이 맞는지 확인할 것.",
+      "allowForbidden": ["업로드"],
+      "_note": "VOC1035.jsp:70 — 목록 행의 '점수 업로드' 컬럼에 <a title='업로드'>업로드</a> 를 그린다(fnGetCePoint). 클릭 → confirm → alert '작업이 완료되었습니다'. 결함현상은 '작업 실패 얼럿 노출'.",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1035.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 1200 },
+        { "action": "click", "selector": "#searchBtn a, #searchBtn" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 2500 },
+        {
+          "action": "eval",
+          "script": "(()=>{const rows=document.querySelectorAll('#list tr.jqgrow');if(!rows.length)throw new Error('CE 마감 목록이 0건 — 기준 연/월 조건 확인 필요');const a=document.querySelector(\"#list a[title='업로드']\");if(!a)throw new Error(\"목록에 [업로드] 링크가 없음 — 마감 상태에 따라 안 그려질 수 있다(VOC1035.jsp:70)\");})()"
+        },
+        { "action": "click", "selector": "#list a[title='업로드'] >> nth=0" },
+        { "action": "expectDialog", "text": "작업이 완료되었습니다", "timeout": 60000 },
+        { "action": "screenshot", "name": "CE마감-업로드결과" }
+      ]
+    }
+  ]
+}

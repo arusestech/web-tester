@@ -1,0 +1,33 @@
+{
+  "extends": "스타벅스/04_QA시나리오/_공통.json",
+  "name": "[확인] 결함회귀 실행이 남긴 테스트 데이터",
+  "_comment": "조회 전용. 2026-09-20 결함회귀 전수 실행(VC_TC_1236/1245/1204)이 공유 개발 DB 에 남긴 행을 확인만 한다. 아무것도 바꾸지 않는다. 파일명이 _ 로 시작해 일괄 실행에서 제외된다.",
+  "crud": [
+    {
+      "name": "1) VOC 배분관리 일반/VitalFew 잔재",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1024.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 3000 },
+        { "action": "screenshot", "name": "배분관리-현재" },
+        {
+          "action": "eval",
+          "script": "(()=>{const dump=id=>[...document.querySelectorAll('#'+id+' tr.jqgrow')].map(r=>[...r.querySelectorAll('td')].map(t=>t.innerText.trim()).filter(x=>x).join(' | ')).join('  //  ')||'(없음)';throw new Error('일반: '+dump('list_normal')+'   ||||   VitalFew: '+dump('list_vital'));})()"
+        }
+      ]
+    },
+    {
+      "name": "2) 스토어케어 분류관리 잔재(유형코드 한글코 / TEST_QA_1204)",
+      "steps": [
+        { "action": "goto", "url": "/screen/STC0102.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 3500 },
+        { "action": "screenshot", "name": "스토어케어분류-현재" },
+        {
+          "action": "eval",
+          "script": "(()=>{const t=document.getElementById('storecareCauseTree');const txt=t?t.innerText.replace(/\\s+/g,' ').trim():'(트리 없음)';const hit=/한글코|TEST_QA_1204/.test(txt);throw new Error((hit?'★ 잔재 있음 — ':'잔재 없음 — ')+'트리 내용: '+txt.slice(0,300));})()"
+        }
+      ]
+    }
+  ]
+}

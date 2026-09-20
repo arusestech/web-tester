@@ -1,0 +1,29 @@
+{
+  "extends": "스타벅스/04_QA시나리오/_공통.json",
+  "name": "[진단] appendData 내부 계측",
+  "_comment": "VC_TC_1236/1245 — 초기 로드의 fnSearchNormal() 은 목록을 채우는데 이후 호출은 못 채운다. uxl.grid.appendData 를 감싸 인자·결과를 찍어 원인을 가린다. 저장하지 않으며 조회만 한다.",
+  "crud": [
+    {
+      "name": "appendData 호출 인자·결과 덤프",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1024.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 3000 },
+        {
+          "action": "eval",
+          "_comment": "appendData 를 감싸 호출 인자와 그리드 상태를 기록한다",
+          "script": "(()=>{window.__log=[];const orig=uxl.grid.appendData;uxl.grid.appendData=function(grid,result,clearFlag,cnt){const $g=(typeof grid==='string')?$('#'+grid):grid;let info={grid:String(grid),clearFlag:clearFlag,cnt:String(cnt),recordsBefore:$g.getGridParam('records')};try{const d0=result.getDataList(0);info.dataList0=d0?('rowCount='+d0.rowCount):'null';}catch(e){info.dataList0='ERR '+e.message;}try{const dc=result.getDataList(cnt);info.dataListCnt=dc?('rowCount='+dc.rowCount):'null';}catch(e){info.dataListCnt='ERR '+e.message;}const r=orig.apply(this,arguments);info.rowsAfter=$g.find('tr.jqgrow').length;info.recordsAfter=$g.getGridParam('records');window.__log.push(info);return r;};})()"
+        },
+        {
+          "action": "eval",
+          "script": "(()=>{$('#list_normal').jqGrid('clearGridData');fnSearchNormal();})()"
+        },
+        { "action": "wait", "ms": 5000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const l=window.__log||[];if(!l.length)throw new Error('appendData 가 호출되지 않았다 — 조회 자체가 안 됨(AJAX 실패 가능)');throw new Error('appendData 호출 '+l.length+'회: '+l.map(x=>JSON.stringify(x)).join('  ||  '));})()"
+        }
+      ]
+    }
+  ]
+}

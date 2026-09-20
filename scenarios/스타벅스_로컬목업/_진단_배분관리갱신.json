@@ -1,0 +1,68 @@
+{
+  "extends": "스타벅스/04_QA시나리오/_공통.json",
+  "name": "[진단] 배분관리 저장 후 목록 갱신",
+  "_comment": "VC_TC_1236/1245 원인 규명용. 저장은 하지 않고 팝업 콜백(callback)만 직접 호출해 목록 재조회 경로만 재현한다 — 데이터를 만들지 않는다. VOC1024.jsp:505 callback(param) → 일반은 clearGridData+fnSearchNormal(), VitalFew 는 uxl.grid.init+fnSearchVital().",
+  "crud": [
+    {
+      "name": "callback('0') 직접 호출 — 일반 목록 재조회 경로",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1024.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 3000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list_normal tr.jqgrow').length;const v=document.querySelectorAll('#list_vital tr.jqgrow').length;sessionStorage.setItem('d_before',n+'/'+v);if(typeof callback!=='function')throw new Error('opener 에 callback 함수 없음');callback('0');})()"
+        },
+        { "action": "wait", "ms": 1000 },
+        {
+          "action": "eval",
+          "script": "(()=>{sessionStorage.setItem('d_1s',document.querySelectorAll('#list_normal tr.jqgrow').length);})()"
+        },
+        { "action": "wait", "ms": 4000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const now=document.querySelectorAll('#list_normal tr.jqgrow').length;throw new Error('일반 목록 — 호출 전(일반/바이탈)='+sessionStorage.getItem('d_before')+' / callback 1초 후='+sessionStorage.getItem('d_1s')+' / 5초 후='+now);})()"
+        }
+      ]
+    },
+    {
+      "name": "callback('1') 직접 호출 — Vital Few 목록 재조회 경로",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1024.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 3000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const v=document.querySelectorAll('#list_vital tr.jqgrow').length;sessionStorage.setItem('v_before',v);callback('1');})()"
+        },
+        { "action": "wait", "ms": 5000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const now=document.querySelectorAll('#list_vital tr.jqgrow').length;throw new Error('VitalFew 목록 — 호출 전='+sessionStorage.getItem('v_before')+' / 5초 후='+now);})()"
+        }
+      ]
+    },
+    {
+      "name": "fnSearchNormal() 단독 호출 — 조회 자체는 되는지",
+      "steps": [
+        { "action": "goto", "url": "/screen/VOC1024.ub" },
+        { "action": "waitForLoad", "state": "networkidle" },
+        { "action": "wait", "ms": 3000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const n=document.querySelectorAll('#list_normal tr.jqgrow').length;sessionStorage.setItem('f_before',n);$('#list_normal').jqGrid('clearGridData');})()"
+        },
+        { "action": "wait", "ms": 500 },
+        {
+          "action": "eval",
+          "script": "(()=>{sessionStorage.setItem('f_cleared',document.querySelectorAll('#list_normal tr.jqgrow').length);fnSearchNormal();})()"
+        },
+        { "action": "wait", "ms": 5000 },
+        {
+          "action": "eval",
+          "script": "(()=>{const now=document.querySelectorAll('#list_normal tr.jqgrow').length;throw new Error('전='+sessionStorage.getItem('f_before')+' / clear 후='+sessionStorage.getItem('f_cleared')+' / fnSearchNormal() 5초 후='+now);})()"
+        }
+      ]
+    }
+  ]
+}
